@@ -3,8 +3,8 @@ from storm import Container, Injectable, Controller, Module
 
 @Injectable(singleton=True)
 class ExampleService:
-    def get_data(self):
-        return "This is some data from the service."
+    def get_message(self):
+        return "Hello from ExampleService"
 
 @Controller("/example")
 class ExampleController:
@@ -12,7 +12,7 @@ class ExampleController:
         self.service = service
 
     def get(self):
-        return self.service.get_data()
+        return self.service.get_message()
 
 class ExampleModule(Module):
     def __init__(self):
@@ -21,10 +21,10 @@ class ExampleModule(Module):
             providers=[ExampleService],
         )
 
-def test_dependency_injection():
+def test_service_injection():
     container = Container()
-    module = ExampleModule()
-    module.register(container)
+    example_module = ExampleModule()
+    example_module.register(container)
 
     controller = container.resolve("ExampleController")
-    assert controller.get() == "This is some data from the service."
+    assert controller.get() == "Hello from ExampleService"
