@@ -2,7 +2,6 @@ import json
 from storm.core.router import Router
 from storm.core.middleware_pipeline import MiddlewarePipeline
 
-
 class StormApplication:
     """
     The main application class responsible for bootstrapping the Storm framework.
@@ -13,14 +12,23 @@ class StormApplication:
         - router: An instance of the Router class to handle route management
         - middleware_pipeline: The pipeline that handles middleware execution
     """
-
     def __init__(self, root_module):
         self.root_module = root_module
         self.modules = {}
-        self.router = Router()
-        self.middleware_pipeline = MiddlewarePipeline([])
+        self.router = Router()  
+        self.middleware_pipeline = MiddlewarePipeline()
         self._load_modules()
         self._initialize_services()
+
+
+    def add_global_middleware(self, middleware_cls):
+        """
+        Registers a global middleware to be applied across all routes.
+
+        :param middleware_cls: The middleware class to be added as global middleware.
+        """
+        self.middleware_pipeline.add_global_middleware(middleware_cls)
+
 
     def _load_modules(self):
         """
@@ -48,10 +56,9 @@ class StormApplication:
         """
         try:
             handler, params = self.router.resolve(method, path)
-            response = await handler(**params)
+            response = await self.middleware_pipeline.execute(request_kwargs, handler)
             return response, 200
         except ValueError as e:
-            # Return a 404 error if the route is not found
             return {"error": str(e)}, 404
 
     def add_middleware(self, middleware_cls):
