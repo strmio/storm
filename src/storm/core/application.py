@@ -1,6 +1,8 @@
 import json
+from storm.core.interceptor_pipeline import InterceptorPipeline
 from storm.core.router import Router
 from storm.core.middleware_pipeline import MiddlewarePipeline
+
 
 class StormApplication:
     """
@@ -12,14 +14,23 @@ class StormApplication:
         - router: An instance of the Router class to handle route management
         - middleware_pipeline: The pipeline that handles middleware execution
     """
+
     def __init__(self, root_module):
         self.root_module = root_module
         self.modules = {}
-        self.router = Router()  
+        self.router = Router()
         self.middleware_pipeline = MiddlewarePipeline()
+        self.interceptor_pipeline = InterceptorPipeline(global_interceptors=[])
         self._load_modules()
         self._initialize_services()
 
+    def add_global_interceptor(self, interceptor_cls):
+        """
+        Registers a global interceptor to be applied across all requests.
+
+        :param interceptor_cls: The interceptor class to be added as a global interceptor.
+        """
+        self.interceptor_pipeline.add_global_interceptor(interceptor_cls)
 
     def add_global_middleware(self, middleware_cls):
         """
@@ -28,7 +39,6 @@ class StormApplication:
         :param middleware_cls: The middleware class to be added as global middleware.
         """
         self.middleware_pipeline.add_global_middleware(middleware_cls)
-
 
     def _load_modules(self):
         """
@@ -47,7 +57,7 @@ class StormApplication:
 
     async def handle_request(self, method, path, **request_kwargs):
         """
-        Handles incoming HTTP requests by resolving routes and executing middleware.
+        Handles incoming HTTP requests by resolving routes and executing middleware and interceptors.
 
         :param method: The HTTP method (GET, POST, etc.)
         :param path: The URL path
@@ -56,7 +66,14 @@ class StormApplication:
         """
         try:
             handler, params = self.router.resolve(method, path)
-            response = await self.middleware_pipeline.execute(request_kwargs, handler)
+            request_kwargs.update(params)
+
+            # Execute middleware first, which may modify the request
+            modified_request = await self.middleware_pipeline.execute(request_kwargs, lambda req: req)
+
+            # Execute interceptors after middleware, passing the modified request and getting the response
+            response = await self.interceptor_pipeline.execute(modified_request, handler)
+            
             return response, 200
         except ValueError as e:
             return {"error": str(e)}, 404

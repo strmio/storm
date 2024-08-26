@@ -1,17 +1,23 @@
-# tests/test_global_middleware.py
-
 import pytest
 from storm.core.application import StormApplication
 from storm.core.global_middleware import GlobalMiddleware
 from storm.common.decorators.module import Module
 
 class TestGlobalMiddleware(GlobalMiddleware):
+    """
+    Test middleware that sets a flag in the request to confirm that it was executed.
+    """
+
     async def process(self, request, next_handler):
         request['global_middleware_applied'] = True
         return await next_handler(request)
 
 @pytest.mark.asyncio
 async def test_global_middleware_execution():
+    """
+    Test to ensure that global middleware is applied to the request.
+    """
+
     @Module()
     class TestModule:
         pass
