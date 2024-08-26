@@ -1,6 +1,6 @@
 # src/storm/core/middleware_pipeline.py
 
-from storm.common.middleware import Middleware
+from storm.core.middleware import Middleware
 
 class MiddlewarePipeline:
     """

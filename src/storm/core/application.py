@@ -1,5 +1,7 @@
+import json
 from storm.core.router import Router
 from storm.core.middleware_pipeline import MiddlewarePipeline
+
 
 class StormApplication:
     """
@@ -8,23 +10,21 @@ class StormApplication:
     Attributes:
         - root_module: The root module of the application
         - modules: A dictionary to store loaded modules
+        - router: An instance of the Router class to handle route management
         - middleware_pipeline: The pipeline that handles middleware execution
-
-    Methods:
-        - handle_request: Handles incoming requests by resolving routes and executing middleware
-        - add_middleware: Adds global middleware to the application
-        - run: Starts the application server
     """
+
     def __init__(self, root_module):
         self.root_module = root_module
         self.modules = {}
+        self.router = Router()
         self.middleware_pipeline = MiddlewarePipeline([])
         self._load_modules()
         self._initialize_services()
 
     def _load_modules(self):
         """
-        Loads the modules defined in the root module's imports.
+        Load the modules defined in the root module's imports.
         """
         for module in self.root_module.imports:
             self.modules[module.__name__] = module
@@ -47,10 +47,11 @@ class StormApplication:
         :return: A tuple containing the response and status code
         """
         try:
-            handler, params = Router().resolve(method, path)
-            response = await self.middleware_pipeline.execute(request_kwargs, handler)
+            handler, params = self.router.resolve(method, path)
+            response = await handler(**params)
             return response, 200
         except ValueError as e:
+            # Return a 404 error if the route is not found
             return {"error": str(e)}, 404
 
     def add_middleware(self, middleware_cls):

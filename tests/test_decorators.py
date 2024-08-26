@@ -1,7 +1,7 @@
 # tests/test_decorators.py
 
 import pytest
-from storm.common.decorators import route, get, post
+from storm.common.decorators.http import route, get, post, routes
 
 @pytest.mark.asyncio
 async def test_route_decorator():
@@ -9,7 +9,7 @@ async def test_route_decorator():
     async def test_handler():
         return "test passed"
 
-    handler, _ = route.router.resolve('GET', '/test')
+    handler, _ = routes.resolve('GET', '/test')
     response = await handler()
     assert response == "test passed"
 
@@ -23,10 +23,10 @@ async def test_http_method_decorators():
     async def test_post_handler():
         return "POST passed"
 
-    handler, _ = route.router.resolve('GET', '/test-get')
+    handler, _ = routes.resolve('GET', '/test-get')
     response = await handler()
     assert response == "GET passed"
 
-    handler, _ = route.router.resolve('POST', '/test-post')
+    handler, _ = routes.resolve('POST', '/test-post')
     response = await handler()
     assert response == "POST passed"
