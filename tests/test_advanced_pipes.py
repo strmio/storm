@@ -1,5 +1,4 @@
 import pytest
-import asyncio
 from storm.common.pipes.json_to_dict_pipe import JsonToDictPipe
 from storm.common.pipes.email_validation_pipe import EmailValidationPipe
 

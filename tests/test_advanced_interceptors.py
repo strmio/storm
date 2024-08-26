@@ -1,5 +1,4 @@
 import pytest
-import asyncio
 import logging
 from storm.common.interceptors.caching_interceptor import CachingInterceptor
 from storm.common.interceptors.error_handling_interceptor import ErrorHandlingInterceptor
