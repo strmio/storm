@@ -1,19 +1,20 @@
 import pytest
 import logging
-from storm import Container, Module
+from storm.common.decorators import Injectable, Controller
+from storm.core.module import Module
 from storm.core.controller import ControllerBase
-from storm.core.decorators import Controller
-from storm import Injectable
 from storm.common.middlewares.logger_middleware import LoggerMiddleware
 from storm.core.middleware import Middleware
 from storm.core.middleware_pipeline import MiddlewarePipeline
 
 logging.basicConfig(level=logging.INFO)
 
+
 @Injectable(singleton=True)
 class MiddlewareService:
     def get_data(self):
         return "Data from MiddlewareService"
+
 
 @Controller("/middleware")
 class MiddlewareController(ControllerBase):
@@ -33,6 +34,7 @@ class MiddlewareModule(Module):
             middleware=[LoggerMiddleware],
         )
 
+
 class TestMiddleware(Middleware):
     async def process_request(self, request, next_handler):
         request['processed'] = True
@@ -42,10 +44,11 @@ class TestMiddleware(Middleware):
         response['middleware'] = "processed"
         return response
 
+
 @pytest.mark.asyncio
 async def test_middleware_pipeline():
     pipeline = MiddlewarePipeline([TestMiddleware()])
-    
+
     async def final_handler(request):
         return {"response": "final"}
 

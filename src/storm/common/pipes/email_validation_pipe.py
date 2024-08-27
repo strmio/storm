@@ -1,5 +1,5 @@
 import re
-from storm.core.pipes import Pipe
+from storm.common.pipes.pipe import Pipe
 
 class EmailValidationPipe(Pipe):
     EMAIL_REGEX = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'

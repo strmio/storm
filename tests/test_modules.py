@@ -1,5 +1,8 @@
 import pytest
-from storm import Container, Injectable, Controller, Module
+from storm.common.decorators.injectable import Injectable
+from storm.common.decorators import Controller
+from storm.core.container import Container
+from storm.core.module import Module
 
 # Service in a shared module
 @Injectable(singleton=True)

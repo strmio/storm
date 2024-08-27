@@ -1,5 +1,5 @@
 import asyncio
-from storm.core.interceptor import Interceptor
+from storm.common.interceptors.interceptor import Interceptor
 
 class CachingInterceptor(Interceptor):
     def __init__(self):

@@ -1,4 +1,5 @@
 from functools import wraps
+
 from storm.core.router import Router
 
 routes = Router()

@@ -1,5 +1,6 @@
-from storm.core.guards import Guard
 from datetime import datetime
+
+from storm.core.guards import Guard
 
 class TimeBasedGuard(Guard):
     def __init__(self, start_hour, end_hour, time_provider=datetime.now):

@@ -1,7 +1,7 @@
 import json
 from storm.core.interceptor_pipeline import InterceptorPipeline
-from storm.core.router import Router
 from storm.core.middleware_pipeline import MiddlewarePipeline
+from storm.core.router import Router
 
 
 class StormApplication:

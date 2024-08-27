@@ -1,4 +1,4 @@
-from storm.core.exception import StormException
+from storm.common.exceptions.exception import StormException
 
 
 class NotFoundException(StormException):

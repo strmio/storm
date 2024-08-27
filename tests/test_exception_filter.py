@@ -1,6 +1,6 @@
 import pytest
 from storm.common.exceptions import NotFoundException, StormException
-from storm.core.filter import ExceptionFilter
+from storm.common.filters.filter import ExceptionFilter
 
 @pytest.mark.asyncio
 async def test_exception_filter_handles_known_exceptions():

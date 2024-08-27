@@ -1,5 +1,5 @@
 import logging
-from storm.core.interceptor import Interceptor
+from storm.common.interceptors.interceptor import Interceptor
 
 logger = logging.getLogger(__name__)
 

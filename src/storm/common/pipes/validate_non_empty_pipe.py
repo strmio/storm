@@ -1,4 +1,4 @@
-from storm.core.pipes import Pipe
+from storm.common.pipes.pipe import Pipe
 
 class ValidateNonEmptyPipe(Pipe):
     async def transform(self, value, metadata=None):

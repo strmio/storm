@@ -1,5 +1,5 @@
 import json
-from storm.core.pipes import Pipe
+from storm.common.pipes.pipe import Pipe
 
 class JsonToDictPipe(Pipe):
     async def transform(self, value, metadata=None):
