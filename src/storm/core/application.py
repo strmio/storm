@@ -47,13 +47,28 @@ class StormApplication:
         for module in self.root_module.imports:
             self.modules[module.__name__] = module
 
-    def _initialize_services(self):
+    def _inject_dependencies(self, service, module):
         """
-        Initializes the services defined in each loaded module.
+        Inject dependencies into a service, resolving them from the module's providers.
+
+        :param service: The service instance to inject dependencies into.
+        :param module: The module providing the dependencies.
         """
-        for module in self.modules.values():
-            for provider in module.providers:
-                pass  # Initialize providers if necessary
+        for attr_name, dependency in service.__annotations__.items():
+            if dependency in module.providers:
+                setattr(service, attr_name, module.providers[dependency.__name__])
+
+    def _initialize_services(self, module):
+        """
+        Initialize services for a given module, resolving dependencies and ensuring
+        that each service is ready to be used.
+
+        :param module:  The module whose services need to be initialized.
+        """
+        for provider in module.providers:
+            service_instance = provider()
+            self._inject_dependencies(service_instance, module)
+            module.providers[provider.__name__] = service_instance
 
     async def handle_request(self, method, path, **request_kwargs):
         """
@@ -118,3 +133,19 @@ class StormApplication:
                 'type': 'http.response.body',
                 'body': bytes(json.dumps(response), 'utf-8'),
             })
+
+    def _initialize_module(self, module):
+        # Initialize module services and controllers
+        self._initialize_services(module)
+
+        # Call onInit hook if it exists
+        if hasattr(module, 'onInit') and callable(module.onInit):
+            module.onInit()
+
+    def shutdown(self):
+        """
+        Perform shutdown tasks, calling any onDestroy hooks in the modules.
+        """
+        for module in self.modules.values():
+            if hasattr(module, 'onDestroy') and callable(module.onDestroy):
+                module.onDestroy()
