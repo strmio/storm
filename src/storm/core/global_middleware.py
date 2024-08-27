@@ -9,7 +9,7 @@ class GlobalMiddleware(ABC):
     """
 
     @abstractmethod
-    async def process(self, request, next_handler):
+    async def process_request(self, request, next_handler):
         """
         Process the incoming request and optionally modify it.
 

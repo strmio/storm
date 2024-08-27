@@ -8,7 +8,7 @@ class TestGlobalMiddleware(GlobalMiddleware):
     Test middleware that sets a flag in the request to confirm that it was executed.
     """
 
-    async def process(self, request, next_handler):
+    async def process_request(self, request, next_handler):
         request['global_middleware_applied'] = True
         return await next_handler(request)
 

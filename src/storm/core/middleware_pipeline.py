@@ -1,5 +1,8 @@
 # src/storm/core/middleware_pipeline.py
 
+import queue
+
+
 class MiddlewarePipeline:
     """
     Manages the sequential execution of middleware, including global and route-specific middleware.
@@ -16,8 +19,23 @@ class MiddlewarePipeline:
         :param global_middleware: A list of global middleware classes.
         :param route_middleware: A list of route-specific middleware classes.
         """
-        self.global_middleware = global_middleware or []
-        self.route_middleware = route_middleware or []
+        self.global_middleware = queue.Queue()
+        self.route_middleware = queue.Queue()
+
+        for middleware in (global_middleware or []):
+            self.global_middleware.put(middleware)
+
+        for middleware in (route_middleware or []):
+            self.route_middleware.put(middleware)
+
+    def _merge_middleware(self):
+        """Merge global and route middleware into a single queue."""
+        merged_queue = queue.Queue()
+        while not self.global_middleware.empty():
+            merged_queue.put(self.global_middleware.get())
+        while not self.route_middleware.empty():
+            merged_queue.put(self.route_middleware.get())
+        return merged_queue
 
     def add_global_middleware(self, middleware_cls):
         """
@@ -25,7 +43,7 @@ class MiddlewarePipeline:
 
         :param middleware_cls: The global middleware class to be added.
         """
-        self.global_middleware.append(middleware_cls())
+        self.global_middleware.put(middleware_cls())
 
     async def execute(self, request, handler):
         """
@@ -35,12 +53,12 @@ class MiddlewarePipeline:
         :param handler: The final handler function to process the request.
         :return: The response after processing by middleware and handler.
         """
-        all_middleware = self.global_middleware + self.route_middleware
-        if not all_middleware:
+        all_middleware = self._merge_middleware()
+        if all_middleware.empty():
             return request
         return await self._execute_request_middleware(request, handler, all_middleware)
 
-    async def _execute_request_middleware(self, request, handler, middleware_list):
+    async def _execute_request_middleware(self, request, handler, middleware_queue):
         """
         Recursively processes the request through each middleware in the list.
 
@@ -49,15 +67,13 @@ class MiddlewarePipeline:
         :param middleware_list: The list of middleware to process the request through.
         :return: The response after processing by middleware and handler.
         """
-        if not middleware_list:
+
+        if middleware_queue.empty():
             return handler(request)
 
-        current_middleware = middleware_list[0]
-        remaining_middleware = middleware_list[1:]
+        current_middleware = middleware_queue.get()
 
-        async def next_handler(req):
-            return await self._execute_request_middleware(req, handler, remaining_middleware)
+        async def next_middleware(req):
+            return await self._execute_request_middleware(req, handler, middleware_queue)
 
-        if hasattr(current_middleware, 'process'):
-            return await current_middleware.process(request, next_handler)
-        return await current_middleware.process_request(request, next_handler)
+        return await current_middleware.process_request(request, next_middleware)
