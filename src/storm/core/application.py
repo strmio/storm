@@ -22,7 +22,7 @@ class StormApplication:
         self.middleware_pipeline = MiddlewarePipeline()
         self.interceptor_pipeline = InterceptorPipeline(global_interceptors=[])
         self._load_modules()
-        self._initialize_services()
+
 
     def add_global_interceptor(self, interceptor_cls):
         """
@@ -46,6 +46,8 @@ class StormApplication:
         """
         for module in self.root_module.imports:
             self.modules[module.__name__] = module
+            self._initialize_module(module)
+
 
     def _inject_dependencies(self, service, module):
         """
