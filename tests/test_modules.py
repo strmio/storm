@@ -2,7 +2,7 @@ import pytest
 from storm.common.decorators.injectable import Injectable
 from storm.common.decorators import Controller
 from storm.core.container import Container
-from storm.core.module import Module
+from storm.core.module import ModuleBase
 
 # Service in a shared module
 @Injectable(singleton=True)
@@ -11,7 +11,7 @@ class SharedService:
         return "Shared data from SharedService"
 
 # Shared module
-class SharedModule(Module):
+class SharedModule(ModuleBase):
     def __init__(self):
         super().__init__(
             providers=[SharedService],
@@ -36,7 +36,7 @@ class MainController:
         return self.main_service.get_data()
 
 # Main application module
-class AppModule(Module):
+class AppModule(ModuleBase):
     def __init__(self):
         super().__init__(
             controllers=[MainController],

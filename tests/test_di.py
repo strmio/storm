@@ -2,7 +2,7 @@ import pytest
 from storm.common.decorators.injectable import Injectable
 from storm.common.decorators import Controller
 from storm.core.container import Container
-from storm.core.module import Module
+from storm.core.module import ModuleBase
 @Injectable(singleton=True)
 class ExampleService:
     def get_message(self):
@@ -16,7 +16,7 @@ class ExampleController:
     def get(self):
         return self.service.get_message()
 
-class ExampleModule(Module):
+class ExampleModule(ModuleBase):
     def __init__(self):
         super().__init__(
             controllers=[ExampleController],

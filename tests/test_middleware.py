@@ -1,7 +1,7 @@
 import pytest
 import logging
 from storm.common.decorators import Injectable, Controller
-from storm.core.module import Module
+from storm.core.module import ModuleBase
 from storm.core.controller import ControllerBase
 from storm.common.middlewares.logger_middleware import LoggerMiddleware
 from storm.core.middleware import Middleware
@@ -26,7 +26,7 @@ class MiddlewareController(ControllerBase):
         return self.service.get_data()
 
 
-class MiddlewareModule(Module):
+class MiddlewareModule(ModuleBase):
     def __init__(self):
         super().__init__(
             controllers=[MiddlewareController],

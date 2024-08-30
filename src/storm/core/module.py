@@ -1,5 +1,6 @@
-class Module:
-    def __init__(self, controllers=[], providers=[], imports=[], middleware=[]):
+
+class ModuleBase():
+    def __init__(self, controllers=[], providers=[], imports=[], middleware=[], module_cls=None):
         """
         Initialize the module with controllers, providers, imports, and middleware.
         :param controllers: List of controller classes.
@@ -11,6 +12,14 @@ class Module:
         self.providers = providers
         self.imports = imports
         self.middleware = middleware
+        self._module_cls = module_cls
+        
+        if hasattr(module_cls, 'onInit') and callable(module_cls.onInit):
+            module_cls.onInit(self)
+            self.onInit()
+       
+        if hasattr(module_cls, 'onDestroy') and callable(module_cls.onDestroy):
+            module_cls.onDestroy(self)
 
     def register(self, container):
         """
@@ -34,3 +43,15 @@ class Module:
         # Register middleware
         for middleware in self.middleware:
             container.register(middleware.__name__, middleware, singleton=True)
+
+    def onInit(self):
+        """
+        Hook for module initialization.
+        """
+        pass
+    
+    def onDestroy(self):
+        """
+        Hook for module destruction.
+        """
+        pass

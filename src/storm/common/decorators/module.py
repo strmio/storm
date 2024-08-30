@@ -1,4 +1,5 @@
-# src/storm/core/module.py
+from storm.core.module import ModuleBase
+
 
 def Module(imports=None, providers=None, controllers=None):
     """
@@ -10,11 +11,12 @@ def Module(imports=None, providers=None, controllers=None):
     :return: The decorated class as a module
     """
     def decorator(cls):
-        cls.imports = imports or []
-        cls.providers = providers or []
-        cls.controllers = controllers or []
-        return cls
-    
-    
-    return decorator
+        module = ModuleBase(
+            imports=imports or [],
+            providers=providers or [],
+            controllers=controllers or [],
+            module_cls=cls
+        )
+        return module
 
+    return decorator
