@@ -1,4 +1,3 @@
-from abc import ABC, abstractmethod
 
 class ModuleBase():
     def __init__(self, controllers=[], providers=[], imports=[], middleware=[], module_cls=None):
