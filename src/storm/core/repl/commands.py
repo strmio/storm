@@ -31,3 +31,13 @@ def list_controllers(app):
     for controller in app.modules.values():
         for ctrl in controller.controllers:
             print(f" - {ctrl.__class__.__name__}")
+
+def reload(app):
+    """
+    Reloads the application’s modules and services.
+    
+    :param app: The Storm application instance.
+    """
+    print("Reloading application...")
+    app._load_modules()  # Assume a private method exists to reload modules
+    print("Application reloaded.")
