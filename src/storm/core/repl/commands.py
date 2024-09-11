@@ -39,5 +39,15 @@ def reload(app):
     :param app: The Storm application instance.
     """
     print("Reloading application...")
-    app._load_modules()  # Assume a private method exists to reload modules
+    app._load_modules()
     print("Application reloaded.")
+
+def show_routes(app):
+    """
+    Displays all registered routes in the application.
+
+    :param app: The Storm application instance.
+    """
+    print("Registered Routes:")
+    for route in app.router.routes:
+        print(f" - {route.method} {route.path}")
