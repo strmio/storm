@@ -1,3 +1,5 @@
+import os
+
 def help():
     """
     Lists available commands in the Storm REPL.
@@ -51,3 +53,10 @@ def show_routes(app):
     print("Registered Routes:")
     for route in app.router.routes:
         print(f" - {route.method} {route.path}")
+
+def clear():
+    """
+    Clears the REPL screen.
+    """
+    os.system('cls' if os.name == 'nt' else 'clear')
+    print("Screen cleared.")
