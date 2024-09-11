@@ -60,3 +60,16 @@ def clear():
     """
     os.system('cls' if os.name == 'nt' else 'clear')
     print("Screen cleared.")
+
+
+def eval_code(code, context):
+    """
+    Evaluates and executes arbitrary Python code within the REPL.
+
+    :param code: The Python code to evaluate.
+    :param context: The REPL context, usually a dictionary with available variables.
+    """
+    try:
+        exec(code, context)
+    except Exception as e:
+        print(f"Error executing code: {e}")
