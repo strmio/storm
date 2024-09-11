@@ -65,16 +65,6 @@ class InterceptorPipeline:
         :param interceptor_queue: The list of interceptors to process the request through.
         :return: The response after processing by interceptors and handler.
         """
-        # if not interceptor_list:
-        #     return await handler(request)
-
-        # current_interceptor = interceptor_list[0]
-        # remaining_interceptors = interceptor_list[1:]
-
-        # async def next_handler(req):
-        #     return await self._execute_interceptors(req, handler, remaining_interceptors)
-
-        # return await current_interceptor.intercept(request, next_handler)
 
         if interceptor_queue.empty():
             return await handler(request)
