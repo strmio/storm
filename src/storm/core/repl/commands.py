@@ -73,3 +73,23 @@ def eval_code(code, context):
         exec(code, context)
     except Exception as e:
         print(f"Error executing code: {e}")
+
+
+def get_service(app, service_name):
+    """
+    Retrieves a specific service by name from the application context.
+
+    :param app: The Storm application instance.
+    :param service_name: The name of the service to retrieve.
+    :return: The service instance or a message if not found.
+    """
+    service = next(
+        (provider for module in app.modules.values() for provider in module.providers if provider.__class__.__name__ == service_name),
+        None
+    )
+    if service:
+        print(f"Service '{service_name}' retrieved successfully.")
+        return service
+    else:
+        print(f"Service '{service_name}' not found.")
+        return None
