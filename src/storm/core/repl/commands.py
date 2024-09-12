@@ -93,3 +93,24 @@ def get_service(app, service_name):
     else:
         print(f"Service '{service_name}' not found.")
         return None
+
+
+def inspect_route(app, path):
+    """
+    Inspects a specific route by its path, showing handlers and middleware.
+    
+    :param app: The Storm application instance.
+    :param path: The route path to inspect.
+    """
+    route = next((route for route in app.router.routes if route.path == path), None)
+    if not route:
+        print(f"No route found for path: {path}")
+        return
+
+    print(f"Inspecting Route: {path}")
+    print(f"Method: {route.method}")
+    print(f"Handler: {route.handler.__name__}")
+    if route.middleware:
+        print("Middleware:")
+        for mw in route.middleware:
+            print(f" - {mw.__class__.__name__}")
