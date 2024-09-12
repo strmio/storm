@@ -1,4 +1,6 @@
+import time
 import os
+
 
 def help():
     """
@@ -12,10 +14,11 @@ def help():
     for command, description in commands.items():
         print(f"{command}: {description}")
 
+
 def list_services(app):
     """
     Lists all services registered in the application.
-    
+
     :param app: The Storm application instance.
     """
     print("Registered Services:")
@@ -23,10 +26,11 @@ def list_services(app):
         for provider in service.providers:
             print(f" - {provider.__class__.__name__}")
 
+
 def list_controllers(app):
     """
     Lists all controllers registered in the application.
-    
+
     :param app: The Storm application instance.
     """
     print("Registered Controllers:")
@@ -34,15 +38,17 @@ def list_controllers(app):
         for ctrl in controller.controllers:
             print(f" - {ctrl.__class__.__name__}")
 
+
 def reload(app):
     """
     Reloads the application’s modules and services.
-    
+
     :param app: The Storm application instance.
     """
     print("Reloading application...")
     app._load_modules()
     print("Application reloaded.")
+
 
 def show_routes(app):
     """
@@ -53,6 +59,7 @@ def show_routes(app):
     print("Registered Routes:")
     for route in app.router.routes:
         print(f" - {route.method} {route.path}")
+
 
 def clear():
     """
@@ -84,7 +91,8 @@ def get_service(app, service_name):
     :return: The service instance or a message if not found.
     """
     service = next(
-        (provider for module in app.modules.values() for provider in module.providers if provider.__class__.__name__ == service_name),
+        (provider for module in app.modules.values()
+         for provider in module.providers if provider.__class__.__name__ == service_name),
         None
     )
     if service:
@@ -98,11 +106,12 @@ def get_service(app, service_name):
 def inspect_route(app, path):
     """
     Inspects a specific route by its path, showing handlers and middleware.
-    
+
     :param app: The Storm application instance.
     :param path: The route path to inspect.
     """
-    route = next((route for route in app.router.routes if route.path == path), None)
+    route = next(
+        (route for route in app.router.routes if route.path == path), None)
     if not route:
         print(f"No route found for path: {path}")
         return
@@ -114,3 +123,16 @@ def inspect_route(app, path):
         print("Middleware:")
         for mw in route.middleware:
             print(f" - {mw.__class__.__name__}")
+
+
+def benchmark(command, context):
+    """
+    Runs a command and displays the execution time for performance analysis.
+
+    :param command: The command to benchmark.
+    :param context: The REPL context containing available variables and functions.
+    """
+    start_time = time.time()
+    exec(command, context)
+    end_time = time.time()
+    print(f"Execution time: {end_time - start_time:.4f} seconds")
