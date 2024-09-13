@@ -136,3 +136,14 @@ def benchmark(command, context):
     exec(command, context)
     end_time = time.time()
     print(f"Execution time: {end_time - start_time:.4f} seconds")
+
+
+def list_modules(app):
+    """
+    Lists all modules registered in the application.
+
+    :param app: The Storm application instance.
+    """
+    print("Registered Modules:")
+    for module in app.imports.values():
+        print(f" - {module.__class__.__name__}")

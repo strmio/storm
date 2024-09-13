@@ -3,6 +3,7 @@ import readline
 import rlcompleter
 import atexit
 import os
+import sys
 from .commands import help, list_services, list_controllers, reload, show_routes
 
 
@@ -23,8 +24,9 @@ class StormRepl:
             'show_routes': lambda: show_routes(app),
         }
         self.banner = "Storm REPL - Type 'help()' for a list of available commands."
-        self.setup_history()
+        # self.setup_history()
         self.setup_autocompletion()
+        sys.ps1 = 'strm $ '
 
     def setup_history(self):
         """
