@@ -156,10 +156,10 @@ class LoggerMiddleware(Middleware):
 
 Storm comes with a powerful CLI to streamline your development workflow:
 
-- **Create a new project:** `storm-cli new my-storm-app`
-- **Generate a module:** `storm-cli generate module my-module`
-- **Generate a controller:** `storm-cli generate controller my-controller`
-- **Generate a service:** `storm-cli generate service my-service`
+- **Create a new project:** `storm new my-storm-app`
+- **Generate a module:** `storm generate module my-module`
+- **Generate a controller:** `storm generate controller my-controller`
+- **Generate a service:** `storm generate service my-service`
 
 ## Examples
 
