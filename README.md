@@ -31,6 +31,15 @@
 - **ORM Integration:** Seamlessly connect to databases using popular ORMs like SQLAlchemy or Tortoise ORM.
 - **Comprehensive Testing:** Built-in utilities for unit and integration testing.
 
+## [![Repography logo](https://images.repography.com/logo.svg)](https://repography.com) / Recent activity [![Time period](https://images.repography.com/54868595/Adi3g/nox-cli/recent-activity/0bdCu61BTSZLmgTWnKjefwC3r7W3VPhJTZ_NE2VYbq0/8GKWUmVqldQq9KP597PaNdFZ4EIIiRWfHwIk0AvTaXg_badge.svg)](https://repography.com)
+[![Timeline graph](https://images.repography.com/54868595/Adi3g/nox-cli/recent-activity/0bdCu61BTSZLmgTWnKjefwC3r7W3VPhJTZ_NE2VYbq0/8GKWUmVqldQq9KP597PaNdFZ4EIIiRWfHwIk0AvTaXg_timeline.svg)](https://github.com/Adi3g/nox-cli/commits)
+[![Issue status graph](https://images.repography.com/54868595/Adi3g/nox-cli/recent-activity/0bdCu61BTSZLmgTWnKjefwC3r7W3VPhJTZ_NE2VYbq0/8GKWUmVqldQq9KP597PaNdFZ4EIIiRWfHwIk0AvTaXg_issues.svg)](https://github.com/Adi3g/nox-cli/issues)
+[![Pull request status graph](https://images.repography.com/54868595/Adi3g/nox-cli/recent-activity/0bdCu61BTSZLmgTWnKjefwC3r7W3VPhJTZ_NE2VYbq0/8GKWUmVqldQq9KP597PaNdFZ4EIIiRWfHwIk0AvTaXg_prs.svg)](https://github.com/Adi3g/nox-cli/pulls)
+[![Trending topics](https://images.repography.com/54868595/Adi3g/nox-cli/recent-activity/0bdCu61BTSZLmgTWnKjefwC3r7W3VPhJTZ_NE2VYbq0/8GKWUmVqldQq9KP597PaNdFZ4EIIiRWfHwIk0AvTaXg_words.svg)](https://github.com/Adi3g/nox-cli/commits)
+[![Top contributors](https://images.repography.com/54868595/Adi3g/nox-cli/recent-activity/0bdCu61BTSZLmgTWnKjefwC3r7W3VPhJTZ_NE2VYbq0/8GKWUmVqldQq9KP597PaNdFZ4EIIiRWfHwIk0AvTaXg_users.svg)](https://github.com/Adi3g/nox-cli/graphs/contributors)
+[![Activity map](https://images.repography.com/54868595/Adi3g/nox-cli/recent-activity/0bdCu61BTSZLmgTWnKjefwC3r7W3VPhJTZ_NE2VYbq0/8GKWUmVqldQq9KP597PaNdFZ4EIIiRWfHwIk0AvTaXg_map.svg)](https://github.com/Adi3g/nox-cli/commits)
+
+
 ## Getting Started
 
 ### Installation
