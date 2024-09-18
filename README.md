@@ -1,5 +1,10 @@
 # Storm Framework
 
+<p align="center">
+  <a href="https://stormpy.io/" target="blank"><img src="https://github.com/user-attachments/assets/99f75677-8da2-4096-ad49-b8706cff090e" width="150" alt="Statikk Logo" /></a>
+</p>
+
+
 **Storm** is a Python framework inspired by NestJS, designed to build efficient, scalable, and maintainable server-side applications. With a focus on modularity, dependency injection, and an intuitive development experience, Storm empowers developers to create robust backend systems with ease.
 
 ## Table of Contents
