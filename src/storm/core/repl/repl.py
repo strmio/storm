@@ -5,6 +5,7 @@ import atexit
 import os
 import sys
 from .commands import help, list_services, list_controllers, reload, show_routes
+from storm.core.repl.repl_logger import ReplLogger
 
 
 class StormRepl:
@@ -15,6 +16,7 @@ class StormRepl:
 
     def __init__(self, app):
         self.app = app
+        self.logger = ReplLogger()
         self.context = {
             'app': app,
             'help': help,
@@ -32,6 +34,7 @@ class StormRepl:
         """
         Sets up command history for the REPL.
         """
+        self.logger.info("Setting up REPL history")
         history_file = os.path.expanduser("~/.storm_repl_history")
         try:
             readline.read_history_file(history_file)
@@ -50,6 +53,7 @@ class StormRepl:
         """
         Starts the interactive REPL session.
         """
+        self.logger.info("Starting REPL session")
         code.interact(banner=self.banner, local=self.context)
 
 

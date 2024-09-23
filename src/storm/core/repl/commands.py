@@ -1,6 +1,8 @@
+from storm.core.repl.repl_logger import ReplLogger
 import time
 import os
 
+logger = ReplLogger()
 
 def help():
     """
@@ -11,6 +13,7 @@ def help():
         'list_services()': 'List all registered services in the application',
         'list_controllers()': 'List all registered controllers in the application',
     }
+    logger.info("Displaying help commands.")
     for command, description in commands.items():
         print(f"{command}: {description}")
 
@@ -18,9 +21,8 @@ def help():
 def list_services(app):
     """
     Lists all services registered in the application.
-
-    :param app: The Storm application instance.
     """
+    logger.info("Listing services.")
     print("Registered Services:")
     for service in app.modules.values():
         for provider in service.providers:
@@ -30,9 +32,8 @@ def list_services(app):
 def list_controllers(app):
     """
     Lists all controllers registered in the application.
-
-    :param app: The Storm application instance.
     """
+    logger.info("Listing controllers.")
     print("Registered Controllers:")
     for controller in app.modules.values():
         for ctrl in controller.controllers:
@@ -42,9 +43,8 @@ def list_controllers(app):
 def reload(app):
     """
     Reloads the application’s modules and services.
-
-    :param app: The Storm application instance.
     """
+    logger.info("Reloading the application.")
     print("Reloading application...")
     app._load_modules()
     print("Application reloaded.")
@@ -53,9 +53,8 @@ def reload(app):
 def show_routes(app):
     """
     Displays all registered routes in the application.
-
-    :param app: The Storm application instance.
     """
+    logger.info("Displaying registered routes.")
     print("Registered Routes:")
     for route in app.router.routes:
         print(f" - {route.method} {route.path}")
@@ -65,6 +64,7 @@ def clear():
     """
     Clears the REPL screen.
     """
+    logger.info("Clearing screen.")
     os.system('cls' if os.name == 'nt' else 'clear')
     print("Screen cleared.")
 
@@ -72,33 +72,31 @@ def clear():
 def eval_code(code, context):
     """
     Evaluates and executes arbitrary Python code within the REPL.
-
-    :param code: The Python code to evaluate.
-    :param context: The REPL context, usually a dictionary with available variables.
     """
+    logger.info(f"Evaluating code: {code}")
     try:
         exec(code, context)
     except Exception as e:
+        logger.error(f"Error executing code: {e}")
         print(f"Error executing code: {e}")
 
 
 def get_service(app, service_name):
     """
     Retrieves a specific service by name from the application context.
-
-    :param app: The Storm application instance.
-    :param service_name: The name of the service to retrieve.
-    :return: The service instance or a message if not found.
     """
+    logger.info(f"Retrieving service: {service_name}")
     service = next(
         (provider for module in app.modules.values()
          for provider in module.providers if provider.__class__.__name__ == service_name),
         None
     )
     if service:
+        logger.info(f"Service '{service_name}' retrieved successfully.")
         print(f"Service '{service_name}' retrieved successfully.")
         return service
     else:
+        logger.warning(f"Service '{service_name}' not found.")
         print(f"Service '{service_name}' not found.")
         return None
 
@@ -106,13 +104,12 @@ def get_service(app, service_name):
 def inspect_route(app, path):
     """
     Inspects a specific route by its path, showing handlers and middleware.
-
-    :param app: The Storm application instance.
-    :param path: The route path to inspect.
     """
+    logger.info(f"Inspecting route: {path}")
     route = next(
         (route for route in app.router.routes if route.path == path), None)
     if not route:
+        logger.warning(f"No route found for path: {path}")
         print(f"No route found for path: {path}")
         return
 
@@ -128,22 +125,20 @@ def inspect_route(app, path):
 def benchmark(command, context):
     """
     Runs a command and displays the execution time for performance analysis.
-
-    :param command: The command to benchmark.
-    :param context: The REPL context containing available variables and functions.
     """
+    logger.info(f"Benchmarking command: {command}")
     start_time = time.time()
     exec(command, context)
     end_time = time.time()
+    logger.info(f"Execution time: {end_time - start_time:.4f} seconds")
     print(f"Execution time: {end_time - start_time:.4f} seconds")
 
 
 def list_modules(app):
     """
     Lists all modules registered in the application.
-
-    :param app: The Storm application instance.
     """
+    logger.info("Listing registered modules.")
     print("Registered Modules:")
     for module in app.imports.values():
         print(f" - {module.__class__.__name__}")
