@@ -2,6 +2,7 @@ import json
 from storm.core.interceptor_pipeline import InterceptorPipeline
 from storm.core.middleware_pipeline import MiddlewarePipeline
 from storm.core.router import Router
+from storm.common.services.logger import Logger
 
 class StormApplication:
     """
@@ -18,6 +19,7 @@ class StormApplication:
         self.root_module = root_module
         self.modules = {}
         self.router = Router()
+        self.logger = Logger()
         self.middleware_pipeline = MiddlewarePipeline()
         self.interceptor_pipeline = InterceptorPipeline(global_interceptors=[])
         self._load_modules()
@@ -40,11 +42,11 @@ class StormApplication:
         self.middleware_pipeline.add_global_middleware(middleware_cls)
 
     def _load_modules(self):
-        """
-        Load the modules defined in the root module's imports.
-        """
+        """ Load modules and log the process. """
+        self.logger.info(f"Loading modules from: {self.root_module.__name__}")
         for module in self.root_module.imports:
             self.modules[module.__name__] = module
+            self.logger.info(f"Loaded module: {module.__name__}")
             self._initialize_module(module)
 
 
@@ -136,12 +138,14 @@ class StormApplication:
             })
 
     def _initialize_module(self, module):
-        # Initialize module services and controllers
-        self._initialize_services(module)
+        """ Initialize module and register controllers """
+        for controller in module.controllers:
+            self.logger.info(f"Registering controller: {controller.__name__}")
+            # Register the routes of the controller with the router
+            for route in controller.routes:
+                self.logger.info(f"Registering route: {route['method']} {route['path']}")
+                self.router.add_route(route["method"], route["path"], route["handler"])
 
-        # Call onInit hook if it exists
-        if hasattr(module, 'onInit') and callable(module.onInit):
-            module.onInit()
 
     def shutdown(self):
         """

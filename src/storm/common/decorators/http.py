@@ -20,14 +20,14 @@ def route(method, path):
         return wrapper
     return decorator
 
-def get(path):
+def Get(path):
     return route('GET', path)
 
-def post(path):
+def Post(path):
     return route('POST', path)
 
-def put(path):
+def Put(path):
     return route('PUT', path)
 
-def delete(path):
+def Delete(path):
     return route('DELETE', path)
