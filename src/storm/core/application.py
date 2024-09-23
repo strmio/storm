@@ -3,7 +3,6 @@ from storm.core.interceptor_pipeline import InterceptorPipeline
 from storm.core.middleware_pipeline import MiddlewarePipeline
 from storm.core.router import Router
 
-
 class StormApplication:
     """
     The main application class responsible for bootstrapping the Storm framework.
