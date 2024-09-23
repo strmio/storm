@@ -27,7 +27,7 @@ class Router:
         :param path: The URL path from the incoming request
         :return: The handler function and any extracted parameters
         """
-        self.logger.info(f"Resolving route for: {method} {path}")
+        # self.logger.info(f"Resolving route for: {method} {path}")
         for (route_method, path_regex), handler in self.routes.items():
             if route_method == method and re.match(path_regex, path):
                 self.logger.info(f"Matched route: {method} {path}")

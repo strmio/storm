@@ -6,8 +6,11 @@ class Logger:
     def __init__(self, name: str = "storm"):
         self.logger = logging.getLogger(name)
         self.logger.setLevel(logging.DEBUG)
-        self._setup_console_handler()
-        self._setup_file_handler()
+        
+        # Check if the logger already has handlers to avoid adding them multiple times
+        if not self.logger.hasHandlers():
+            self._setup_console_handler()
+            self._setup_file_handler()
 
     def _setup_console_handler(self):
         """Set up console handler with colorized output."""

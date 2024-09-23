@@ -6,9 +6,7 @@ from storm.core.application import StormApplication
 # Define Controller
 @Controller("/users")
 class UsersController:
-    def __init__(self):
-        print("UsersController initialized")
-    @Get("/")
+    @Get("/users")
     def get_users(self):
         return {"users": ["John", "Jane"]}
 
