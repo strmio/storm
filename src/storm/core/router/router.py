@@ -43,7 +43,7 @@ class Router:
         :param path: The URL path
         :return: A regex pattern that matches the path
         """
-        return re.sub(r':(\w+)', r'(?P<\1>[^/]+)', path) + r'$'
+        return re.sub(r':(\w+)', r'(?P<\1>[^/]+)', path) + r'/?$'
 
     def _extract_params(self, path_regex, path):
         """
