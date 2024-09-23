@@ -55,3 +55,15 @@ class ModuleBase():
         Hook for module destruction.
         """
         pass
+
+    def on_bootstrap(self):
+        """
+        Called after all modules are loaded and the app is ready to run.
+        """
+        pass
+
+    def on_shutdown(self):
+        """
+        Called when the application is shutting down.
+        """
+        pass

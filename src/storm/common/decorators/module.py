@@ -17,6 +17,7 @@ def Module(imports=None, providers=None, controllers=None):
             controllers=controllers or [],
             module_cls=cls
         )
+        module.__name__ = cls.__name__
         return module
 
     return decorator
