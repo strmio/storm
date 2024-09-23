@@ -112,9 +112,6 @@ class StormApplication:
         :param port: The port number (default is 8000)
         """
         import uvicorn
-        import logging
-        # Disable Uvicorn access logs
-        logging.getLogger("uvicorn.access").disabled = True
         uvicorn.run(self, host=host, port=port, log_level='error')
 
     async def __call__(self, scope, receive, send):
