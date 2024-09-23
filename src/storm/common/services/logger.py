@@ -17,7 +17,7 @@ class Logger:
         """Set up console handler with colorized output in NestJS format."""
         console_handler = logging.StreamHandler()
         console_formatter = colorlog.ColoredFormatter(
-            "[Nest] %(process)d - %(asctime)s %(log_color)s%(levelname)-7s [%(name)s] %(message)s",
+            "[Storm] %(process)d - %(asctime)s %(log_color)s%(levelname)-7s [%(name)s] %(message)s",
             datefmt='%Y-%m-%d %H:%M:%S',
             log_colors={
                 'DEBUG': 'cyan',
