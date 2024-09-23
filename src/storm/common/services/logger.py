@@ -1,22 +1,23 @@
 import logging
 import colorlog
 from pythonjsonlogger import jsonlogger
+import os
 
 class Logger:
     def __init__(self, name: str = "storm"):
         self.logger = logging.getLogger(name)
         self.logger.setLevel(logging.DEBUG)
-        
-        # Check if the logger already has handlers to avoid adding them multiple times
+
+        # Check if the logger already has handlers to avoid duplication
         if not self.logger.hasHandlers():
             self._setup_console_handler()
             self._setup_file_handler()
 
     def _setup_console_handler(self):
-        """Set up console handler with colorized output."""
+        """Set up console handler with colorized output in NestJS format."""
         console_handler = logging.StreamHandler()
         console_formatter = colorlog.ColoredFormatter(
-            "%(log_color)s%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+            "[Nest] %(process)d - %(asctime)s %(log_color)s%(levelname)-7s [%(name)s] %(message)s",
             datefmt='%Y-%m-%d %H:%M:%S',
             log_colors={
                 'DEBUG': 'cyan',
@@ -30,10 +31,11 @@ class Logger:
         self.logger.addHandler(console_handler)
 
     def _setup_file_handler(self):
-        """Set up file handler with JSON formatting."""
+        """Set up file handler with JSON formatting in NestJS format."""
         file_handler = logging.FileHandler("storm.log")
         file_formatter = jsonlogger.JsonFormatter(
-            "%(asctime)s %(name)s %(levelname)s %(message)s"
+            "[Storm] %(process)d - %(asctime)s %(levelname)-7s [%(name)s] %(message)s",
+            datefmt='%Y-%m-%d %H:%M:%S'
         )
         file_handler.setFormatter(file_formatter)
         self.logger.addHandler(file_handler)
