@@ -14,7 +14,7 @@ class Logger:
             self._setup_file_handler()
 
     def _setup_console_handler(self):
-        """Set up console handler with colorized output in NestJS format."""
+        """Set up console handler with colorized output."""
         console_handler = logging.StreamHandler()
         console_formatter = colorlog.ColoredFormatter(
             "[Storm] %(process)d - %(asctime)s %(log_color)s%(levelname)-7s [%(name)s] %(message)s",
@@ -31,7 +31,7 @@ class Logger:
         self.logger.addHandler(console_handler)
 
     def _setup_file_handler(self):
-        """Set up file handler with JSON formatting in NestJS format."""
+        """Set up file handler with JSON formatting."""
         file_handler = logging.FileHandler("storm.log")
         file_formatter = jsonlogger.JsonFormatter(
             "[Storm] %(process)d - %(asctime)s %(levelname)-7s [%(name)s] %(message)s",
