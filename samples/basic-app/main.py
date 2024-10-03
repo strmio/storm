@@ -4,17 +4,21 @@ from storm.common.decorators.controller import Controller
 from storm.core.application import StormApplication
 
 # Define Controller
-@Controller("/users")
-class UsersController:
+@Controller("/users")  # Define base path for this controller
+class UsersController():
+
     @Get("/")
-    def get_users(self):
+    async def get_users(self, request):
         return {"users": ["John", "Jane"]}
 
 # Define Module
 @Module(controllers=[UsersController], imports=[])
-class AppModule:
+class UsersModule:
     pass
 
+@Module(imports=[UsersModule])
+class AppModule:
+    pass
 
 # Create the Storm Application and Run the Server
 if __name__ == "__main__":
