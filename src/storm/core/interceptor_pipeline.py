@@ -2,7 +2,6 @@
 
 import queue
 
-
 class InterceptorPipeline:
     """
     Manages the sequential execution of global interceptors.
@@ -67,6 +66,7 @@ class InterceptorPipeline:
         """
 
         if interceptor_queue.empty():
+            handler.set_request(request)
             return await handler()
         
         current_interceptor = interceptor_queue.get()
