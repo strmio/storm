@@ -5,7 +5,7 @@ from storm.common.decorators.controller import Controller
 from storm.common.services.logger import Logger
 from storm.core.application import StormApplication
 
-
+# Define Controller
 @Injectable()
 class UsersService():
     def __init__(self):
@@ -32,7 +32,6 @@ class UsersController():
     @Get("/count")
     async def get_users_count(self):
         return self.users_service.get_count()
-
 
 # Define Module
 @Module(controllers=[UsersController], providers=[UsersService])
