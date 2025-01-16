@@ -62,3 +62,16 @@ class HttpRequest:
                 k: v for k, v in [pair.split("=") for pair in query_string.split("&") if "=" in pair]
             }
         return query_params
+
+    def get_request_info(self):
+        """
+        Returns a tuple containing method, path, and request_kwargs.
+        
+        :return: Tuple (method, path, request_kwargs)
+        """
+        request_kwargs = {
+            "headers": self.headers,
+            "query_params": self.query_params,
+            "body": self.body
+        }
+        return self.method, self.path, request_kwargs
