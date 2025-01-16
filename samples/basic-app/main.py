@@ -11,6 +11,10 @@ class UsersController():
     async def get_users(self, request):
         return {"users": ["John", "Jane"]}
 
+    @Get("/me")
+    async def get_me(self, request):
+        return {"users": ["John", "Jane"]}
+
 # Define Module
 @Module(controllers=[UsersController], imports=[])
 class UsersModule:
