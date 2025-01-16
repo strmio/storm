@@ -1,10 +1,13 @@
 # src/storm/core/controller.py
 
+from storm.core.router.router import Router
+
+
 class ControllerBase:
     def __init__(self, base_path = "", middleware=[]):
         base_path = base_path
         self.middleware = middleware
-        self.routes = []
+        self.routes = Router()
         
     async def execute(self, request):
         async def next_middleware(index):
@@ -16,12 +19,5 @@ class ControllerBase:
 
         return await next_middleware(0)
 
-    def add_route(self, method, path, handler):
-        self.routes.append({
-            "method": method,
-            "path": path,
-            "handler": handler
-        })
-
     def get_routes(self):
-        return self.routes
+        return self.routes.routes

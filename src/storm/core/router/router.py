@@ -15,9 +15,19 @@ class Router:
         :param path: The URL path (e.g., '/users/:id')
         :param handler: The function to handle requests to this route
         """
-        self.logger.info(f"Adding route: {method} {path}")
+        # self.logger.info(f"Adding route: {method} {path}")
         path_regex = self._path_to_regex(path)
         self.routes[(method, path_regex)] = handler
+
+    def add_route_from_controller_router(self, method_path, handler):
+        """
+        Registers a new route with the specified HTTP method and path.
+
+        :param method: The HTTP method (GET, POST, etc.)
+        :param path: The URL path (e.g., '/users/:id')
+        :param handler: The function to handle requests to this route
+        """
+        self.routes[method_path] = handler
 
     def resolve(self, method, path):
         """
