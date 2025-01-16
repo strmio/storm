@@ -143,7 +143,8 @@ class StormApplication:
             self.logger.info(f"Registering controller: {controller.__name__}")
             # Register the routes of the controller with the router
             ctr = controller()
-            for route in ctr.get_routes():
+            for route in ctr.routes:
+                print(route)
                 self.logger.info(f"Registering route: {route['method']} {route['path']}")
                 self.router.add_route(route["method"], route["path"], route["handler"])
 
