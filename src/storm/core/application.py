@@ -49,7 +49,6 @@ class StormApplication:
             self.logger.info(f"Loaded module: {module.__name__}")
             self._initialize_module(module)
 
-
     def _inject_dependencies(self, service, module):
         """
         Inject dependencies into a service, resolving them from the module's providers.
