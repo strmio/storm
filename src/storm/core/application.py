@@ -19,7 +19,7 @@ class StormApplication:
         self.root_module = root_module
         self.modules = {}
         self.router = Router()
-        self.logger = Logger()
+        self.logger = Logger("StormApplication")
         self.middleware_pipeline = MiddlewarePipeline()
         self.interceptor_pipeline = InterceptorPipeline(global_interceptors=[])
         self._load_modules()
@@ -125,7 +125,36 @@ class StormApplication:
         if scope['type'] == 'http':
             method = scope['method']
             path = scope['path']
-            request_kwargs = {}
+
+            # 1. Extract Query Parameters
+            query_string = scope.get("query_string", b"").decode('utf-8')
+            query_params = {}
+            if query_string:
+                query_params = {
+                    k: v for k, v in [pair.split('=') for pair in query_string.split('&') if '=' in pair]
+                }
+
+            # 3. Extract Body Parameters
+            body_content = b''
+            while True:
+                event = await receive()
+                if event['type'] == 'http.request':
+                    body_content += event.get('body', b'')
+                    if not event.get('more_body', False):
+                        break
+
+            try:
+                body_params = json.loads(body_content.decode('utf-8')) if body_content else {}
+            except json.JSONDecodeError:
+                body_params = {"error": "Invalid JSON"}
+
+            # Combine all parameters into request_kwargs
+            request_kwargs = {
+                "query_params": query_params,
+                "body": body_params,
+                "headers": dict(scope.get("headers", [])),
+            }
+            
             response, status_code = await self.handle_request(method, path, **request_kwargs)
             await send({
                 'type': 'http.response.start',

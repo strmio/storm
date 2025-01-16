@@ -1,5 +1,5 @@
 
-def Get(path):
+def Get(path=""):
     """Decorator to define a GET route."""
     def decorator(func):
         func.is_route = True
@@ -9,7 +9,8 @@ def Get(path):
         return func
     return decorator
 
-def Post(path):
+
+def Post(path=""):
     """Decorator to define a POST route."""
     def decorator(func):
         func.is_route = True
@@ -19,7 +20,8 @@ def Post(path):
         return func
     return decorator
 
-def Put(path):
+
+def Put(path=""):
     """Decorator to define a POST route."""
     def decorator(func):
         func.is_route = True
@@ -29,13 +31,14 @@ def Put(path):
         return func
     return decorator
 
-def Delete(path):
+
+def Delete(path=""):
     """Decorator to define a POST route."""
     def decorator(func):
         func.is_route = True
-        func._route = {"method": "DELETE", "path": path}  # Attach route metadata
+        # Attach route metadata
+        func._route = {"method": "DELETE", "path": path}
         func.route_method = "DELETE"
         func.route_path = path  # Attach route path
         return func
     return decorator
-

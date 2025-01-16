@@ -67,7 +67,7 @@ class InterceptorPipeline:
         """
 
         if interceptor_queue.empty():
-            return await handler(request)
+            return await handler()
         
         current_interceptor = interceptor_queue.get()
 
