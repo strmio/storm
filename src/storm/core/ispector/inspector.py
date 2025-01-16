@@ -1,5 +1,9 @@
+from storm.common.services.logger import Logger
+
+
 class Inspector:
     def __init__(self, app):
+        self.logger = Logger(self.__class__.__name__)
         self.app = app
 
     def list_services(self):
