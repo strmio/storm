@@ -22,8 +22,8 @@ def Controller(base_path, middleware=[]):
             # Automatically register routes
             for attr_name in dir(self):
                 attr = getattr(self, attr_name)
-                if callable(attr) and hasattr(attr, 'route_method'):
-                    self.add_route(attr.route_method, attr.route_path, attr)
+                if callable(attr) and hasattr(attr, '_route'):
+                    self.routes.add_route(attr.route_method, attr.route_path, attr)
 
         cls.__init__ = new_init  # Replace the constructor with the new init
         return cls
