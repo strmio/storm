@@ -1,4 +1,5 @@
 import json
+from storm.core.adapters.http_request import HttpRequest
 from storm.core.interceptor_pipeline import InterceptorPipeline
 from storm.core.middleware_pipeline import MiddlewarePipeline
 from storm.core.router import Router
@@ -19,7 +20,7 @@ class StormApplication:
         self.root_module = root_module
         self.modules = {}
         self.router = Router()
-        self.logger = Logger()
+        self.logger = Logger("StormApplication")
         self.middleware_pipeline = MiddlewarePipeline()
         self.interceptor_pipeline = InterceptorPipeline(global_interceptors=[])
         self._load_modules()
@@ -48,7 +49,6 @@ class StormApplication:
             self.modules[module.__name__] = module
             self.logger.info(f"Loaded module: {module.__name__}")
             self._initialize_module(module)
-
 
     def _inject_dependencies(self, service, module):
         """
@@ -123,9 +123,12 @@ class StormApplication:
         :param send: The send channel
         """
         if scope['type'] == 'http':
-            method = scope['method']
-            path = scope['path']
-            request_kwargs = {}
+            # Initialize HttpRequest and parse the body
+            request = HttpRequest(scope, receive, send)
+            await request.parse_body()
+            method, path, request_kwargs = request.get_request_info()
+
+            # Handle the request
             response, status_code = await self.handle_request(method, path, **request_kwargs)
             await send({
                 'type': 'http.response.start',
