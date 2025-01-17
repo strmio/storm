@@ -1,4 +1,6 @@
-# Storm Framework
+<p align="center">
+  <a href="https://stormpy.io/" target="blank"><img src="https://github.com/user-attachments/assets/99f75677-8da2-4096-ad49-b8706cff090e" width="150" alt="Statikk Logo" /></a>
+</p>
 
 **Storm** is a Python framework inspired by NestJS, designed to build efficient, scalable, and maintainable server-side applications. With a focus on modularity, dependency injection, and an intuitive development experience, Storm empowers developers to create robust backend systems with ease.
 
@@ -30,6 +32,15 @@
 - **CLI Tool:** Quickly scaffold projects, generate modules, controllers, and services with the Storm CLI.
 - **ORM Integration:** Seamlessly connect to databases using popular ORMs like SQLAlchemy or Tortoise ORM.
 - **Comprehensive Testing:** Built-in utilities for unit and integration testing.
+
+## [![Repography logo](https://images.repography.com/logo.svg)](https://repography.com) / Recent activity [![Time period](https://images.repography.com/54868595/Adi3g/nox-cli/recent-activity/0bdCu61BTSZLmgTWnKjefwC3r7W3VPhJTZ_NE2VYbq0/8GKWUmVqldQq9KP597PaNdFZ4EIIiRWfHwIk0AvTaXg_badge.svg)](https://repography.com)
+[![Timeline graph](https://images.repography.com/54868595/Adi3g/nox-cli/recent-activity/0bdCu61BTSZLmgTWnKjefwC3r7W3VPhJTZ_NE2VYbq0/8GKWUmVqldQq9KP597PaNdFZ4EIIiRWfHwIk0AvTaXg_timeline.svg)](https://github.com/Adi3g/nox-cli/commits)
+[![Issue status graph](https://images.repography.com/54868595/Adi3g/nox-cli/recent-activity/0bdCu61BTSZLmgTWnKjefwC3r7W3VPhJTZ_NE2VYbq0/8GKWUmVqldQq9KP597PaNdFZ4EIIiRWfHwIk0AvTaXg_issues.svg)](https://github.com/Adi3g/nox-cli/issues)
+[![Pull request status graph](https://images.repography.com/54868595/Adi3g/nox-cli/recent-activity/0bdCu61BTSZLmgTWnKjefwC3r7W3VPhJTZ_NE2VYbq0/8GKWUmVqldQq9KP597PaNdFZ4EIIiRWfHwIk0AvTaXg_prs.svg)](https://github.com/Adi3g/nox-cli/pulls)
+[![Trending topics](https://images.repography.com/54868595/Adi3g/nox-cli/recent-activity/0bdCu61BTSZLmgTWnKjefwC3r7W3VPhJTZ_NE2VYbq0/8GKWUmVqldQq9KP597PaNdFZ4EIIiRWfHwIk0AvTaXg_words.svg)](https://github.com/Adi3g/nox-cli/commits)
+[![Top contributors](https://images.repography.com/54868595/Adi3g/nox-cli/recent-activity/0bdCu61BTSZLmgTWnKjefwC3r7W3VPhJTZ_NE2VYbq0/8GKWUmVqldQq9KP597PaNdFZ4EIIiRWfHwIk0AvTaXg_users.svg)](https://github.com/Adi3g/nox-cli/graphs/contributors)
+[![Activity map](https://images.repography.com/54868595/Adi3g/nox-cli/recent-activity/0bdCu61BTSZLmgTWnKjefwC3r7W3VPhJTZ_NE2VYbq0/8GKWUmVqldQq9KP597PaNdFZ4EIIiRWfHwIk0AvTaXg_map.svg)](https://github.com/Adi3g/nox-cli/commits)
+
 
 ## Getting Started
 
@@ -156,10 +167,10 @@ class LoggerMiddleware(Middleware):
 
 Storm comes with a powerful CLI to streamline your development workflow:
 
-- **Create a new project:** `storm-cli new my-storm-app`
-- **Generate a module:** `storm-cli generate module my-module`
-- **Generate a controller:** `storm-cli generate controller my-controller`
-- **Generate a service:** `storm-cli generate service my-service`
+- **Create a new project:** `storm new my-storm-app`
+- **Generate a module:** `storm generate module my-module`
+- **Generate a controller:** `storm generate controller my-controller`
+- **Generate a service:** `storm generate service my-service`
 
 ## Examples
 
