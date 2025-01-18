@@ -1,6 +1,9 @@
 # src/storm/core/interceptor_pipeline.py
 
+import inspect
 import queue
+
+from storm.core.helpers import add_params
 
 class InterceptorPipeline:
     """
@@ -66,8 +69,7 @@ class InterceptorPipeline:
         """
 
         if interceptor_queue.empty():
-            handler.set_request(request)
-            return await handler()
+            return await handler()        
         
         current_interceptor = interceptor_queue.get()
 
