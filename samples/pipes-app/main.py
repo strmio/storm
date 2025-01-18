@@ -1,9 +1,5 @@
-from storm.common.decorators import Get, Post, Body, Query, Param
+from storm.common.decorators import Injectable, Controller, Module, Get, Post, Delete, Body, Query, Param
 from storm.common.pipes import ParseIntPipe
-from storm.common.decorators.http import Delete
-from storm.common.decorators.injectable import Injectable
-from storm.common.decorators.module import Module
-from storm.common.decorators.controller import Controller
 from storm.common.pipes.parse_uuid_pipe import ParseUUIDPipe
 from storm.common.services.logger import Logger
 from storm.core.application import StormApplication
@@ -83,10 +79,10 @@ class UsersController():
         return self.users_service.get_users(q)
 
     @Get("/:id")
-    @Param("id")
+    @Param("id", ParseIntPipe)
     async def get_user(self, id):
         self.logger.info(f"Fetching user with ID: {id}")
-        return self.users_service.get_user(int(id))
+        return self.users_service.get_user(id)
 
     @Get("/count")
     async def get_users_count(self, ip, host):
@@ -122,15 +118,17 @@ class NotesController():
                        id=Param("id", ParseUUIDPipe)):
         return {"note": {"id": str(id), "user_id": user_id, "content": "This is a note."}}
 
-# Define Module
+# Define Modules
 
-
-@Module(controllers=[UsersController, NotesController], providers=[UsersService])
+@Module(controllers=[UsersController], providers=[UsersService])
 class UsersModule:
     pass
 
+@Module(controllers=[NotesController])
+class NotesModule:
+    pass
 
-@Module(imports=[UsersModule])
+@Module(imports=[UsersModule, NotesModule])
 class AppModule:
     pass
 
