@@ -13,3 +13,4 @@ from .query_params import *
 from .headers import *
 from .ip import *
 from .host import *
+from .param import *
