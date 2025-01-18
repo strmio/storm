@@ -4,7 +4,8 @@ import re
 
 class Router:
     def __init__(self):
-        self.routes = {}
+        self.static_routes = {}
+        self.dynamic_routes = {}
         self.logger = Logger()
 
     def add_route(self, method, path, handler):
@@ -15,19 +16,31 @@ class Router:
         :param path: The URL path (e.g., '/users/:id')
         :param handler: The function to handle requests to this route
         """
-        # self.logger.info(f"Adding route: {method} {path}")
         path_regex = self._path_to_regex(path)
-        self.routes[(method, path_regex)] = handler
+        if ':' in path:
+            self.dynamic_routes[(method, path_regex)] = handler
+        else:
+            self.static_routes[(method, path)] = handler
 
-    def add_route_from_controller_router(self, method_path, handler):
+    def add_static_route_from_controller_router(self, method_path, handler):
         """
-        Registers a new route with the specified HTTP method and path.
+        Registers a new static route with the specified HTTP method and path.
 
         :param method: The HTTP method (GET, POST, etc.)
         :param path: The URL path (e.g., '/users/:id')
         :param handler: The function to handle requests to this route
         """
-        self.routes[method_path] = handler
+        self.static_routes[method_path] = handler
+    
+    def add_dynamic_route_from_controller_router(self, method_path, handler):
+        """
+        Registers a new dynamic route with the specified HTTP method and path.
+
+        :param method: The HTTP method (GET, POST, etc.)
+        :param path: The URL path (e.g., '/users/:id')
+        :param handler: The function to handle requests to this route
+        """
+        self.dynamic_routes[method_path] = handler
 
     def resolve(self, method, path):
         """
@@ -37,13 +50,17 @@ class Router:
         :param path: The URL path from the incoming request
         :return: The handler function and any extracted parameters
         """
-        for (route_method, path_regex), handler in self.routes.items():
+        if (method, path) in self.static_routes:
+            self.logger.info(f"Matched static route: {method} {path}")
+            return self.static_routes[(method, path)], {}
+        for (route_method, path_regex), handler in self.dynamic_routes.items():
             if route_method == method and re.match(path_regex, path):
-                self.logger.info(f"Matched route: {method} {path}")
+                self.logger.info(f"Matched dynamic route: {method} {path}")
                 params = self._extract_params(path_regex, path)
                 return handler, params
         self.logger.error(f"No route found for: {method} {path}")
         raise ValueError(f"No route found for {method} {path}")
+
 
     def _path_to_regex(self, path):
         """
@@ -64,3 +81,19 @@ class Router:
         """
         match = re.match(path_regex, path)
         return match.groupdict() if match else {}
+
+    def get_static_routes(self):
+        """
+        Retrieves all static routes.
+
+        :return: A dictionary of static routes with their handlers
+        """
+        return self.static_routes
+
+    def get_dynamic_routes(self):
+        """
+        Retrieves all dynamic routes.
+
+        :return: A dictionary of dynamic routes with their handlers
+        """
+        return self.dynamic_routes
