@@ -84,6 +84,7 @@ class HttpRequest:
             "query_params": self.query_params,
             "body": self.body,
             "client_ip": self.client_ip,
-            "host": self.host
+            "host": self.host,
+            "params": {},
         }
         return self.method, self.path, request_kwargs
