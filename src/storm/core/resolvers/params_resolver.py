@@ -1,11 +1,10 @@
 from inspect import signature, Parameter
-
 from storm.common import execution_context
 from storm.common.decorators.param import Param
 
 class ParamsResolver:
     """
-    A class responsible for resolving handler arguments, including instances of Params.
+    A class responsible for resolving handler arguments, including instances of Param.
     """
     @staticmethod
     async def resolve(handler, request):
@@ -26,8 +25,8 @@ class ParamsResolver:
 
         for param_name, param in sig.parameters.items():
             if param.default is not Parameter.empty and isinstance(param.default, Param):
-                # Resolve the Params object using its resolve method
-                resolved_args[param_name] = param.default.resolve()
+                # Resolve the Param object asynchronously
+                resolved_args[param_name] = await param.default.resolve()
             elif param_name in route_params:
                 # Use route parameters directly if available
                 resolved_args[param_name] = route_params[param_name]
