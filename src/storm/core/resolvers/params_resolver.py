@@ -1,7 +1,7 @@
 from inspect import signature, Parameter
 
 from storm.common import execution_context
-from storm.common.decorators.param import Params
+from storm.common.decorators.param import Param
 
 class ParamsResolver:
     """
@@ -25,7 +25,7 @@ class ParamsResolver:
         route_params = context.get("request", {}).get("params", {})
 
         for param_name, param in sig.parameters.items():
-            if param.default is not Parameter.empty and isinstance(param.default, Params):
+            if param.default is not Parameter.empty and isinstance(param.default, Param):
                 # Resolve the Params object using its resolve method
                 resolved_args[param_name] = param.default.resolve()
             elif param_name in route_params:
