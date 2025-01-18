@@ -4,6 +4,7 @@ import inspect
 import queue
 
 from storm.core.helpers import add_params
+from storm.core.resolvers.params_resolver import ParamsResolver
 
 class InterceptorPipeline:
     """
@@ -69,7 +70,10 @@ class InterceptorPipeline:
         """
 
         if interceptor_queue.empty():
-            return await handler()        
+            # Resolve arguments for the handler using the Resolver
+            resolved_args = await ParamsResolver.resolve(handler, request)
+            return await handler(**resolved_args)
+
         
         current_interceptor = interceptor_queue.get()
 
