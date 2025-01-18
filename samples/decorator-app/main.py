@@ -1,4 +1,4 @@
-from storm.common.decorators import Get, Post, Body, Request, Query, Header, Ip, Host, Param, Params
+from storm.common.decorators import Get, Post, Body, Request, Query, Header, Ip, Host, Param
 from storm.common.decorators.http import Delete
 from storm.common.decorators.injectable import Injectable
 from storm.common.decorators.module import Module
@@ -102,7 +102,7 @@ class UsersController():
         return self.users_service.get_me()
 
     @Delete("/:id")
-    async def delete_user(self, id = Params("id")):
+    async def delete_user(self, id = Param("id")):
         self.logger.info(f"Deleting user with ID: {id}, type: {type(id)}")
         return self.users_service.delete_user(int(id))
 
