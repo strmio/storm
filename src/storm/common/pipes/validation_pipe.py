@@ -1,3 +1,6 @@
+from .pipe import Pipe
+
+
 class ValidationPipe(Pipe):
     """
     A generic validation pipe that applies a custom validation function to the input.
