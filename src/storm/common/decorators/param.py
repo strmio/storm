@@ -3,29 +3,40 @@ from storm.common.execution_context import execution_context
 
 class Param:
     """
-    A unified implementation of Param/Params that can work both as a decorator
-    and as a dynamic parameter resolver in function arguments.
+    A unified implementation of Param that supports async pipes for transformation or validation.
 
     :param param_name: The name of the route parameter to inject or resolve.
+    :param pipe: An optional class or instance of a Pipe to transform or validate the parameter.
     """
-    def __init__(self, param_name=None):
+    def __init__(self, param_name=None, pipe=None):
         self.param_name = param_name
+        self.pipe = pipe
 
-    def resolve(self):
+    async def resolve(self):
         """
-        Dynamically resolve the parameter value or all parameters.
+        Dynamically resolve the parameter value or all parameters, applying the pipe if specified.
         """
         context = execution_context.get()
         route_params = context.get("request", {}).get("params", {})
 
+        # Get the parameter value or all parameters
         if self.param_name is None:
-            return route_params
-        return route_params.get(self.param_name)
+            result = route_params
+        else:
+            result = route_params.get(self.param_name)
+
+        # Apply the pipe if it exists
+        if self.pipe and result is not None:
+            # Instantiate the pipe if it's a class
+            pipe_instance = self.pipe() if isinstance(self.pipe, type) else self.pipe
+            result = await pipe_instance.transform(result, metadata={"param_name": self.param_name})
+        return result
 
     def __call__(self, func=None):
-        # If called without a function, act as a resolver
+        # If called without a function, resolve the value synchronously for default arguments
         if func is None:
-            return self.resolve()
+            import asyncio
+            return asyncio.run(self.resolve())
 
         # If called with a function, act as a decorator
         @wraps(func)
@@ -34,9 +45,13 @@ class Param:
             context = execution_context.get()
             route_params = context.get("request", {}).get("params", {})
 
-            # Inject the route parameter into kwargs if it exists
+            # Resolve the parameter value and apply the pipe if necessary
             if self.param_name in route_params:
-                kwargs[self.param_name] = route_params[self.param_name]
+                value = route_params[self.param_name]
+                if self.pipe:
+                    pipe_instance = self.pipe() if isinstance(self.pipe, type) else self.pipe
+                    value = await pipe_instance.transform(value, metadata={"param_name": self.param_name})
+                kwargs[self.param_name] = value
             else:
                 kwargs[self.param_name] = route_params
 
