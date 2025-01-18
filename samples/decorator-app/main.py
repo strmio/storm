@@ -1,4 +1,5 @@
-from storm.common.decorators import Get, Post, Body, Request, Query, Header, Ip, Host
+from storm.common.decorators import Get, Post, Body, Request, Query, Header, Ip, Host, Param, Params
+from storm.common.decorators.http import Delete
 from storm.common.decorators.injectable import Injectable
 from storm.common.decorators.module import Module
 from storm.common.decorators.controller import Controller
@@ -17,7 +18,7 @@ class UsersService():
             {"id": 4, "name": "Bob Brown", "email": "bob.brown@example.com"}
         ]
     
-    def get_users(self, q = None):
+    def get_users(self, q: str = None):
         # Simulate fetching users from a database or external service
         if q:
             users = [user for user in self.users if q.lower() in user["name"].lower()]
@@ -44,7 +45,21 @@ class UsersService():
         # Simulate adding a new user to the database or external service
         self.users.append(user)
         return {"status": "ok", "user": user}
+
+    def get_user_by_email(self, email):
+        # Simulate fetching a user by email from a database or external service
+        users = self.users
+        user = next((user for user in users if user["email"] == email), None)
+        return {"user": user}
     
+    def delete_user(self, id):
+        # Simulate deleting a user from the database or external service
+        users = self.users
+        user = next((user for user in users if user["id"] == id), None)
+        if user:
+            users.remove(user)
+            return {"status": "ok", "user": user}
+        return {"status": "error", "message": "User not found"}    
 
 # Define Controller
 @Controller("/users")  # Define base path for this controller
@@ -61,8 +76,10 @@ class UsersController():
         return self.users_service.get_users(q)
     
     @Get("/:id")
-    async def get_user(self):
-        return self.users_service.get_user(1)
+    @Param("id")
+    async def get_user(self, id):
+        self.logger.info(f"Fetching user with ID: {id}")
+        return self.users_service.get_user(int(id))
 
     @Get("/count")
     @Ip()
@@ -83,6 +100,11 @@ class UsersController():
         if not auth:
             return {"error": "Unauthorized"}
         return self.users_service.get_me()
+
+    @Delete("/:id")
+    async def delete_user(self, id = Params("id")):
+        self.logger.info(f"Deleting user with ID: {id}, type: {type(id)}")
+        return self.users_service.delete_user(int(id))
 
 # Define Module
 @Module(controllers=[UsersController], providers=[UsersService])
