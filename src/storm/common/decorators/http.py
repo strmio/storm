@@ -14,14 +14,7 @@ def route(method, path=""):
         wrapper._route = {"method": method.upper(), "path": path}
         wrapper.route_method = method.upper()
         wrapper.route_path = path
-        wrapper.request = None
 
-        # Add a method to update the request attribute
-        def set_request(value):
-            wrapper.request = value
-        
-        wrapper.set_request = set_request
-        
         return wrapper
     
     return decorator

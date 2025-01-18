@@ -1,9 +1,12 @@
+from contextvars import ContextVar
 import json
 from storm.core.adapters.http_request import HttpRequest
 from storm.core.interceptor_pipeline import InterceptorPipeline
 from storm.core.middleware_pipeline import MiddlewarePipeline
 from storm.core.router import Router
 from storm.common.services.logger import Logger
+from storm.common.execution_context import execution_context
+
 
 class StormApplication:
     """
@@ -83,18 +86,24 @@ class StormApplication:
         :return: A tuple containing the response and status code
         """
         try:
+            # Set the execution context for the current request
+            execution_context.set({"request": request_kwargs})
+
             handler, params = self.router.resolve(method, path)
             request_kwargs.update(params)
 
             # Execute middleware first, which may modify the request
             modified_request = await self.middleware_pipeline.execute(request_kwargs, lambda req: req)
-
+                        
             # Execute interceptors after middleware, passing the modified request and getting the response
             response = await self.interceptor_pipeline.execute(modified_request, handler)
             
             return response, 200
         except ValueError as e:
             return {"error": str(e)}, 404
+        finally:
+            # Clear the execution context after handling the request
+            execution_context.clear()
 
     def add_middleware(self, middleware_cls):
         """
@@ -147,10 +156,15 @@ class StormApplication:
             # Register the routes of the controller with the router
             ctr = controller()
 
-            for method_path, handler in ctr.routes.routes.items():
+            for method_path, handler in ctr.router.get_static_routes().items():
                 method, path = method_path
                 self.logger.info(f"Registering route: {method} {path}")
-                self.router.add_route_from_controller_router(method_path, handler)
+                self.router.add_static_route_from_controller_router(method_path, handler)
+            
+            for method_path, handler in ctr.router.get_dynamic_routes().items():
+                method, path = method_path
+                self.logger.info(f"Registering route: {method} {path}")
+                self.router.add_dynamic_route_from_controller_router(method_path, handler)
 
 
     def shutdown(self):

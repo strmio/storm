@@ -24,6 +24,8 @@ class HttpRequest:
         self.headers = self._parse_headers(scope.get("headers", []))
         self.query_params = self._parse_query_params(scope.get("query_string", b""))
         self.body = None
+        self.client_ip = self._parse_client_ip(scope)
+        self.host = self.headers.get("host")
 
     async def parse_body(self):
         """
@@ -63,6 +65,14 @@ class HttpRequest:
             }
         return query_params
 
+    def _parse_client_ip(self, scope):
+        """
+        Parse the client IP from the ASGI scope.
+        :param scope: The scope of the ASGI connection
+        :return: Client IP address as a string
+        """
+        return scope.get("client", [None])[0]
+
     def get_request_info(self):
         """
         Returns a tuple containing method, path, and request_kwargs.
@@ -72,6 +82,8 @@ class HttpRequest:
         request_kwargs = {
             "headers": self.headers,
             "query_params": self.query_params,
-            "body": self.body
+            "body": self.body,
+            "client_ip": self.client_ip,
+            "host": self.host
         }
         return self.method, self.path, request_kwargs
