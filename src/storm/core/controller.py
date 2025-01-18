@@ -7,7 +7,7 @@ class ControllerBase:
     def __init__(self, base_path = "", middleware=[]):
         base_path = base_path
         self.middleware = middleware
-        self.routes = Router()
+        self.router = Router()
         
     async def execute(self, request):
         async def next_middleware(index):
@@ -19,5 +19,3 @@ class ControllerBase:
 
         return await next_middleware(0)
 
-    def get_routes(self):
-        return self.routes.routes
