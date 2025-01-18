@@ -156,10 +156,15 @@ class StormApplication:
             # Register the routes of the controller with the router
             ctr = controller()
 
-            for method_path, handler in ctr.routes.routes.items():
+            for method_path, handler in ctr.router.get_static_routes().items():
                 method, path = method_path
                 self.logger.info(f"Registering route: {method} {path}")
-                self.router.add_route_from_controller_router(method_path, handler)
+                self.router.add_static_route_from_controller_router(method_path, handler)
+            
+            for method_path, handler in ctr.router.get_dynamic_routes().items():
+                method, path = method_path
+                self.logger.info(f"Registering route: {method} {path}")
+                self.router.add_dynamic_route_from_controller_router(method_path, handler)
 
 
     def shutdown(self):
