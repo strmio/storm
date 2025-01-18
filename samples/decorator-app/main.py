@@ -1,4 +1,4 @@
-from storm.common.decorators import Get, Post, Body
+from storm.common.decorators import Get, Post, Body, Request, Query, Header, Ip, Host
 from storm.common.decorators.injectable import Injectable
 from storm.common.decorators.module import Module
 from storm.common.decorators.controller import Controller
@@ -17,8 +17,11 @@ class UsersService():
             {"id": 4, "name": "Bob Brown", "email": "bob.brown@example.com"}
         ]
     
-    def get_users(self):
+    def get_users(self, q = None):
         # Simulate fetching users from a database or external service
+        if q:
+            users = [user for user in self.users if q.lower() in user["name"].lower()]
+            return {"users": users}
         return {"users": self.users}
 
     def get_user(self, id):
@@ -30,7 +33,12 @@ class UsersService():
     def get_count(self):
         users = self.users
         return {"users_count": len(users)}
-
+    
+    def get_me(self):
+        # Simulate fetching the current user's information
+        current_user = {"id": 1, "name": "John Doe", "email": "john.doe@example.com"}
+        return {"user": current_user}
+        
     def add_user(self, user):
         self.logger.info(f"Adding user: {user}")
         # Simulate adding a new user to the database or external service
@@ -47,21 +55,34 @@ class UsersController():
         self.users_service = users_service
 
     @Get()
-    async def get_users(self):
-        return self.users_service.get_users()
+    @Request("req")
+    @Query("q", "q")
+    async def get_users(self, req, q):
+        return self.users_service.get_users(q)
     
     @Get("/:id")
     async def get_user(self):
         return self.users_service.get_user(1)
 
     @Get("/count")
-    async def get_users_count(self):
+    @Ip()
+    @Host()
+    async def get_users_count(self, ip, host):
+        self.logger.info(f"IP: {ip}, Host: {host}")
         return self.users_service.get_count()
 
     @Post()
     @Body("user")
     async def add_user(self, user):
         return self.users_service.add_user(user)
+    
+    @Get("/me")
+    @Header("auth", "authorization")
+    async def get_me(self, auth):
+        self.logger.info(auth)
+        if not auth:
+            return {"error": "Unauthorized"}
+        return self.users_service.get_me()
 
 # Define Module
 @Module(controllers=[UsersController], providers=[UsersService])
