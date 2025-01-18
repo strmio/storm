@@ -1,5 +1,6 @@
 from contextvars import ContextVar
 import json
+from storm.common.decorators.param import Params
 from storm.core.adapters.http_request import HttpRequest
 from storm.core.interceptor_pipeline import InterceptorPipeline
 from storm.core.middleware_pipeline import MiddlewarePipeline
@@ -86,11 +87,11 @@ class StormApplication:
         :return: A tuple containing the response and status code
         """
         try:
+            handler, params = self.router.resolve(method, path)
+            request_kwargs["params"] = params
+
             # Set the execution context for the current request
             execution_context.set({"request": request_kwargs})
-
-            handler, params = self.router.resolve(method, path)
-            request_kwargs.update(params)
 
             # Execute middleware first, which may modify the request
             modified_request = await self.middleware_pipeline.execute(request_kwargs, lambda req: req)
@@ -157,7 +158,7 @@ class StormApplication:
             ctr = controller()
 
             for method_path, handler in ctr.router.get_static_routes().items():
-                method, path = method_path
+                method, path = method_path                
                 self.logger.info(f"Registering route: {method} {path}")
                 self.router.add_static_route_from_controller_router(method_path, handler)
             
