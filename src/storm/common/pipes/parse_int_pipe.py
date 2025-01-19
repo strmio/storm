@@ -1,3 +1,4 @@
+from storm.common.exceptions.http import BadRequestException
 from .pipe import Pipe
 
 class ParseIntPipe(Pipe):
@@ -9,4 +10,5 @@ class ParseIntPipe(Pipe):
             return int(value)
         except ValueError:
             param_name = metadata.get("param_name", "unknown")
-            raise ValueError(f"Invalid value for parameter '{param_name}': {value}. Expected an integer.")
+            raise BadRequestException(f"Invalid value for parameter '{param_name}': {value}. Expected an integer.") from None
+
