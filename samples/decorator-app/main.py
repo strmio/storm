@@ -71,8 +71,8 @@ class UsersController():
 
     @Get()
     @Request("req")
-    @Query("q", "q")
-    async def get_users(self, req, q):
+    @Query("q")
+    async def get_users(self, req, q: str):
         return self.users_service.get_users(q)
     
     @Get("/:id")
