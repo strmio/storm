@@ -1,29 +1,6 @@
-from storm.common.exceptions.exception import StormException
+from storm.common.exceptions.exception import StormHttpException
 
-
-class NotFoundException(StormException):
-    """
-    Exception raised when a requested resource is not found.
-
-    :param message: Error message
-    """
-
-    def __init__(self, message="Resource not found"):
-        super().__init__(message, status_code=404)
-
-
-class UnauthorizedException(StormException):
-    """
-    Exception raised for unauthorized access attempts.
-
-    :param message: Error message
-    """
-
-    def __init__(self, message="Unauthorized access"):
-        super().__init__(message, status_code=401)
-
-
-class BadRequestException(StormException):
+class BadRequestException(StormHttpException):
     """
     Exception raised for bad requests.
 
@@ -31,10 +8,21 @@ class BadRequestException(StormException):
     """
 
     def __init__(self, message="Bad request"):
-        super().__init__(message, status_code=400)
+        super().__init__(message, status_code=400, name="BadRequest")
 
 
-class ForbiddenException(StormException):
+class UnauthorizedException(StormHttpException):
+    """
+    Exception raised for unauthorized access attempts.
+
+    :param message: Error message
+    """
+
+    def __init__(self, message="Unauthorized access"):
+        super().__init__(message, status_code=401, name="Unauthorized")
+
+
+class ForbiddenException(StormHttpException):
     """
     Exception raised when access to a resource is forbidden.
 
@@ -42,43 +30,21 @@ class ForbiddenException(StormException):
     """
 
     def __init__(self, message="Forbidden"):
-        super().__init__(message, status_code=403)
+        super().__init__(message, status_code=403, name="Forbidden")
 
 
-class ConflictException(StormException):
+class NotFoundException(StormHttpException):
     """
-    Exception raised when a request could not be completed due to a conflict.
+    Exception raised when a requested resource is not found.
 
     :param message: Error message
     """
 
-    def __init__(self, message="Conflict"):
-        super().__init__(message, status_code=409)
+    def __init__(self, message="Resource not found"):
+        super().__init__(message, status_code=404, name="NotFound")
 
 
-class InternalServerErrorException(StormException):
-    """
-    Exception raised for an unexpected internal server error.
-
-    :param message: Error message
-    """
-
-    def __init__(self, message="Internal server error"):
-        super().__init__(message, status_code=500)
-
-
-class ServiceUnavailableException(StormException):
-    """
-    Exception raised when the service is unavailable.
-
-    :param message: Error message
-    """
-
-    def __init__(self, message="Service unavailable"):
-        super().__init__(message, status_code=503)
-
-
-class MethodNotAllowedException(StormException):
+class MethodNotAllowedException(StormHttpException):
     """
     Exception raised when the HTTP method is not allowed for the requested resource.
 
@@ -86,10 +52,21 @@ class MethodNotAllowedException(StormException):
     """
 
     def __init__(self, message="Method not allowed"):
-        super().__init__(message, status_code=405)
+        super().__init__(message, status_code=405, name="MethodNotAllowed")
 
 
-class UnsupportedMediaTypeException(StormException):
+class ConflictException(StormHttpException):
+    """
+    Exception raised when a request could not be completed due to a conflict.
+
+    :param message: Error message
+    """
+
+    def __init__(self, message="Conflict"):
+        super().__init__(message, status_code=409, name="Conflict")
+
+
+class UnsupportedMediaTypeException(StormHttpException):
     """
     Exception raised when the request media type is unsupported.
 
@@ -97,10 +74,10 @@ class UnsupportedMediaTypeException(StormException):
     """
 
     def __init__(self, message="Unsupported media type"):
-        super().__init__(message, status_code=415)
+        super().__init__(message, status_code=415, name="UnsupportedMediaType")
 
 
-class UnprocessableEntityException(StormException):
+class UnprocessableEntityException(StormHttpException):
     """
     Exception raised when the server understands the content type of the request entity, 
     but was unable to process the contained instructions.
@@ -109,10 +86,10 @@ class UnprocessableEntityException(StormException):
     """
 
     def __init__(self, message="Unprocessable entity"):
-        super().__init__(message, status_code=422)
+        super().__init__(message, status_code=422, name="UnprocessableEntity")
 
 
-class TooManyRequestsException(StormException):
+class TooManyRequestsException(StormHttpException):
     """
     Exception raised when the user has sent too many requests in a given amount of time.
 
@@ -120,10 +97,32 @@ class TooManyRequestsException(StormException):
     """
 
     def __init__(self, message="Too many requests"):
-        super().__init__(message, status_code=429)
+        super().__init__(message, status_code=429, name="TooManyRequests")
 
 
-class GatewayTimeoutException(StormException):
+class InternalServerErrorException(StormHttpException):
+    """
+    Exception raised for an unexpected internal server error.
+
+    :param message: Error message
+    """
+
+    def __init__(self, message="Internal server error"):
+        super().__init__(message, status_code=500, name="InternalServerError")
+
+
+class ServiceUnavailableException(StormHttpException):
+    """
+    Exception raised when the service is unavailable.
+
+    :param message: Error message
+    """
+
+    def __init__(self, message="Service unavailable"):
+        super().__init__(message, status_code=503, name="ServiceUnavailable")
+
+
+class GatewayTimeoutException(StormHttpException):
     """
     Exception raised when the server, while acting as a gateway or proxy, 
     did not receive a timely response from an upstream server.
@@ -132,4 +131,13 @@ class GatewayTimeoutException(StormException):
     """
 
     def __init__(self, message="Gateway timeout"):
-        super().__init__(message, status_code=504)
+        super().__init__(message, status_code=504, name="GatewayTimeout")
+class NotFoundException(StormHttpException):
+    """
+    Exception raised when a requested resource is not found.
+
+    :param message: Error message
+    """
+
+    def __init__(self, message="Resource not found"):
+        super().__init__(message, status_code=404)

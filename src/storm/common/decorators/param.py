@@ -1,48 +1,61 @@
 from functools import wraps
 from storm.common.execution_context import execution_context
 
-def Param(param_name = "params"):
+class Param:
     """
-    Decorator to inject a specific route parameter into the handler.
+    A unified implementation of Param that supports async pipes for transformation or validation.
 
-    :param param_name: The name of the route parameter to inject.
+    :param param_name: The name of the route parameter to inject or resolve.
+    :param pipe: An optional class or instance of a Pipe to transform or validate the parameter.
     """
-    def decorator(func):
+    def __init__(self, param_name=None, pipe=None):
+        self.param_name = param_name
+        self.pipe = pipe
+
+    async def resolve(self):
+        """
+        Dynamically resolve the parameter value or all parameters, applying the pipe if specified.
+        """
+        context = execution_context.get()
+        route_params = context.get("request", {}).get("params", {})
+
+        # Get the parameter value or all parameters
+        if self.param_name is None:
+            result = route_params
+        else:
+            result = route_params.get(self.param_name)
+
+        # Apply the pipe if it exists
+        if self.pipe and result is not None:
+            # Instantiate the pipe if it's a class
+            pipe_instance = self.pipe() if isinstance(self.pipe, type) else self.pipe
+            result = await pipe_instance.transform(result, metadata={"param_name": self.param_name})
+        return result
+
+    def __call__(self, func=None):
+        # If called without a function, resolve the value synchronously for default arguments
+        if func is None:
+            import asyncio
+            return asyncio.run(self.resolve())
+
+        # If called with a function, act as a decorator
         @wraps(func)
         async def wrapper(*args, **kwargs):
             # Get the current request from the execution context
             context = execution_context.get()
             route_params = context.get("request", {}).get("params", {})
 
-            # Inject the route parameter into kwargs if it exists
-            if param_name in route_params:
-                kwargs[param_name] = route_params[param_name]
+            # Resolve the parameter value and apply the pipe if necessary
+            if self.param_name in route_params:
+                value = route_params[self.param_name]
+                if self.pipe:
+                    pipe_instance = self.pipe() if isinstance(self.pipe, type) else self.pipe
+                    value = await pipe_instance.transform(value, metadata={"param_name": self.param_name})
+                kwargs[self.param_name] = value
             else:
-                kwargs[param_name] = route_params
+                kwargs[self.param_name] = route_params
 
             # Call the original function with updated kwargs
             return await func(*args, **kwargs)
 
         return wrapper
-
-    return decorator
-
-
-class Params:
-    """
-    A placeholder for route parameters to be resolved dynamically.
-    If param_name is None, all route parameters will be returned.
-    """
-    def __init__(self, param_name=None):
-        self.param_name = param_name
-
-    def resolve(self):
-        """
-        Dynamically resolve the parameter value or all parameters.
-        """
-        context = execution_context.get()
-        route_params = context.get("request", {}).get("params", {})
-
-        if self.param_name is None:
-            return route_params
-        return route_params.get(self.param_name)

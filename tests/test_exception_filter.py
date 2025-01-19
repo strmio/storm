@@ -1,5 +1,5 @@
 import pytest
-from storm.common.exceptions import NotFoundException, StormException
+from storm.common.exceptions import NotFoundException, StormHttpException
 from storm.common.filters.filter import ExceptionFilter
 
 @pytest.mark.asyncio
