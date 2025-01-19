@@ -1,8 +1,11 @@
-from storm.common.decorators import Get, Post, Body, Request, Query, Param
+from storm.common.decorators import Get, Post, Body, Query, Param, HttpCode
+from storm.common.enums import HttpStatus
+from storm.common.exceptions.http import ForbiddenException
 from storm.common.pipes import PydanticValidationPipe
 from storm.common.decorators.injectable import Injectable
 from storm.common.decorators.module import Module
 from storm.common.decorators.controller import Controller
+from storm.common.pipes.parse_int_pipe import ParseIntPipe
 from storm.common.services.logger import Logger
 from storm.core.application import StormApplication
 from pydantic import BaseModel, EmailStr
@@ -13,9 +16,7 @@ class UserModel(BaseModel):
     email: EmailStr
     id: int
 
-# Define Controller
-
-
+# Define Services
 @Injectable()
 class UsersService():
     def __init__(self):
@@ -29,15 +30,15 @@ class UsersService():
         # Simulate fetching users from a database or external service
         if q:
             users = [user.model_dump()
-                     for user in self.users if q.lower() in user["name"].lower()]
+                     for user in self.users if q.lower() in user.name.lower()]
             return {"users": users}
         return {"users": [user.model_dump() for user in self.users]}
 
     def get_user(self, id):
         # Simulate fetching a user by ID from a database or external service
         users = self.users
-        user = next((user for user in users if user["id"] == id), None)
-        return {"user": user.model_dump()}
+        user = next((user for user in users if user.id == id), None)
+        return {"user": user.model_dump() if user else None}
 
     def add_user(self, user):
         self.logger.info(f"Adding user: {user}")
@@ -60,14 +61,19 @@ class UsersController():
         return self.users_service.get_users(q)
 
     @Get("/:id")
-    @Param("id")
+    @Param("id", ParseIntPipe)
     async def get_user(self, id):
         self.logger.info(f"Fetching user with ID: {id}")
         return self.users_service.get_user(int(id))
 
     @Post()
+    @HttpCode(HttpStatus.CREATED)
     async def add_user(self, user: UserModel = Body(pipe=PydanticValidationPipe(UserModel))):
         return self.users_service.add_user(user)
+
+    @Get("/me")
+    async def get_me(self):
+        raise ForbiddenException("You are not allowed to access this resource")
 
 # Define Module
 
