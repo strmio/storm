@@ -1,11 +1,12 @@
-import json
+from storm.common.exceptions.exception import StormHttpException
+from storm.common.exceptions.http import InternalServerErrorException, NotFoundException
 from storm.core.adapters.http_request import HttpRequest
+from storm.core.adapters.http_response import HttpResponse
 from storm.core.interceptor_pipeline import InterceptorPipeline
 from storm.core.middleware_pipeline import MiddlewarePipeline
 from storm.core.router import Router
 from storm.common.services.logger import Logger
 from storm.common.execution_context import execution_context
-
 
 class StormApplication:
     """
@@ -75,7 +76,7 @@ class StormApplication:
             self._inject_dependencies(service_instance, module)
             module.providers[provider.__name__] = service_instance
 
-    async def handle_request(self, method, path, **request_kwargs):
+    async def handle_request(self, method, path, request, response, **request_kwargs):
         """
         Handles incoming HTTP requests by resolving routes and executing middleware and interceptors.
 
@@ -89,17 +90,23 @@ class StormApplication:
             request_kwargs["params"] = params
 
             # Set the execution context for the current request
-            execution_context.set({"request": request_kwargs})
+            execution_context.set({"request": request_kwargs, "req": request, "response": response})
 
             # Execute middleware first, which may modify the request
             modified_request = await self.middleware_pipeline.execute(request_kwargs, lambda req: req)
                         
             # Execute interceptors after middleware, passing the modified request and getting the response
-            response = await self.interceptor_pipeline.execute(modified_request, handler)
+            content = await self.interceptor_pipeline.execute(modified_request, handler)
             
-            return response, 200
+            response.update_content(content)
+        
+            return response, response.status_code
         except ValueError as e:
-            return {"error": str(e)}, 404
+            raise NotFoundException()
+        except Exception as e:
+            # Log the error and capture the traceback
+            self.logger.error(e)
+            raise e
         finally:
             # Clear the execution context after handling the request
             execution_context.clear()
@@ -130,23 +137,39 @@ class StormApplication:
         :param receive: The receive channel
         :param send: The send channel
         """
-        if scope['type'] == 'http':
-            # Initialize HttpRequest and parse the body
-            request = HttpRequest(scope, receive, send)
-            await request.parse_body()
-            method, path, request_kwargs = request.get_request_info()
+        try:
+            if scope['type'] == 'http':
+                try:
+                    # Initialize HttpRequest and parse the body
+                    request = HttpRequest(scope, receive, send)
+                    await request.parse_body()
 
-            # Handle the request
-            response, status_code = await self.handle_request(method, path, **request_kwargs)
-            await send({
-                'type': 'http.response.start',
-                'status': status_code,
-                'headers': [(b'content-type', b'application/json')],
-            })
-            await send({
-                'type': 'http.response.body',
-                'body': bytes(json.dumps(response), 'utf-8'),
-            })
+                    # Extract method, path, and additional request info
+                    method, path, request_kwargs = request.get_request_info()
+
+                    # Generate a default response object
+                    response = HttpResponse.from_request(
+                        request=request,
+                        status_code=200
+                    )
+
+                    # Handle the request and generate a response
+                    response, status_code = await self.handle_request(method, path, request, response, **request_kwargs)
+
+                except StormHttpException as http_exc:
+                    response = HttpResponse.from_error(http_exc)
+
+                except Exception as exc:
+                    # Handle unexpected exceptions
+                    self.logger.error(exc)
+                    response = HttpResponse.from_error(InternalServerErrorException())
+                # Send the response
+                await response.send(send)
+        except Exception as exc:
+            self.logger.error(exc)
+            response = HttpResponse.from_error(InternalServerErrorException())
+            await response.send(send)
+
 
     def _initialize_module(self, module):
         """ Initialize module and register controllers """
