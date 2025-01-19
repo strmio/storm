@@ -15,4 +15,4 @@ class ParseDatePipe(Pipe):
         try:
             return datetime.strptime(value, self.date_format)
         except ValueError:
-            raise ValueError(f"Invalid date value: {value}. Expected format: {self.date_format}")
+            raise BadRequestException(f"Invalid date value: {value}. Expected format: {self.date_format}")
