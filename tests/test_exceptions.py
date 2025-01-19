@@ -1,11 +1,11 @@
 import pytest
 from storm.common.exceptions import (
-    StormException, NotFoundException, UnauthorizedException,
+    StormHttpException, NotFoundException, UnauthorizedException,
     BadRequestException, ForbiddenException, ConflictException
 )
 
 def test_storm_exception():
-    exception = StormException("Something went wrong", 500)
+    exception = StormHttpException("Something went wrong", 500)
     assert exception.to_dict() == {"error": "Something went wrong", "status_code": 500}
 
 def test_not_found_exception():
