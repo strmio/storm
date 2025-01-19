@@ -1,5 +1,5 @@
 import logging
-from storm.common.exceptions import StormException
+from storm.common.exceptions import StormHttpException
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +16,7 @@ class ExceptionFilter:
         :param request: The HTTP request associated with the exception (optional)
         :return: A tuple containing the response dictionary and status code
         """
-        if isinstance(exception, StormException):
+        if isinstance(exception, StormHttpException):
             response = exception.to_dict()
             status_code = exception.status_code
         else:
