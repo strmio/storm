@@ -9,4 +9,4 @@ from .parse_date_pipe import *
 from .parse_bool_pipe import *
 from .parse_array_pipe import *
 from .parse_uuid_pipe import *
-
+from .pydantic_validation_pipe import *
