@@ -1,3 +1,4 @@
+from storm.common.exceptions.http import BadRequestException
 from storm.common.pipes.pipe import Pipe
 
 
@@ -13,4 +14,4 @@ class ParseBoolPipe(Pipe):
             return True
         elif str_value in falsy:
             return False
-        raise ValueError(f"Invalid boolean value: {value}")
+        raise BadRequestException(f"Invalid boolean value: {value}")

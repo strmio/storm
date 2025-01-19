@@ -1,4 +1,5 @@
 import re
+from storm.common.exceptions.http import BadRequestException
 from storm.common.pipes.pipe import Pipe
 
 class EmailValidationPipe(Pipe):
@@ -6,5 +7,5 @@ class EmailValidationPipe(Pipe):
 
     async def transform(self, value, metadata=None):
         if not re.match(self.EMAIL_REGEX, value):
-            raise ValueError("Invalid email address")
+            raise BadRequestException("Invalid email address")
         return value
