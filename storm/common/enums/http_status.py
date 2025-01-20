@@ -1,6 +1,6 @@
-from enum import Enum
+from enum import IntEnum
 
-class HttpStatus(Enum):
+class HttpStatus(IntEnum):
     CONTINUE = 100
     SWITCHING_PROTOCOLS = 101
     PROCESSING = 102
