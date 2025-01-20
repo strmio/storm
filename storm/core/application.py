@@ -1,6 +1,7 @@
 import inspect
 from functools import wraps
 import traceback
+from storm.common.enums.http_status import HttpStatus
 from storm.common.exceptions.exception import StormHttpException
 from storm.common.exceptions.http import InternalServerErrorException, NotFoundException
 from storm.core.adapters.http_request import HttpRequest
@@ -231,7 +232,7 @@ class StormApplication:
                 response, _ = await self.handle_request(method, path, request, response, **request_kwargs)
             except StormHttpException as exc:
                 self.logger.error(exc)
-                if exc.status_code == 500:
+                if exc.status_code == HttpStatus.INTERNAL_SERVER_ERROR:
                     tb = traceback.format_exc()
                     self.logger.error(tb)
                 response = HttpResponse.from_error(exc)
