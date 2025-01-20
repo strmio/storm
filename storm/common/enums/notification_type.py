@@ -1,6 +1,6 @@
-from enum import Enum
+from enum import StrEnum
 
-class NotificationType(Enum):
+class NotificationType(StrEnum):
     EMAIL = "email"
     SMS = "sms"
     PUSH = "push"

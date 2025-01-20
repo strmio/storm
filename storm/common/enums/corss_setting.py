@@ -1,6 +1,6 @@
-from enum import Enum
+from enum import StrEnum
 
-class CORSSetting(Enum):
+class CORSSetting(StrEnum):
     ALLOW_ORIGIN = "Access-Control-Allow-Origin"
     ALLOW_METHODS = "Access-Control-Allow-Methods"
     ALLOW_HEADERS = "Access-Control-Allow-Headers"

@@ -1,6 +1,6 @@
-from enum import Enum
+from enum import StrEnum
 
-class Protocol(Enum):
+class Protocol(StrEnum):
     HTTP = "http"
     HTTPS = "https"
     FTP = "ftp"

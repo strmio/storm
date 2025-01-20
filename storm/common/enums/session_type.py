@@ -1,6 +1,6 @@
-from enum import Enum
+from enum import StrEnum
 
-class SessionType(Enum):
+class SessionType(StrEnum):
     COOKIE = "cookie"
     TOKEN = "token"
     JWT = "jwt"

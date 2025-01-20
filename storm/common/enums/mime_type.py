@@ -1,6 +1,6 @@
-from enum import Enum
+from enum import StrEnum
 
-class MimeType(Enum):
+class MimeType(StrEnum):
     APPLICATION_JSON = "application/json"
     APPLICATION_XML = "application/xml"
     TEXT_HTML = "text/html"

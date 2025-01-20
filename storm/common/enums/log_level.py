@@ -1,6 +1,6 @@
-from enum import Enum
+from enum import StrEnum
 
-class LogLevel(Enum):
+class LogLevel(StrEnum):
     DEBUG = "DEBUG"
     INFO = "INFO"
     WARNING = "WARNING"

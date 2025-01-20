@@ -1,6 +1,6 @@
-from enum import Enum
+from enum import StrEnum
 
-class HttpHeaders(Enum):
+class HttpHeaders(StrEnum):
     CONTENT_TYPE = "Content-Type"
     AUTHORIZATION = "Authorization"
     ACCEPT = "Accept"
