@@ -1,3 +1,4 @@
+from storm.common.exceptions.http import BadRequestException
 from .pipe import Pipe
 
 class ParseFloatPipe(Pipe):
@@ -8,4 +9,4 @@ class ParseFloatPipe(Pipe):
         try:
             return float(value)
         except ValueError:
-            raise ValueError(f"Invalid float value: {value}")
+            raise BadRequestException(f"Invalid float value: {value}")

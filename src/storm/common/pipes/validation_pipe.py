@@ -1,3 +1,4 @@
+from storm.common.exceptions.http import BadRequestException
 from .pipe import Pipe
 
 
@@ -22,5 +23,5 @@ class ValidationPipe(Pipe):
         :raises ValueError: If validation fails.
         """
         if not self.validate_fn(value):
-            raise ValueError(self.error_message)
+            raise BadRequestException(self.error_message)
         return value
