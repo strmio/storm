@@ -6,7 +6,7 @@ class Router:
     def __init__(self):
         self.static_routes = {}
         self.dynamic_routes = {}
-        self.logger = Logger()
+        self.logger = Logger(self.__class__.__name__)
 
     def add_route(self, method, path, handler):
         """
@@ -51,14 +51,11 @@ class Router:
         :return: The handler function and any extracted parameters
         """
         if (method, path) in self.static_routes:
-            self.logger.info(f"Matched static route: {method} {path}")
             return self.static_routes[(method, path)], {}
         for (route_method, path_regex), handler in self.dynamic_routes.items():
             if route_method == method and re.match(path_regex, path):
-                self.logger.info(f"Matched dynamic route: {method} {path}")
                 params = self._extract_params(path_regex, path)
                 return handler, params
-        self.logger.error(f"No route found for: {method} {path}")
         raise ValueError(f"No route found for {method} {path}")
 
 
