@@ -1,5 +1,5 @@
 from storm.common import Module
-from storm.core.application import StormApplication
+from storm.core import StormApplication
 from services.user_service import UsersService
 from services.users_notes_service import UsersNotesService
 from controllers.users_controllers import UsersController

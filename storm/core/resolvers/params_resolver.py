@@ -1,6 +1,8 @@
 from inspect import signature, Parameter
-from storm.common import execution_context
-from storm.common.decorators import Param, Query, Body
+from storm.common.execution_context import execution_context
+from storm.common.decorators.param import Param
+from storm.common.decorators.query_params import Query
+from storm.common.decorators.body import Body
 
 class ParamsResolver:
     """

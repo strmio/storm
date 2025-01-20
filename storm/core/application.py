@@ -231,6 +231,9 @@ class StormApplication:
                 response, _ = await self.handle_request(method, path, request, response, **request_kwargs)
             except StormHttpException as exc:
                 self.logger.error(exc)
+                if exc.status_code == 500:
+                    tb = traceback.format_exc()
+                    self.logger.error(tb)
                 response = HttpResponse.from_error(exc)
             except Exception as exc:
                 tb = traceback.format_exc()
