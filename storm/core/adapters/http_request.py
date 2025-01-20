@@ -34,11 +34,13 @@ class HttpRequest:
 
         # Client and server information
         self.client = scope.get("client", (None, None))
-        self.client_ip = self.client[0]
-        self.client_port = self.client[1]
+        (ip, port) = self.client
+        self.client_ip = ip
+        self.client_port = port
         self.server = scope.get("server", (None, None))
-        self.server_host = self.server[0]
-        self.server_port = self.server[1]
+        (ip, port) = self.server
+        self.server_host = ip
+        self.server_port = port
 
         # WebSocket-specific attributes
         self.is_websocket = scope.get("type") == "websocket"

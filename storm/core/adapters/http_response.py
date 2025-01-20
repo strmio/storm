@@ -1,5 +1,7 @@
 import json
-
+from storm.common.enums.content_type import ContentType
+from storm.common.enums.http_headers import HttpHeaders
+from storm.common.enums.http_status import HttpStatus
 from storm.common.exceptions.exception import StormHttpException
 
 
@@ -8,7 +10,7 @@ class HttpResponse:
     A class to construct and send HTTP responses in an ASGI application.
     """
 
-    def __init__(self, content=None, status_code=200, headers=None, content_type="text/plain"):
+    def __init__(self, content=None, status_code=HttpStatus.OK, headers=None, content_type="text/plain"):
         """
         Initialize the HttpResponse object.
 
@@ -26,7 +28,7 @@ class HttpResponse:
         self.headers["content-type"] = self.content_type
 
     @staticmethod
-    def from_request(request, content=None, status_code=200, headers=None):
+    def from_request(request, content=None, status_code=HttpStatus.OK, headers=None):
         """
         Create a response based on the request object.
 
@@ -102,7 +104,7 @@ class HttpResponse:
         :param content_type: New Content-Type value
         """
         self.content_type = content_type
-        self.headers["content-type"] = self.content_type
+        self.headers[HttpHeaders.contentType] = self.content_type
 
     async def send(self, send):
         """
@@ -139,7 +141,7 @@ class HttpResponse:
             return b""  # Empty response
 
 # Helper methods to create common response types
-def JsonResponse(data, status_code=200, headers=None):
+def JsonResponse(data, status_code=HttpStatus.OK, headers=None):
     """
     Create a JSON response.
     """
@@ -147,11 +149,11 @@ def JsonResponse(data, status_code=200, headers=None):
         content=data,
         status_code=status_code,
         headers=headers,
-        content_type="application/json"
+        content_type=ContentType.APPLICATION_JSON
     )
 
 
-def TextResponse(text, status_code=200, headers=None):
+def TextResponse(text, status_code=HttpStatus.OK, headers=None):
     """
     Create a plain text response.
     """
@@ -159,11 +161,11 @@ def TextResponse(text, status_code=200, headers=None):
         content=text,
         status_code=status_code,
         headers=headers,
-        content_type="text/plain"
+        content_type=ContentType.PLAIN
     )
 
 
-def HtmlResponse(html, status_code=200, headers=None):
+def HtmlResponse(html, status_code=HttpStatus.OK, headers=None):
     """
     Create an HTML response.
     """
@@ -171,7 +173,7 @@ def HtmlResponse(html, status_code=200, headers=None):
         content=html,
         status_code=status_code,
         headers=headers,
-        content_type="text/html"
+        content_type=ContentType.TEXT_HTML
     )
 
 
