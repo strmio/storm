@@ -1,5 +1,8 @@
 # src/storm/common/exceptions.py
 
+from storm.common.enums.http_status import HttpStatus
+
+
 class StormHttpException(Exception):
     """
     Base class for all custom exceptions in the Storm framework.
@@ -7,7 +10,7 @@ class StormHttpException(Exception):
     :param message: A descriptive error message
     :param status_code: HTTP status code associated with the error
     """
-    def __init__(self, message="An error occurred", status_code=500, name=None):
+    def __init__(self, message="An error occurred", status_code=HttpStatus.INTERNAL_SERVER_ERROR, name=None):
         super().__init__(message)
         self.message = message
         self.error = name or self.__class__.__name__
