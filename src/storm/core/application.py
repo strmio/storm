@@ -190,6 +190,8 @@ class StormApplication:
         """
         try:
             handler, params = self.router.resolve(method, path)
+            if not handler:
+                raise NotFoundException()
             request_kwargs["params"] = params
             execution_context.set({"request": request_kwargs, "req": request, "response": response})
 
@@ -200,8 +202,9 @@ class StormApplication:
             return response, response.status_code
 
         except ValueError:
-            raise NotFoundException()
-
+            raise NotFoundException(message=f"Cannot {method} {path}")
+        except StormHttpException as e:
+            raise e
         except Exception as e:
             self.logger.error(e)
             raise InternalServerErrorException() from e
@@ -227,11 +230,11 @@ class StormApplication:
 
                 response, _ = await self.handle_request(method, path, request, response, **request_kwargs)
             except StormHttpException as exc:
-                tb = traceback.format_exc()
-                self.logger.error(tb)
+                self.logger.error(exc)
                 response = HttpResponse.from_error(exc)
             except Exception as exc:
-                self.logger.error(exc)
+                tb = traceback.format_exc()
+                self.logger.error(tb)
                 response = HttpResponse.from_error(InternalServerErrorException())
             finally:
                 await response.send(send)
