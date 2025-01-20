@@ -1,6 +1,6 @@
-from enum import Enum
+from enum import StrEnum
 
-class TimeUnit(Enum):
+class TimeUnit(StrEnum):
     SECONDS = "seconds"
     MINUTES = "minutes"
     HOURS = "hours"

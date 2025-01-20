@@ -1,6 +1,6 @@
-from enum import Enum
+from enum import StrEnum
 
-class CompressionAlgorithm(Enum):
+class CompressionAlgorithm(StrEnum):
     GZIP = "gzip"
     BZIP2 = "bzip2"
     LZMA = "lzma"

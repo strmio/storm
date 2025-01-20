@@ -1,6 +1,6 @@
-from enum import Enum
+from enum import StrEnum
 
-class CacheControl(Enum):
+class CacheControl(StrEnum):
     NO_CACHE = "no-cache"
     NO_STORE = "no-store"
     MUST_REVALIDATE = "must-revalidate"
