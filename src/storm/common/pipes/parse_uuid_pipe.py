@@ -1,4 +1,6 @@
 import uuid
+
+from storm.common.exceptions.http import BadRequestException
 from .pipe import Pipe
 
 class ParseUUIDPipe(Pipe):
@@ -17,4 +19,4 @@ class ParseUUIDPipe(Pipe):
             return uuid.UUID(value)
         except ValueError:
             param_name = metadata.get("param_name", "unknown") if metadata else "unknown"
-            raise ValueError(f"Invalid value for parameter '{param_name}': {value}. Expected a valid UUID.")
+            raise BadRequestException(f"Invalid value for parameter '{param_name}': {value}. Expected a valid UUID.")
