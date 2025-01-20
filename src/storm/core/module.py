@@ -1,69 +1,52 @@
 
-class ModuleBase():
-    def __init__(self, controllers=[], providers=[], imports=[], middleware=[], module_cls=None):
+class ModuleBase:
+    def __init__(
+        self, *, controllers=None, providers=None, imports=None, middleware=None, module_cls=None
+    ):
         """
         Initialize the module with controllers, providers, imports, and middleware.
+        
         :param controllers: List of controller classes.
         :param providers: List of provider (service) classes.
         :param imports: List of other modules to be imported.
         :param middleware: List of middleware classes.
+        :param module_cls: Optional custom module class with lifecycle hooks.
         """
-        self.controllers = controllers
-        self.providers = providers
-        self.imports = imports
-        self.middleware = middleware
+        self.controllers = self._initialize_map(controllers)
+        self.providers = self._initialize_map(providers)
+        self.imports = imports or []
+        self.middleware = middleware or []
         self._module_cls = module_cls
-        
-        if hasattr(module_cls, 'onInit') and callable(module_cls.onInit):
-            module_cls.onInit(self)
-            self.onInit()
-       
-        if hasattr(module_cls, 'onDestroy') and callable(module_cls.onDestroy):
-            module_cls.onDestroy(self)
+
+        # self._invoke_lifecycle_hook("onInit")
+        # self._invoke_lifecycle_hook("onDestroy")
+
+    def _initialize_map(self, items):
+        """Create a dictionary with class names as keys and classes as values."""
+        return {item.__name__: item for item in (items or [])}
+
+    def _invoke_lifecycle_hook(self, hook_name):
+        """Invoke a lifecycle hook if it exists and is callable."""
+        if hasattr(self._module_cls, hook_name) and callable(getattr(self._module_cls, hook_name)):
+            getattr(self._module_cls, hook_name)(self)
 
     def register(self, container):
         """
         Register all providers, controllers, and middleware in the container.
+        
         :param container: The DI container.
         """
-        # Register imported modules first
+        self._register_imports(container)
+        self._register_items(container, self.providers, singleton=True)
+        self._register_items(container, self.controllers, singleton=True)
+        self._register_items(container, self.middleware, singleton=True)
+
+    def _register_imports(self, container):
+        """Register imported modules in the container."""
         for imported_module in self.imports:
             imported_module.register(container)
 
-        # Register providers
-        for provider in self.providers:
-            name = provider.__name__
-            container.register(name, provider, singleton=getattr(provider, '__singleton__', True))
-
-        # Register controllers with middleware
-        for controller in self.controllers:
-            name = controller.__name__
-            container.register(name, controller, singleton=True)
-
-        # Register middleware
-        for middleware in self.middleware:
-            container.register(middleware.__name__, middleware, singleton=True)
-
-    def onInit(self):
-        """
-        Hook for module initialization.
-        """
-        pass
-    
-    def onDestroy(self):
-        """
-        Hook for module destruction.
-        """
-        pass
-
-    def on_bootstrap(self):
-        """
-        Called after all modules are loaded and the app is ready to run.
-        """
-        pass
-
-    def on_shutdown(self):
-        """
-        Called when the application is shutting down.
-        """
-        pass
+    def _register_items(self, container, items, singleton):
+        """Register items (providers, controllers, or middleware) in the container."""
+        for item_name, item_cls in items.items():
+            container.register(item_name, item_cls, singleton=singleton)
