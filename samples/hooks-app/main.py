@@ -1,4 +1,4 @@
-from storm.common.decorators import Module
+from storm.common import Module
 from storm.core.application import StormApplication
 from services.user_service import UsersService
 from services.users_notes_service import UsersNotesService
