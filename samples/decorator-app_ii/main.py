@@ -28,11 +28,12 @@ class UsersService():
 
     def get_users(self, q: str = None):
         # Simulate fetching users from a database or external service
-        if q:
-            users = [user.model_dump()
-                     for user in self.users if q.lower() in user.name.lower()]
-            return {"users": users}
-        return {"users": [user.model_dump() for user in self.users]}
+        users = [
+            user.model_dump() 
+            for user in self.users 
+            if not q or q.lower() in user.name.lower()
+        ]
+        return {"users": users}
 
     def get_user(self, id):
         # Simulate fetching a user by ID from a database or external service
@@ -76,7 +77,6 @@ class UsersController():
         raise ForbiddenException("You are not allowed to access this resource")
 
 # Define Module
-
 
 @Module(controllers=[UsersController], providers=[UsersService])
 class UsersModule:
