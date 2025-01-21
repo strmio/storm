@@ -8,5 +8,6 @@ from .guards import *
 from .serializer import *
 from .services import *
 from .execution_context import *
+from .hooks import *
 
-__all__ = ['execution_context', 'decorators', 'middlewares', 'enums', 'exceptions', 'filters', 'pipes', 'guards', 'serializer', "services" ]
+__all__ = ['execution_context', 'decorators', 'middlewares', 'enums', 'exceptions', 'filters', 'pipes', 'guards', 'serializer', "services", "hooks" ]
