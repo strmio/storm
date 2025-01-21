@@ -1,9 +1,6 @@
 
 
-from storm.common.decorators.injectable import Injectable
-from storm.common.exceptions.http import NotFoundException
-from storm.common.services.logger import Logger
-from storm.core.hooks.hooks import OnModuleInit
+from storm.common import Injectable, NotFoundException, Logger, OnModuleInit
 
 
 @Injectable()
@@ -33,13 +30,13 @@ class UsersService(OnModuleInit):
 
     def get_user(self, id):
         # Simulate fetching a user by ID from a database or external service
-        users = self._users
-        user = next((user for user in users if user["id"] == id), None)
-        return {"user": user}
+        user = next((user for user in self._users if user["id"] == id), None)
+        if not user:
+            raise NotFoundException(f"User with ID {id} not found.")
+        return user
 
     def get_count(self):
-        users = self._users
-        return {"users_count": len(users)}
+        return {"users_count": len(self._users)}
 
     def get_me(self):
         # Simulate fetching the current user's information
@@ -55,9 +52,8 @@ class UsersService(OnModuleInit):
 
     def get_user_by_email(self, email):
         # Simulate fetching a user by email from a database or external service
-        users = self._users
-        user = next((user for user in users if user["email"] == email), None)
-        return {"user": user}
+        user = next((user for user in self._users if user["email"] == email), None)
+        return user
 
     def delete_user(self, id):
         # Simulate deleting a user from the database or external service
