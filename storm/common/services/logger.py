@@ -49,22 +49,25 @@ class Logger:
                 # Get the color for the log level
                 log_color = Logger.LOG_COLORS.get(record.levelname, Logger.LOG_COLORS["RESET"])
 
-                # Apply color to the log level
-                record.levelname = f"{log_color}{record.levelname}{Logger.LOG_COLORS['RESET']}"
-
-                # Apply color to the message
-                record.msg = f"{log_color}{record.msg}{Logger.LOG_COLORS['RESET']}"
+                # Apply color to the log level and message
+                levelname = f"{log_color}{record.levelname}{Logger.LOG_COLORS['RESET']}"
+                message = f"{log_color}{record.getMessage()}{Logger.LOG_COLORS['RESET']}"
 
                 # Apply yellow color to the logger name with brackets
                 name_color = Logger.LOG_COLORS["NAME"]
-                record.name = f"{name_color}[{record.name}]{Logger.LOG_COLORS['RESET']}"
+                name = f"{name_color}[{record.name}]{Logger.LOG_COLORS['RESET']}"
 
                 # Always display the `[Storm]` part in green
                 prefix_color = Logger.LOG_COLORS["INFO"]  # Using green (defined for INFO)
                 prefix = f"{prefix_color}[Storm] {record.process} - {Logger.LOG_COLORS['RESET']}"
 
-                # Combine the formatted prefix with the rest of the log
-                formatted_message = super().format(record)
+                # Replace placeholders in the format string
+                formatted_message = self._fmt % {
+                    "asctime": self.formatTime(record, self.datefmt),
+                    "levelname": levelname,
+                    "name": name,
+                    "message": message,
+                }
                 return f"{prefix} {formatted_message}"
 
         console_formatter = ColoredFormatter(
@@ -73,7 +76,6 @@ class Logger:
         )
         console_handler.setFormatter(console_formatter)
         self.logger.addHandler(console_handler)
-
 
     def _setup_file_handler(self):
         """Set up a file handler with plain text formatting."""
