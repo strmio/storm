@@ -111,7 +111,7 @@ class StormApplication:
         
         for name, provider in module.providers.items():
             self._inject_dependencies(provider, module)
-
+        
     def _inject_dependencies(self, service, module):
         """
         Inject dependencies into a service based on the module's providers.
@@ -149,6 +149,7 @@ class StormApplication:
             ):
                 
                 if dependency_type.__name__ in module.providers.keys():
+                    setattr(service_class, param_name, module.providers[dependency_type.__name__])
                     default_kwargs[param_name] = module.providers[dependency_type.__name__]
                 else:
                     raise ValueError(f"Dependency {dependency_type.__name__} not found in module providers.")
