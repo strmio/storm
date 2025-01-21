@@ -5,13 +5,14 @@ from storm.common.decorators.query_params import Query
 from storm.common.pipes.parse_int_pipe import ParseIntPipe
 from storm.common.services.logger import Logger
 from storm.core.hooks.hooks import OnModuleInit
-from services.user_service import UsersService
+from services.users_service import UsersService
 
 @Controller("/users")  # Define base path for this controller
 class UsersController(OnModuleInit):
 
-    users_service: UsersService
-    _logger: Logger = Logger("UsersController")
+    
+    def __init__(self, users_service: UsersService):
+        self._logger = Logger(self.__class__.__name__)
     
 
     def on_module_init(self):

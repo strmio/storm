@@ -1,6 +1,6 @@
 from storm.common.decorators.injectable import Injectable
 from storm.common.services.logger import Logger
-from .user_service import UsersService
+from services.users_service import UsersService
 
 @Injectable()
 class UsersNotesService():
