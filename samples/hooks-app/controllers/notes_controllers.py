@@ -1,8 +1,8 @@
-from storm.common.decorators.controller import Controller
-from storm.common.decorators.http import Get
-from storm.common.decorators.param import Param
-from storm.common.pipes.parse_int_pipe import ParseIntPipe
-from storm.common.services.logger import Logger
+from storm.common import Controller
+from storm.common import Get
+from storm.common import Param
+from storm.common import ParseIntPipe
+from storm.common import Logger
 from services.users_notes_service import UsersNotesService
 from services.user_service import UsersService
 
