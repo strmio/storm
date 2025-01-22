@@ -3,10 +3,26 @@ from storm.common.execution_context import execution_context
 from storm.common.decorators.param import Param
 from storm.common.decorators.query_params import Query
 from storm.common.decorators.body import Body
+from storm.common.decorators.headers import Headers
+
+class OptionalMeta:
+    """
+    Meta class to represent optional parameters with default values.
+    """
+    def __init__(self, default=None):
+        self.default = default
+
+
+def Optional(default=None):
+    """
+    Decorator to mark a parameter as optional with a default value.
+    """
+    return OptionalMeta(default=default)
+
 
 class ParamsResolver:
     """
-    A class responsible for resolving handler arguments, including instances of Param, Query, and Body.
+    A class responsible for resolving handler arguments, including instances of Param, Query, Body, and Optional.
     """
     @staticmethod
     async def resolve(handler, request):
@@ -38,6 +54,15 @@ class ParamsResolver:
                 elif isinstance(param.default, Body):
                     # Resolve the Body object asynchronously
                     resolved_args[param_name] = await param.default.resolve()
+                elif isinstance(param.default, Headers):
+                    # Resolve the Headers object asynchronously
+                    resolved_args[param_name] = await param.default.resolve()
+                elif isinstance(param.default, OptionalMeta):
+                    # Use the default value from OptionalMeta
+                    resolved_args[param_name] = param.default.default
+                else:
+                    # Use the provided default value
+                    resolved_args[param_name] = param.default
             elif param_name in route_params:
                 # Use route parameters directly if available
                 resolved_args[param_name] = route_params[param_name]
