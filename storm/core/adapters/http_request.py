@@ -1,5 +1,31 @@
 import json
 from urllib.parse import parse_qs
+from enum import StrEnum
+
+
+class HttpRequestEnums(StrEnum):
+    """
+    Enums to avoid magic strings in HttpRequest.
+    """
+    CONTENT_TYPE = "content-type"
+    APPLICATION_JSON = "application/json"
+    APPLICATION_FORM = "application/x-www-form-urlencoded"
+    COOKIE = "cookie"
+    HTTP_REQUEST = "http.request"
+    METHOD = "method"
+    PATH = "path"
+    RAW_PATH = "raw_path"
+    SCHEME = "scheme"
+    HTTP_VERSION = "http_version"
+    HEADERS = "headers"
+    QUERY_STRING = "query_string"
+    CLIENT = "client"
+    SERVER = "server"
+    TYPE = "type"
+    WEBSOCKET = "websocket"
+    SUBPROTOCOLS = "subprotocols"
+    USER = "user"
+    AUTH = "auth"
 
 
 class HttpRequest:
@@ -21,34 +47,34 @@ class HttpRequest:
         self.send = send
 
         # Basic request info
-        self.method = scope.get("method")
-        self.path = scope.get("path")
-        self.raw_path = scope.get("raw_path", b"").decode("utf-8")
-        self.scheme = scope.get("scheme", "http")
-        self.http_version = scope.get("http_version", "1.1")
+        self.method = scope.get(HttpRequestEnums.METHOD)
+        self.path = scope.get(HttpRequestEnums.PATH)
+        self.raw_path = scope.get(HttpRequestEnums.RAW_PATH, b"").decode("utf-8")
+        self.scheme = scope.get(HttpRequestEnums.SCHEME, "http")
+        self.http_version = scope.get(HttpRequestEnums.HTTP_VERSION, "1.1")
 
         # Headers, query params, and cookies
-        self.headers = self._parse_headers(scope.get("headers", []))
-        self.query_params = self._parse_query_params(scope.get("query_string", b""))
-        self.cookies = self._parse_cookies(self.headers.get("cookie", ""))
+        self.headers = self._parse_headers(scope.get(HttpRequestEnums.HEADERS, []))
+        self.query_params = self._parse_query_params(scope.get(HttpRequestEnums.QUERY_STRING, b""))
+        self.cookies = self._parse_cookies(self.headers.get(HttpRequestEnums.COOKIE, ""))
 
         # Client and server information
-        self.client = scope.get("client", (None, None))
+        self.client = scope.get(HttpRequestEnums.CLIENT, (None, None))
         (ip, port) = self.client
         self.client_ip = ip
         self.client_port = port
-        self.server = scope.get("server", (None, None))
+        self.server = scope.get(HttpRequestEnums.SERVER, (None, None))
         (ip, port) = self.server
         self.server_host = ip
         self.server_port = port
 
         # WebSocket-specific attributes
-        self.is_websocket = scope.get("type") == "websocket"
-        self.subprotocols = scope.get("subprotocols", [])
+        self.is_websocket = scope.get(HttpRequestEnums.TYPE) == HttpRequestEnums.WEBSOCKET
+        self.subprotocols = scope.get(HttpRequestEnums.SUBPROTOCOLS, [])
 
         # Middleware or framework-injected fields
-        self.user = scope.get("user")
-        self.auth = scope.get("auth")
+        self.user = scope.get(HttpRequestEnums.USER)
+        self.auth = scope.get(HttpRequestEnums.AUTH)
 
         # Request body
         self.body = None
@@ -60,7 +86,7 @@ class HttpRequest:
         body_content = b""
         while True:
             event = await self.receive()
-            if event["type"] == "http.request":
+            if event["type"] == HttpRequestEnums.HTTP_REQUEST:
                 body_content += event.get("body", b"")
                 if not event.get("more_body", False):
                     break
@@ -102,13 +128,13 @@ class HttpRequest:
         :param body_content: Raw body bytes
         :return: Decoded body (JSON, text, or raw bytes)
         """
-        content_type = self.headers.get("content-type", "").lower()
-        if "application/json" in content_type:
+        content_type = self.headers.get(HttpRequestEnums.CONTENT_TYPE, "").lower()
+        if HttpRequestEnums.APPLICATION_JSON in content_type:
             try:
                 return json.loads(body_content.decode("utf-8")) if body_content else {}
             except json.JSONDecodeError:
                 return body_content.decode("utf-8")
-        elif "application/x-www-form-urlencoded" in content_type:
+        elif HttpRequestEnums.APPLICATION_FORM in content_type:
             return parse_qs(body_content.decode("utf-8"))
         else:
             return body_content.decode("utf-8") if body_content else ""
@@ -136,3 +162,82 @@ class HttpRequest:
             "params": {},
         }
         return self.method, self.path, request_kwargs
+
+    def get_header(self, key, default=None):
+        """
+        Get a specific header value.
+        :param key: Header key
+        :param default: Default value if the header is not found
+        :return: Header value or default
+        """
+        return self.headers.get(key.lower(), default)
+
+    def set_header(self, key, value):
+        """
+        Set or update a specific header value.
+        :param key: Header key
+        :param value: Header value
+        """
+        self.headers[key.lower()] = value
+
+    def get_cookie(self, key, default=None):
+        """
+        Get a specific cookie value.
+        :param key: Cookie key
+        :param default: Default value if the cookie is not found
+        :return: Cookie value or default
+        """
+        return self.cookies.get(key, default)
+
+    def set_cookie(self, key, value):
+        """
+        Set or update a specific cookie value.
+        :param key: Cookie key
+        :param value: Cookie value
+        """
+        self.cookies[key] = value
+
+    def get_query_param(self, key, default=None):
+        """
+        Get a specific query parameter value.
+        :param key: Query parameter key
+        :param default: Default value if the query parameter is not found
+        :return: Query parameter value or default
+        """
+        return self.query_params.get(key, default)
+
+    def set_query_param(self, key, value):
+        """
+        Set or update a specific query parameter value.
+        :param key: Query parameter key
+        :param value: Query parameter value
+        """
+        self.query_params[key] = value
+
+    def get_body(self):
+        """
+        Get the request body.
+        :return: Body content
+        """
+        return self.body
+
+    def set_body(self, body):
+        """
+        Set or update the request body.
+        :param body: New body content
+        """
+        self.body = body
+
+    def get_client_info(self):
+        """
+        Get client information (IP and port).
+        :return: Tuple of client IP and port
+        """
+        return self.client_ip, self.client_port
+
+    def get_server_info(self):
+        """
+        Get server information (host and port).
+        :return: Tuple of server host and port
+        """
+        return self.server_host, self.server_port
