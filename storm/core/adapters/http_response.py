@@ -10,7 +10,7 @@ class HttpResponse:
     A class to construct and send HTTP responses in an ASGI application.
     """
 
-    def __init__(self, content=None, status_code=HttpStatus.OK, headers=None, content_type="text/plain"):
+    def __init__(self, content=None, status_code=HttpStatus.OK, headers=None, content_type=ContentType.JSON):
         """
         Initialize the HttpResponse object.
 
@@ -25,7 +25,7 @@ class HttpResponse:
         self.content_type = content_type
 
         # Ensure Content-Type is included in headers
-        self.headers["content-type"] = self.content_type
+        self.headers[HttpHeaders.CONTENT_TYPE] = self.content_type
 
     @staticmethod
     def from_request(request, content=None, status_code=HttpStatus.OK, headers=None):
@@ -41,22 +41,18 @@ class HttpResponse:
         # Default headers
         headers = headers or {}
 
-        # Example: Add a header based on request headers
-        if "accept-language" in request.headers:
-            headers["content-language"] = request.headers["accept-language"]
+        # Add a header based on request headers
+        if HttpHeaders.ACCEPT_LANGUAGE in request.headers:
+            headers[HttpHeaders.ACCEPT_LANGUAGE] = request.headers[HttpHeaders.ACCEPT_LANGUAGE]
 
-        
-        # Example: Echo query parameters back in the response for debugging
-        if request.query_params:
-            headers["x-query-params"] = json.dumps(request.query_params)
 
         # Create the response
         return HttpResponse(
             content=content,
             status_code=status_code,
             headers=headers,
-            content_type="application/json"
-        )
+            content_type=ContentType.JSON
+            )
 
     @staticmethod
     def from_error(error: StormHttpException, headers=None):
@@ -74,7 +70,7 @@ class HttpResponse:
             content=error.to_dict(),
             status_code=error.status_code,
             headers=headers,
-            content_type="application/json"
+            content_type=ContentType.JSON
         )
 
     def update_content(self, content):
@@ -141,6 +137,8 @@ class HttpResponse:
             return b""  # Empty response
 
 # Helper methods to create common response types
+
+
 def JsonResponse(data, status_code=HttpStatus.OK, headers=None):
     """
     Create a JSON response.
@@ -149,7 +147,7 @@ def JsonResponse(data, status_code=HttpStatus.OK, headers=None):
         content=data,
         status_code=status_code,
         headers=headers,
-        content_type=ContentType.APPLICATION_JSON
+        content_type=ContentType.JSON
     )
 
 
