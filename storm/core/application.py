@@ -41,6 +41,7 @@ class StormApplication:
         self._load_modules()
         self._load_controllers()
         self.logger.info(f"Storm application succefully started")
+        self._shutdown_called = False
 
     def add_global_interceptor(self, interceptor_cls):
         """
@@ -111,7 +112,7 @@ class StormApplication:
         
         for name, provider in module.providers.items():
             self._inject_dependencies(provider, module)
-
+        
     def _inject_dependencies(self, service, module):
         """
         Inject dependencies into a service based on the module's providers.
@@ -149,6 +150,7 @@ class StormApplication:
             ):
                 
                 if dependency_type.__name__ in module.providers.keys():
+                    setattr(service_class, param_name, module.providers[dependency_type.__name__])
                     default_kwargs[param_name] = module.providers[dependency_type.__name__]
                 else:
                     raise ValueError(f"Dependency {dependency_type.__name__} not found in module providers.")
@@ -242,6 +244,17 @@ class StormApplication:
                 response = HttpResponse.from_error(InternalServerErrorException())
             finally:
                 await response.send(send)
+        elif scope['type'] == 'lifespan':
+            # Handle startup and shutdown events
+            while True:
+                message = await receive()
+                if message['type'] == 'lifespan.startup':
+                    self.logger.info("Starting up Storm application.")
+                    await send({'type': 'lifespan.startup.complete'})
+                elif message['type'] == 'lifespan.shutdown':
+                    self.shutdown()
+                    await send({'type': 'lifespan.shutdown.complete'})
+                    break
 
     def run(self, host='127.0.0.1', port=8000):
         """
@@ -251,12 +264,38 @@ class StormApplication:
         :param port: The port number to bind the server (default is 8000).
         """
         import uvicorn
-        uvicorn.run(self, host=host, port=port, log_level='error')
+        import signal
+
+        def handle_shutdown(signal_number, frame):
+            self.logger.info(f"Received shutdown signal: {signal_number}")
+            self.shutdown()
+
+        # Register signal handlers for graceful shutdown
+        signal.signal(signal.SIGINT, handle_shutdown)  # Handle Ctrl+C
+        signal.signal(signal.SIGTERM, handle_shutdown)  # Handle termination signals
+
+        try:
+            uvicorn.run(self, host=host, port=port, log_level='error')
+        except Exception as e:
+            self.logger.error(f"Error while running the server: {e}")
+        finally:
+            self.shutdown()
 
     def shutdown(self):
         """
         Perform shutdown tasks for the application, invoking any onDestroy hooks in modules.
         """
-        for module in self.modules.values():
+        if self._shutdown_called:
+            return  # Prevent multiple calls to shutdown
+        self._shutdown_called = True
+        print()
+        self.logger.info("Shutting down Storm application.")
+        for module_name, module in self.modules.items():
             if hasattr(module, 'onDestroy') and callable(module.onDestroy):
-                module.onDestroy()
+                try:
+                    self.logger.info(f"Executing onDestroy hook for module: {module_name}")
+                    module.onDestroy()
+                except Exception as e:
+                    self.logger.error(f"Error during onDestroy of module {module_name}: {e}")
+
+        self.logger.info("Storm application shutdown complete.")
