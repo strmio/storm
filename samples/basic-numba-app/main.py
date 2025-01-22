@@ -62,9 +62,10 @@ class ProcessController:
 
     @Get()
     async def process(self):
-        cluster = np.random.rand(1000, 3)
+        cluster = np.random.rand(100, 100)
         return {
             "e": self.numba_service.compute_potential(cluster),
+            "cluster": cluster.tolist()
         }
 
 
