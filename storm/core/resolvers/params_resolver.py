@@ -22,10 +22,10 @@ class ParamsResolver:
         :return: A dictionary of resolved arguments for the handler.
         """
         resolved_args = {}
-        context = execution_context.get()
-        route_params = context.get("request", {}).get("params", {})
-        query_params = context.get("request", {}).get("query_params", {})
-        body = context.get("request", {}).get("body", {})
+        request = execution_context.get_request()
+        route_params = request.get_params()
+        query_params = request.get_query_params()
+        body = request.get_body()
 
         for param_name, param in signature(handler).parameters.items():
             resolved_args[param_name] = await ParamsResolver._resolve_param(
