@@ -15,7 +15,7 @@ def HttpCode(status_code: int):
         @wraps(func)
         async def wrapper(*args, **kwargs):
             # Get the current request from the execution context
-            response = execution_context.get().get("response", {})
+            response = execution_context.get_response()
             response.update_status_code(status_code)
 
             return await func(*args, **kwargs)

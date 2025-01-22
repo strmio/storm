@@ -16,8 +16,8 @@ class Param:
         """
         Dynamically resolve the parameter value or all parameters, applying the pipe if specified.
         """
-        context = execution_context.get()
-        route_params = context.get("request", {}).get("params", {})
+        request = execution_context.get_request()
+        route_params = request.get_params()
 
         # Get the parameter value or all parameters
         if self.param_name is None:
@@ -42,8 +42,8 @@ class Param:
         @wraps(func)
         async def wrapper(*args, **kwargs):
             # Get the current request from the execution context
-            context = execution_context.get()
-            route_params = context.get("request", {}).get("params", {})
+            request = execution_context.get_request()
+            route_params = request.get_params()
 
             # Resolve the parameter value and apply the pipe if necessary
             if self.param_name in route_params:
