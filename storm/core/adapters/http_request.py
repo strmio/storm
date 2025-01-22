@@ -45,7 +45,7 @@ class HttpRequest:
         self.scope = scope
         self.receive = receive
         self.send = send
-
+        self.params = None
         # Basic request info
         self.method = scope.get(HttpRequestEnums.METHOD)
         self.path = scope.get(HttpRequestEnums.PATH)
@@ -172,6 +172,12 @@ class HttpRequest:
         """
         return self.headers.get(key.lower(), default)
 
+    def get_headers(self):
+        """
+        Get headers.
+        :return: Headers dictionary
+        """
+        return self.headers
     def set_header(self, key, value):
         """
         Set or update a specific header value.
@@ -197,13 +203,15 @@ class HttpRequest:
         """
         self.cookies[key] = value
 
-    def get_query_param(self, key, default=None):
+    def get_query_params(self, key=None, default=None):
         """
         Get a specific query parameter value.
         :param key: Query parameter key
         :param default: Default value if the query parameter is not found
         :return: Query parameter value or default
         """
+        if not key:
+            return self.query_params
         return self.query_params.get(key, default)
 
     def set_query_param(self, key, value):
@@ -241,3 +249,56 @@ class HttpRequest:
         :return: Tuple of server host and port
         """
         return self.server_host, self.server_port
+
+    def set_params(self, key_or_dict, value=None):
+            """
+            Set or update the params attribute.
+
+            :param key_or_dict: A dictionary to update the params or a key for a specific parameter.
+            :param value: The value to set if a key is provided.
+            """
+            if not self.params:
+                self.params = {}
+            
+            if isinstance(key_or_dict, dict):
+                # Merge the dictionary into existing params
+                self.params.update(key_or_dict)
+            elif isinstance(key_or_dict, str) and value is not None:
+                # Set or update a specific key-value pair
+                self.params[key_or_dict] = value
+            else:
+                raise ValueError("Provide either a dictionary or a key-value pair.")
+
+    def get_params(self, key=None, default=None):
+        """
+        Get the value of a specific parameter or all parameters.
+
+        :param key: The key of the parameter to retrieve (optional).
+        :param default: The default value to return if the key is not found.
+        :return: The value of the parameter or all parameters if no key is provided.
+        """
+        if key is None:
+            # Return all params
+            return self.params or {}
+        return self.params.get(key, default)
+    
+    def get_client_ip(self):
+        """
+        Get the client IP address.
+        :return: The client IP address
+        """
+        return self.client_ip
+    
+    def get_client_port(self):
+        """
+        Get the client port.
+        :return: The client port
+        """
+        return self.client_port
+    
+    def get_server_host(self):
+        """
+        Get the server host.
+        :return: The server host
+        """
+        return self.server_host
