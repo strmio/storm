@@ -1,5 +1,6 @@
 import inspect
 from functools import wraps
+import signal
 import traceback
 from storm.common.enums.http_status import HttpStatus
 from storm.common.exceptions.exception import StormHttpException
@@ -8,6 +9,7 @@ from storm.core.adapters.http_request import HttpRequest
 from storm.core.adapters.http_response import HttpResponse
 from storm.core.interceptor_pipeline import InterceptorPipeline
 from storm.core.middleware_pipeline import MiddlewarePipeline
+from storm.core.repl.repl_manager import ReplManager
 from storm.core.resolvers.route_resolver import RouteExplorer, RouteResolver
 from storm.core.router import Router
 from storm.common.services.logger import Logger
@@ -42,6 +44,11 @@ class StormApplication:
         self._load_controllers()
         self.logger.info(f"Storm application succefully started")
         self._shutdown_called = False
+
+        # Initialize REPL Manager
+        self.repl_manager = ReplManager(self)
+        self.repl_manager.start()
+
 
     def add_global_interceptor(self, interceptor_cls):
         """
@@ -270,6 +277,7 @@ class StormApplication:
             self.logger.info(f"Received shutdown signal: {signal_number}")
             self.shutdown()
 
+
         # Register signal handlers for graceful shutdown
         signal.signal(signal.SIGINT, handle_shutdown)  # Handle Ctrl+C
         signal.signal(signal.SIGTERM, handle_shutdown)  # Handle termination signals
@@ -280,13 +288,20 @@ class StormApplication:
             self.logger.error(f"Error while running the server: {e}")
         finally:
             self.shutdown()
+    
+    def _handle_shutdown(self, signal_number, frame):
+        """
+        Handle shutdown signals like SIGINT and SIGTERM.
+        """
+        self.logger.info(f"Received shutdown signal: {signal_number}")
+        self.shutdown()
 
     def shutdown(self):
         """
-        Perform shutdown tasks for the application, invoking any onDestroy hooks in modules.
+        Perform shutdown tasks for the application, including stopping the REPL manager.
         """
         if self._shutdown_called:
-            return  # Prevent multiple calls to shutdown
+            return
         self._shutdown_called = True
         print()
         self.logger.info("Shutting down Storm application.")
@@ -297,5 +312,9 @@ class StormApplication:
                     module.onDestroy()
                 except Exception as e:
                     self.logger.error(f"Error during onDestroy of module {module_name}: {e}")
+
+        # Stop the REPL manager
+        self.logger.info("Stopping REPL manager.")
+        self.repl_manager.shutdown()
 
         self.logger.info("Storm application shutdown complete.")
