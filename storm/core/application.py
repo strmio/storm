@@ -1,6 +1,5 @@
 import inspect
 from functools import wraps
-import signal
 import traceback
 from storm.common.enums.http_status import HttpStatus
 from storm.common.exceptions.exception import StormHttpException
