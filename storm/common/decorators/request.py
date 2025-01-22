@@ -12,8 +12,7 @@ def Request(param_name):
         @wraps(func)
         async def wrapper(*args, **kwargs):
             # Get the current request from the execution context
-            context = execution_context.get()
-            request = context.get("request", None)
+            request = execution_context.get_request()
 
             # Inject the request into the kwargs using the given param_name
             if request:

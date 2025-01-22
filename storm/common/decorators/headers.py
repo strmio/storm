@@ -19,8 +19,8 @@ class Headers:
         """
         Dynamically resolve the header value or all headers, applying the pipe if specified.
         """
-        context = execution_context.get()
-        headers = context.get("request", {}).get("headers", {})
+        request = execution_context.get_request()
+        headers = request.get_headers()
 
         # Get the specific header or all headers
         if self.header_name is None:
@@ -45,8 +45,8 @@ class Headers:
         @wraps(func)
         async def wrapper(*args, **kwargs):
             # Get the current request from the execution context
-            context = execution_context.get()
-            headers = context.get("request", {}).get("headers", {})
+            request = execution_context.get_request()
+            headers = request.get_headers()
 
             # Resolve the header value and apply the pipe if necessary
             if self.header_name in headers:
