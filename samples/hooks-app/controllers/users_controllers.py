@@ -1,5 +1,5 @@
-from storm.common import Body, Controller, Delete, Get, Post, Param, Query
-from storm.common import ParseIntPipe
+from storm.common import Body, Controller, Delete, Get, Post, Headers, Param, Query
+from storm.common import ParseIntPipe, UnauthorizedException
 from storm.common import Logger, OnModuleInit
 from services.users_service import UsersService
 
@@ -20,8 +20,7 @@ class UsersController(OnModuleInit):
         return self.users_service.get_users(q)
 
     @Get("/:id")
-    @Param("id", ParseIntPipe)
-    async def get_user(self, id):
+    async def get_user(self, id = Param("id", ParseIntPipe)):
         self._logger.info(f"Fetching user with ID: {id}")
         return self.users_service.get_user(id)
 
@@ -36,13 +35,13 @@ class UsersController(OnModuleInit):
         return self.users_service.add_user(body)
 
     @Get("/me")
-    async def get_me(self, auth):
+    async def get_me(self, auth: str = Headers(header_name="authorization")):
         self._logger.info(auth)
         if not auth:
-            return {"error": "Unauthorized"}
+            raise UnauthorizedException()
         return self.users_service.get_me()
 
-    @Delete("/:id")
-    async def delete_user(self, id: int = Param("id", ParseIntPipe)):
+    @Delete("/:note_id")
+    async def delete_user(self, id: int = Param("note_id", ParseIntPipe)):
         self._logger.info(f"Deleting user with ID: {id}")
         return self.users_service.delete_user(id)
