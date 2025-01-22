@@ -4,20 +4,7 @@ from storm.common.decorators.param import Param
 from storm.common.decorators.query_params import Query
 from storm.common.decorators.body import Body
 from storm.common.decorators.headers import Headers
-
-class OptionalMeta:
-    """
-    Meta class to represent optional parameters with default values.
-    """
-    def __init__(self, default=None):
-        self.default = default
-
-
-def Optional(default=None):
-    """
-    Decorator to mark a parameter as optional with a default value.
-    """
-    return OptionalMeta(default=default)
+from storm.common.decorators.optional import OptionalMeta
 
 
 class ParamsResolver:
