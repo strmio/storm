@@ -36,7 +36,7 @@ class StormApplication:
         self.root_module = root_module
         self.modules = {}
         self.router = Router()
-        self.logger = Logger("StormApplication")
+        self.logger = Logger(self.__class__.__name__)
         self.middleware_pipeline = MiddlewarePipeline()
         self.interceptor_pipeline = InterceptorPipeline(global_interceptors=[])
         self._load_modules()
