@@ -11,5 +11,7 @@ from .mime_type import *
 from .time_unit import *
 from .notification_type import *
 from .corss_setting import *
-from .compress_algorithm    import *
+from .compress_algorithm import *
+from .content_type import *
+
 
