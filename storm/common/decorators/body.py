@@ -18,9 +18,8 @@ class Body:
         Resolve the body parameter from the request, optionally applying a pipe.
         """
         # Get the current request from the execution context
-        context = execution_context.get()
-        request = context.get("request", {})
-        body = request.get("body", {})
+        request = execution_context.get_request()
+        body = request.get_body()
 
         # Get the specific field from the body or use the entire body
         result = body.get(self.param_name) if self.param_name else body
