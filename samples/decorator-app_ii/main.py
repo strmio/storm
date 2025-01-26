@@ -16,9 +16,10 @@ class UserModel(BaseModel):
     email: EmailStr
     id: int
 
+
 # Define Services
 @Injectable()
-class UsersService():
+class UsersService:
     def __init__(self):
         self.logger = Logger(self.__class__.__name__)
         self.users: list[UserModel] = [
@@ -29,8 +30,8 @@ class UsersService():
     def get_users(self, q: str = None):
         # Simulate fetching users from a database or external service
         users = [
-            user.model_dump() 
-            for user in self.users 
+            user.model_dump()
+            for user in self.users
             if not q or q.lower() in user.name.lower()
         ]
         return {"users": users}
@@ -50,8 +51,7 @@ class UsersService():
 
 # Define Controller
 @Controller("/users")  # Define base path for this controller
-class UsersController():
-
+class UsersController:
     def __init__(self, users_service: UsersService):
         self.logger = Logger(self.__class__.__name__)
         self.users_service = users_service
@@ -69,14 +69,18 @@ class UsersController():
 
     @Post()
     @HttpCode(HttpStatus.CREATED)
-    async def add_user(self, user: UserModel = Body(pipe=PydanticValidationPipe(UserModel))):
+    async def add_user(
+        self, user: UserModel = Body(pipe=PydanticValidationPipe(UserModel))
+    ):
         return self.users_service.add_user(user)
 
     @Get("/me")
     async def get_me(self):
         raise ForbiddenException("You are not allowed to access this resource")
 
+
 # Define Module
+
 
 @Module(controllers=[UsersController], providers=[UsersService])
 class UsersModule:

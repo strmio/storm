@@ -1,5 +1,6 @@
 from enum import StrEnum
 
+
 class CompressionAlgorithm(StrEnum):
     GZIP = "gzip"
     BZIP2 = "bzip2"

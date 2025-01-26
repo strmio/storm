@@ -1,6 +1,6 @@
 import pytest
-import asyncio
 from storm.common.guards.role_guard import RoleGuard
+
 
 @pytest.mark.asyncio
 async def test_role_guard():
@@ -13,9 +13,9 @@ async def test_role_guard():
 
     request = Request(role="admin")
     result = await guard.can_activate(request)
-    assert result == True
+    assert result
 
     # Test with a disallowed role
     request = Request(role="guest")
     result = await guard.can_activate(request)
-    assert result == False
+    assert not result

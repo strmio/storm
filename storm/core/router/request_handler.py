@@ -1,5 +1,5 @@
 from urllib.parse import parse_qs
-from .router import Router
+
 
 class RequestHandler:
     """

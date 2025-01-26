@@ -1,5 +1,6 @@
 from enum import StrEnum
 
+
 class MimeType(StrEnum):
     APPLICATION_JSON = "application/json"
     APPLICATION_XML = "application/xml"

@@ -10,7 +10,13 @@ class HttpResponse:
     A class to construct and send HTTP responses in an ASGI application.
     """
 
-    def __init__(self, content=None, status_code=HttpStatus.OK, headers=None, content_type=ContentType.JSON):
+    def __init__(
+        self,
+        content=None,
+        status_code=HttpStatus.OK,
+        headers=None,
+        content_type=ContentType.JSON,
+    ):
         """
         Initialize the HttpResponse object.
 
@@ -43,16 +49,17 @@ class HttpResponse:
 
         # Add a header based on request headers
         if HttpHeaders.ACCEPT_LANGUAGE in request.headers:
-            headers[HttpHeaders.ACCEPT_LANGUAGE] = request.headers[HttpHeaders.ACCEPT_LANGUAGE]
-
+            headers[HttpHeaders.ACCEPT_LANGUAGE] = request.headers[
+                HttpHeaders.ACCEPT_LANGUAGE
+            ]
 
         # Create the response
         return HttpResponse(
             content=content,
             status_code=status_code,
             headers=headers,
-            content_type=ContentType.JSON
-            )
+            content_type=ContentType.JSON,
+        )
 
     @staticmethod
     def from_error(error: StormHttpException, headers=None):
@@ -70,7 +77,7 @@ class HttpResponse:
             content=error.to_dict(),
             status_code=error.status_code,
             headers=headers,
-            content_type=ContentType.JSON
+            content_type=ContentType.JSON,
         )
 
     def update_content(self, content):
@@ -110,16 +117,23 @@ class HttpResponse:
         """
         body = self._encode_content()
         # Send the response start event
-        await send({
-            "type": "http.response.start",
-            "status": self.status_code,
-            "headers": [[key.encode("utf-8"), value.encode("utf-8")] for key, value in self.headers.items()],
-        })
+        await send(
+            {
+                "type": "http.response.start",
+                "status": self.status_code,
+                "headers": [
+                    [key.encode("utf-8"), value.encode("utf-8")]
+                    for key, value in self.headers.items()
+                ],
+            }
+        )
         # Send the response body
-        await send({
-            "type": "http.response.body",
-            "body": body,
-        })
+        await send(
+            {
+                "type": "http.response.body",
+                "body": body,
+            }
+        )
 
     def _encode_content(self):
         """
@@ -136,6 +150,7 @@ class HttpResponse:
         else:
             return b""  # Empty response
 
+
 # Helper methods to create common response types
 
 
@@ -147,7 +162,7 @@ def JsonResponse(data, status_code=HttpStatus.OK, headers=None):
         content=data,
         status_code=status_code,
         headers=headers,
-        content_type=ContentType.JSON
+        content_type=ContentType.JSON,
     )
 
 
@@ -159,7 +174,7 @@ def TextResponse(text, status_code=HttpStatus.OK, headers=None):
         content=text,
         status_code=status_code,
         headers=headers,
-        content_type=ContentType.PLAIN
+        content_type=ContentType.PLAIN,
     )
 
 
@@ -171,11 +186,17 @@ def HtmlResponse(html, status_code=HttpStatus.OK, headers=None):
         content=html,
         status_code=status_code,
         headers=headers,
-        content_type=ContentType.TEXT_HTML
+        content_type=ContentType.TEXT_HTML,
     )
 
 
-def FileResponse(file_bytes, filename, content_type="application/octet-stream", status_code=200, headers=None):
+def FileResponse(
+    file_bytes,
+    filename,
+    content_type="application/octet-stream",
+    status_code=200,
+    headers=None,
+):
     """
     Create a file download response.
     """
@@ -185,5 +206,5 @@ def FileResponse(file_bytes, filename, content_type="application/octet-stream", 
         content=file_bytes,
         status_code=status_code,
         headers=headers,
-        content_type=content_type
+        content_type=content_type,
     )

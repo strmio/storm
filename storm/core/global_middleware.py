@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+
 class GlobalMiddleware(ABC):
     """
     Abstract base class for global middleware in the Storm framework.

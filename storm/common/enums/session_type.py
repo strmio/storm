@@ -1,5 +1,6 @@
 from enum import StrEnum
 
+
 class SessionType(StrEnum):
     COOKIE = "cookie"
     TOKEN = "token"

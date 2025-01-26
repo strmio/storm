@@ -30,7 +30,9 @@ class Inspector:
         """
         self.logger.info("Routes:")
         for route in self.app.router.routes:
-            self.logger.info(f" - {route.method} {route.path} (Handler: {route.handler.__name__})")
+            self.logger.info(
+                f" - {route.method} {route.path} (Handler: {route.handler.__name__})"
+            )
 
     def inspect_service(self, service_name):
         """
@@ -38,15 +40,19 @@ class Inspector:
         :param service_name: The name of the service to inspect.
         """
         service = next(
-            (provider for module in self.app.modules.values()
-             for provider in module.providers if provider.__class__.__name__ == service_name),
-            None
+            (
+                provider
+                for module in self.app.modules.values()
+                for provider in module.providers
+                if provider.__class__.__name__ == service_name
+            ),
+            None,
         )
         if service:
             self.logger.info(f"Service: {service.__class__.__name__}")
             self.logger.info("Methods:")
             for method in dir(service):
-                if callable(getattr(service, method)) and not method.startswith('_'):
+                if callable(getattr(service, method)) and not method.startswith("_"):
                     self.logger.info(f" - {method}")
         else:
             self.logger.info(f"Service '{service_name}' not found.")

@@ -14,6 +14,7 @@ from storm.core.router import Router
 from storm.common.services.logger import Logger
 from storm.common.execution_context import execution_context
 
+
 class StormApplication:
     """
     The main application class responsible for bootstrapping the Storm framework.
@@ -41,13 +42,12 @@ class StormApplication:
         self.interceptor_pipeline = InterceptorPipeline(global_interceptors=[])
         self._load_modules()
         self._load_controllers()
-        self.logger.info(f"Storm application succefully started")
+        self.logger.info("Storm application succefully started")
         self._shutdown_called = False
 
         # Initialize REPL Manager
         self.repl_manager = ReplManager(self)
         self.repl_manager.start()
-
 
     def add_global_interceptor(self, interceptor_cls):
         """
@@ -92,7 +92,6 @@ class StormApplication:
         self._initialize_services(module)
         self._initialize_controllers(module)
 
-
     def _initialize_controllers(self, module):
         """
         Initialize services within a module by injecting dependencies.
@@ -115,10 +114,10 @@ class StormApplication:
             self._inject_init_dependencies(provider, module)
             service_instance = provider()
             module.providers[name] = service_instance
-        
+
         for name, provider in module.providers.items():
             self._inject_dependencies(provider, module)
-        
+
     def _inject_dependencies(self, service, module):
         """
         Inject dependencies into a service based on the module's providers.
@@ -126,11 +125,13 @@ class StormApplication:
         :param service: The service instance to inject dependencies into.
         :param module: The module providing the dependencies.
         """
-        if hasattr(service, '__annotations__'):
+        if hasattr(service, "__annotations__"):
             for attr_name, dependency in service.__annotations__.items():
-                if hasattr(dependency, '__injectable__') and dependency.__injectable__:
+                if hasattr(dependency, "__injectable__") and dependency.__injectable__:
                     if dependency.__name__ in module.providers.keys():
-                        setattr(service, attr_name, module.providers[dependency.__name__])
+                        setattr(
+                            service, attr_name, module.providers[dependency.__name__]
+                        )
 
     def _inject_init_dependencies(self, service_class, module):
         """
@@ -151,15 +152,22 @@ class StormApplication:
             dependency_type = param.annotation
             if (
                 dependency_type
-                and hasattr(dependency_type, '__injectable__')
+                and hasattr(dependency_type, "__injectable__")
                 and dependency_type.__injectable__
             ):
-                
                 if dependency_type.__name__ in module.providers.keys():
-                    setattr(service_class, param_name, module.providers[dependency_type.__name__])
-                    default_kwargs[param_name] = module.providers[dependency_type.__name__]
+                    setattr(
+                        service_class,
+                        param_name,
+                        module.providers[dependency_type.__name__],
+                    )
+                    default_kwargs[param_name] = module.providers[
+                        dependency_type.__name__
+                    ]
                 else:
-                    raise ValueError(f"Dependency {dependency_type.__name__} not found in module providers.")
+                    raise ValueError(
+                        f"Dependency {dependency_type.__name__} not found in module providers."
+                    )
 
         @wraps(original_init)
         def new_init(self, *args, **kwargs):
@@ -169,7 +177,7 @@ class StormApplication:
 
         # Replace the __init__ method of the class
         service_class.__init__ = new_init
-    
+
     def _register_controller(self, controller, module):
         """
         Register a controller's routes with the application router.
@@ -178,14 +186,14 @@ class StormApplication:
         :param module: The module containing the controller.
         """
 
-        if hasattr(controller, 'on_module_init'):
+        if hasattr(controller, "on_module_init"):
             controller.on_module_init()
-        
+
         resolver = RouteResolver(self.router)
         explorer = RouteExplorer()
-        
+
         resolver.register_routes(controller, controller.__base_path__, explorer)
-        
+
     async def handle_request(self, method, path, request, response, **request_kwargs):
         """
         Handle an incoming HTTP request by resolving the route and executing middleware and interceptors.
@@ -201,12 +209,14 @@ class StormApplication:
             handler, params = self.router.resolve(method, path)
             if not handler:
                 raise NotFoundException()
-            
+
             request.set_params(params)
-            
+
             execution_context.set({"request": request, "response": response})
 
-            modified_request = await self.middleware_pipeline.execute(request_kwargs, lambda req: req)
+            modified_request = await self.middleware_pipeline.execute(
+                request_kwargs, lambda req: req
+            )
             content = await self.interceptor_pipeline.execute(modified_request, handler)
 
             response.update_content(content)
@@ -231,7 +241,7 @@ class StormApplication:
         :param receive: The receive callable for the connection.
         :param send: The send callable for the connection.
         """
-        if scope['type'] == 'http':
+        if scope["type"] == "http":
             try:
                 request = HttpRequest(scope, receive, send)
                 await request.parse_body()
@@ -239,32 +249,34 @@ class StormApplication:
                 method, path, request_kwargs = request.get_request_info()
                 response = HttpResponse.from_request(request=request, status_code=200)
 
-                response, _ = await self.handle_request(method, path, request, response, **request_kwargs)
+                response, _ = await self.handle_request(
+                    method, path, request, response, **request_kwargs
+                )
             except StormHttpException as exc:
                 self.logger.error(exc)
                 if exc.status_code == HttpStatus.INTERNAL_SERVER_ERROR:
                     tb = traceback.format_exc()
                     self.logger.error(tb)
                 response = HttpResponse.from_error(exc)
-            except Exception as exc:
+            except Exception:
                 tb = traceback.format_exc()
                 self.logger.error(tb)
                 response = HttpResponse.from_error(InternalServerErrorException())
             finally:
                 await response.send(send)
-        elif scope['type'] == 'lifespan':
+        elif scope["type"] == "lifespan":
             # Handle startup and shutdown events
             while True:
                 message = await receive()
-                if message['type'] == 'lifespan.startup':
+                if message["type"] == "lifespan.startup":
                     self.logger.info("Starting up Storm application.")
-                    await send({'type': 'lifespan.startup.complete'})
-                elif message['type'] == 'lifespan.shutdown':
+                    await send({"type": "lifespan.startup.complete"})
+                elif message["type"] == "lifespan.shutdown":
                     self.shutdown()
-                    await send({'type': 'lifespan.shutdown.complete'})
+                    await send({"type": "lifespan.shutdown.complete"})
                     break
 
-    def run(self, host='127.0.0.1', port=8000):
+    def run(self, host="127.0.0.1", port=8000):
         """
         Start the application server using Uvicorn.
 
@@ -278,18 +290,17 @@ class StormApplication:
             self.logger.info(f"Received shutdown signal: {signal_number}")
             self.shutdown()
 
-
         # Register signal handlers for graceful shutdown
         signal.signal(signal.SIGINT, handle_shutdown)  # Handle Ctrl+C
         signal.signal(signal.SIGTERM, handle_shutdown)  # Handle termination signals
 
         try:
-            uvicorn.run(self, host=host, port=port, log_level='error')
+            uvicorn.run(self, host=host, port=port, log_level="error")
         except Exception as e:
             self.logger.error(f"Error while running the server: {e}")
         finally:
             self.shutdown()
-    
+
     def _handle_shutdown(self, signal_number, frame):
         """
         Handle shutdown signals like SIGINT and SIGTERM.
@@ -307,12 +318,16 @@ class StormApplication:
         print()
         self.logger.info("Shutting down Storm application.")
         for module_name, module in self.modules.items():
-            if hasattr(module, 'onDestroy') and callable(module.onDestroy):
+            if hasattr(module, "onDestroy") and callable(module.onDestroy):
                 try:
-                    self.logger.info(f"Executing onDestroy hook for module: {module_name}")
+                    self.logger.info(
+                        f"Executing onDestroy hook for module: {module_name}"
+                    )
                     module.onDestroy()
                 except Exception as e:
-                    self.logger.error(f"Error during onDestroy of module {module_name}: {e}")
+                    self.logger.error(
+                        f"Error during onDestroy of module {module_name}: {e}"
+                    )
 
         # Stop the REPL manager
         self.logger.info("Stopping REPL manager.")

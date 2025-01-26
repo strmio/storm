@@ -1,5 +1,6 @@
 from enum import StrEnum
 
+
 class CacheControl(StrEnum):
     NO_CACHE = "no-cache"
     NO_STORE = "no-store"

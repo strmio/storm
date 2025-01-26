@@ -1,6 +1,7 @@
 from storm.common.services.logger import Logger
 import re
 
+
 class Router:
     def __init__(self):
         self.static_routes = {}
@@ -16,7 +17,7 @@ class Router:
         :param handler: The function to handle requests to this route
         """
         path_regex = self._path_to_regex(path)
-        if ':' in path:
+        if ":" in path:
             self.dynamic_routes[(method, path, path_regex)] = handler
         else:
             self.static_routes[(method, path)] = handler
@@ -53,7 +54,9 @@ class Router:
         :param path: The URL path
         :return: Specificity score (higher is more specific)
         """
-        return len([segment for segment in path.split('/') if not segment.startswith(':')])
+        return len(
+            [segment for segment in path.split("/") if not segment.startswith(":")]
+        )
 
     def _path_to_regex(self, path):
         """
@@ -62,7 +65,7 @@ class Router:
         :param path: The URL path
         :return: A regex pattern that matches the path
         """
-        return re.sub(r':(\w+)', r'(?P<\1>[^/]+)', path) + r'/?$'
+        return re.sub(r":(\w+)", r"(?P<\1>[^/]+)", path) + r"/?$"
 
     def _extract_params(self, path_regex, path):
         """

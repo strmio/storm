@@ -1,4 +1,14 @@
-from storm.common.decorators import Get, Post, Body, Request, Query, Header, Ip, Host, Param
+from storm.common.decorators import (
+    Get,
+    Post,
+    Body,
+    Request,
+    Query,
+    Header,
+    Ip,
+    Host,
+    Param,
+)
 from storm.common.decorators.http import Delete
 from storm.common.decorators.injectable import Injectable
 from storm.common.decorators.module import Module
@@ -6,18 +16,19 @@ from storm.common.decorators.controller import Controller
 from storm.common.services.logger import Logger
 from storm.core.application import StormApplication
 
+
 # Define Controller
 @Injectable()
-class UsersService():
+class UsersService:
     def __init__(self):
         self.logger = Logger(self.__class__.__name__)
         self.users = [
             {"id": 1, "name": "John Doe", "email": "john.doe@example.com"},
             {"id": 2, "name": "Jane Smith", "email": "jane.smith@example.com"},
             {"id": 3, "name": "Alice Johnson", "email": "alice.johnson@example.com"},
-            {"id": 4, "name": "Bob Brown", "email": "bob.brown@example.com"}
+            {"id": 4, "name": "Bob Brown", "email": "bob.brown@example.com"},
         ]
-    
+
     def get_users(self, q: str = None):
         # Simulate fetching users from a database or external service
         if q:
@@ -34,12 +45,12 @@ class UsersService():
     def get_count(self):
         users = self.users
         return {"users_count": len(users)}
-    
+
     def get_me(self):
         # Simulate fetching the current user's information
         current_user = {"id": 1, "name": "John Doe", "email": "john.doe@example.com"}
         return {"user": current_user}
-        
+
     def add_user(self, user):
         self.logger.info(f"Adding user: {user}")
         # Simulate adding a new user to the database or external service
@@ -51,7 +62,7 @@ class UsersService():
         users = self.users
         user = next((user for user in users if user["email"] == email), None)
         return {"user": user}
-    
+
     def delete_user(self, id):
         # Simulate deleting a user from the database or external service
         users = self.users
@@ -59,12 +70,12 @@ class UsersService():
         if user:
             users.remove(user)
             return {"status": "ok", "user": user}
-        return {"status": "error", "message": "User not found"}    
+        return {"status": "error", "message": "User not found"}
+
 
 # Define Controller
 @Controller("/users")  # Define base path for this controller
-class UsersController():
-    
+class UsersController:
     def __init__(self, users_service: UsersService):
         self.logger = Logger(self.__class__.__name__)
         self.users_service = users_service
@@ -74,7 +85,7 @@ class UsersController():
     @Query("q")
     async def get_users(self, req, q: str):
         return self.users_service.get_users(q)
-    
+
     @Get("/:id")
     @Param("id")
     async def get_user(self, id):
@@ -92,7 +103,7 @@ class UsersController():
     @Body("user")
     async def add_user(self, user):
         return self.users_service.add_user(user)
-    
+
     @Get("/me")
     @Header("auth", "authorization")
     async def get_me(self, auth):
@@ -102,18 +113,21 @@ class UsersController():
         return self.users_service.get_me()
 
     @Delete("/:id")
-    async def delete_user(self, id = Param("id")):
+    async def delete_user(self, id=Param("id")):
         self.logger.info(f"Deleting user with ID: {id}, type: {type(id)}")
         return self.users_service.delete_user(int(id))
+
 
 # Define Module
 @Module(controllers=[UsersController], providers=[UsersService])
 class UsersModule:
     pass
 
+
 @Module(imports=[UsersModule])
 class AppModule:
     pass
+
 
 # Create the Storm Application and Run the Server
 if __name__ == "__main__":

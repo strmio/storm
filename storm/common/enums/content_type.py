@@ -1,5 +1,6 @@
 from enum import StrEnum
 
+
 class ContentType(StrEnum):
     # Text
     PLAIN = "text/plain"

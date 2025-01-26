@@ -1,6 +1,7 @@
 import pytest
-from storm.common.exceptions import NotFoundException, StormHttpException
+from storm.common.exceptions import NotFoundException
 from storm.common.filters.filter import ExceptionFilter
+
 
 @pytest.mark.asyncio
 async def test_exception_filter_handles_known_exceptions():
@@ -8,6 +9,7 @@ async def test_exception_filter_handles_known_exceptions():
     response, status_code = await ExceptionFilter.handle_exception(exception)
     assert response == {"error": "Not found", "status_code": 404}
     assert status_code == 404
+
 
 @pytest.mark.asyncio
 async def test_exception_filter_handles_unknown_exceptions():

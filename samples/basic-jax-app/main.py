@@ -16,7 +16,7 @@ def lj_jax_array(r):
 @jax.jit
 def distances_jax_array(cluster):
     diff = cluster[:, None, :] - cluster[None, :, :]
-    mat = jnp.sum(diff ** 2, axis=-1)
+    mat = jnp.sum(diff**2, axis=-1)
     return jnp.sqrt(mat)
 
 
@@ -30,7 +30,6 @@ def potential_jax_array(cluster):
 
 @Injectable()
 class JaxService:
-
     def __init__(self):
         # Warm up the JAX functions with dummy data during initialization
         dummy_cluster = jnp.array(jax.random.uniform(jax.random.PRNGKey(0), (10, 3)))
@@ -43,7 +42,6 @@ class JaxService:
 
 @Controller("/process")
 class ProcessController:
-
     jax_service: JaxService
 
     def __init__(self):
@@ -56,7 +54,7 @@ class ProcessController:
         cluster = jnp.array(jax.random.uniform(subkey, (1000, 50)))
         return {
             "e": self.jax_service.compute_potential(cluster).item(),
-            "cluster": cluster.tolist()
+            "cluster": cluster.tolist(),
         }
 
 

@@ -1,5 +1,6 @@
 from enum import StrEnum
 
+
 class CORSSetting(StrEnum):
     ALLOW_ORIGIN = "Access-Control-Allow-Origin"
     ALLOW_METHODS = "Access-Control-Allow-Methods"
