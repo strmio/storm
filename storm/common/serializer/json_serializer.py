@@ -1,5 +1,6 @@
 import json
 
+
 class JsonSerializer:
     """
     A utility class for serializing and deserializing data to and from JSON format.

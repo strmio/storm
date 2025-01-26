@@ -3,10 +3,12 @@ from storm.common.exceptions import StormHttpException
 
 logger = logging.getLogger(__name__)
 
+
 class ExceptionFilter:
     """
     A global exception filter that catches exceptions and standardizes the response format.
     """
+
     @staticmethod
     async def handle_exception(exception, request=None):
         """

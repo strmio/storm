@@ -4,14 +4,15 @@ import os
 
 logger = ReplLogger()
 
+
 def help():
     """
     Lists available commands in the Storm REPL.
     """
     commands = {
-        'help()': 'Show this help message',
-        'list_services()': 'List all registered services in the application',
-        'list_controllers()': 'List all registered controllers in the application',
+        "help()": "Show this help message",
+        "list_services()": "List all registered services in the application",
+        "list_controllers()": "List all registered controllers in the application",
     }
     logger.info("Displaying help commands.")
     for command, description in commands.items():
@@ -65,7 +66,7 @@ def clear():
     Clears the REPL screen.
     """
     logger.info("Clearing screen.")
-    os.system('cls' if os.name == 'nt' else 'clear')
+    os.system("cls" if os.name == "nt" else "clear")
     print("Screen cleared.")
 
 
@@ -87,9 +88,13 @@ def get_service(app, service_name):
     """
     logger.info(f"Retrieving service: {service_name}")
     service = next(
-        (provider for module in app.modules.values()
-         for provider in module.providers if provider.__class__.__name__ == service_name),
-        None
+        (
+            provider
+            for module in app.modules.values()
+            for provider in module.providers
+            if provider.__class__.__name__ == service_name
+        ),
+        None,
     )
     if service:
         logger.info(f"Service '{service_name}' retrieved successfully.")
@@ -106,8 +111,7 @@ def inspect_route(app, path):
     Inspects a specific route by its path, showing handlers and middleware.
     """
     logger.info(f"Inspecting route: {path}")
-    route = next(
-        (route for route in app.router.routes if route.path == path), None)
+    route = next((route for route in app.router.routes if route.path == path), None)
     if not route:
         logger.warning(f"No route found for path: {path}")
         print(f"No route found for path: {path}")

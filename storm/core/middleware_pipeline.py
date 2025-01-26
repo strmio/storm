@@ -22,10 +22,10 @@ class MiddlewarePipeline:
         self.global_middleware = queue.Queue()
         self.route_middleware = queue.Queue()
 
-        for middleware in (global_middleware or []):
+        for middleware in global_middleware or []:
             self.global_middleware.put(middleware)
 
-        for middleware in (route_middleware or []):
+        for middleware in route_middleware or []:
             self.route_middleware.put(middleware)
 
     def _merge_middleware(self):
@@ -74,6 +74,8 @@ class MiddlewarePipeline:
         current_middleware = middleware_queue.get()
 
         async def next_middleware(req):
-            return await self._execute_request_middleware(req, handler, middleware_queue)
+            return await self._execute_request_middleware(
+                req, handler, middleware_queue
+            )
 
         return await current_middleware.process_request(request, next_middleware)

@@ -1,5 +1,6 @@
 from enum import StrEnum
 
+
 class FileExtension(StrEnum):
     TXT = ".txt"
     PDF = ".pdf"

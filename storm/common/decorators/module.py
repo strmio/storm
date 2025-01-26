@@ -10,12 +10,13 @@ def Module(imports=None, providers=None, controllers=None):
     :param controllers: List of controllers
     :return: The decorated class as a module
     """
+
     def decorator(cls):
         module = ModuleBase(
             imports=imports or [],
             providers=providers or [],
             controllers=controllers or [],
-            module_cls=cls
+            module_cls=cls,
         )
         module.__name__ = cls.__name__
         return module

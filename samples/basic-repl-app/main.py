@@ -10,8 +10,7 @@ from rx.operators import map, filter, to_list, take
 
 
 @Controller("/process")
-class ProcessController():
-
+class ProcessController:
     def __init__(self):
         self.logger = Logger(self.__class__.__name__)
 
@@ -21,17 +20,17 @@ class ProcessController():
         numbers = from_iterable(range(1, 100000))  # Stream: [1, 2, ..., 10]
 
         # Apply RxPy operations
-        result = (
-            numbers.pipe(
-                filter(lambda x: x % 2 == 0),  # Keep only even numbers
-                map(lambda x: x * x),          # Square each number
-                take(1000),                    # Take only the first 1000 numbers
-                to_list()                      # Collect the result into a list
-            )
+        result = numbers.pipe(
+            filter(lambda x: x % 2 == 0),  # Keep only even numbers
+            map(lambda x: x * x),  # Square each number
+            take(1000),  # Take only the first 1000 numbers
+            to_list(),  # Collect the result into a list
         )
 
         # Convert the Observable into a Python list and return
         return await result
+
+
 # Define Module
 
 
@@ -50,7 +49,6 @@ app = StormApplication(AppModule)
 
 # Create the Storm Application and Run the Server
 if __name__ == "__main__":
-
     # Start the application
     # app.run()
     start_repl(app)

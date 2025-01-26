@@ -1,10 +1,9 @@
 # src/storm/core/interceptor_pipeline.py
 
-import inspect
 import queue
 
-from storm.core.helpers import add_params
 from storm.core.resolvers.params_resolver import ParamsResolver
+
 
 class InterceptorPipeline:
     """
@@ -24,10 +23,10 @@ class InterceptorPipeline:
         self.global_interceptors = queue.Queue()
         self.route_interceptors = queue.Queue()
 
-        for interceptor in (global_interceptors or []):
+        for interceptor in global_interceptors or []:
             self.global_interceptors.put(interceptor)
-        
-        for interceptor in (route_interceptors or []):
+
+        for interceptor in route_interceptors or []:
             self.route_interceptors.put(interceptor)
 
     def _merge_interceptors(self):
@@ -58,7 +57,6 @@ class InterceptorPipeline:
         all_interceptors = self._merge_interceptors()
         return await self._execute_interceptors(request, handler, all_interceptors)
 
-
     async def _execute_interceptors(self, request, handler, interceptor_queue):
         """
         Recursively processes the request through each interceptor in the list.
@@ -74,10 +72,9 @@ class InterceptorPipeline:
             resolved_args = await ParamsResolver.resolve(handler, request)
             return await handler(**resolved_args)
 
-        
         current_interceptor = interceptor_queue.get()
 
         async def next_interceptor(req):
             return await self._execute_interceptors(req, handler, interceptor_queue)
-        
+
         return await current_interceptor.intercept(request, next_interceptor)

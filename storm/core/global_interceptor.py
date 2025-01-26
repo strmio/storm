@@ -2,6 +2,7 @@
 
 from abc import ABC, abstractmethod
 
+
 class GlobalInterceptor(ABC):
     """
     Abstract base class for global interceptors in the Storm framework.

@@ -1,6 +1,7 @@
 from storm.common.enums.http_status import HttpStatus
 from storm.common.exceptions.exception import StormHttpException
 
+
 class BadRequestException(StormHttpException):
     """
     Exception raised for bad requests.
@@ -20,7 +21,9 @@ class UnauthorizedException(StormHttpException):
     """
 
     def __init__(self, message="Unauthorized access"):
-        super().__init__(message, status_code=HttpStatus.UNAUTHORIZED, name="Unauthorized")
+        super().__init__(
+            message, status_code=HttpStatus.UNAUTHORIZED, name="Unauthorized"
+        )
 
 
 class ForbiddenException(StormHttpException):
@@ -53,7 +56,9 @@ class MethodNotAllowedException(StormHttpException):
     """
 
     def __init__(self, message="Method not allowed"):
-        super().__init__(message, status_code=HttpStatus.METHOD_NOT_ALLOWED, name="MethodNotAllowed")
+        super().__init__(
+            message, status_code=HttpStatus.METHOD_NOT_ALLOWED, name="MethodNotAllowed"
+        )
 
 
 class ConflictException(StormHttpException):
@@ -75,19 +80,27 @@ class UnsupportedMediaTypeException(StormHttpException):
     """
 
     def __init__(self, message="Unsupported media type"):
-        super().__init__(message, status_code=HttpStatus.UNSUPPORTED_MEDIA_TYPE, name="UnsupportedMediaType")
+        super().__init__(
+            message,
+            status_code=HttpStatus.UNSUPPORTED_MEDIA_TYPE,
+            name="UnsupportedMediaType",
+        )
 
 
 class UnprocessableEntityException(StormHttpException):
     """
-    Exception raised when the server understands the content type of the request entity, 
+    Exception raised when the server understands the content type of the request entity,
     but was unable to process the contained instructions.
 
     :param message: Error message
     """
 
     def __init__(self, message="Unprocessable entity"):
-        super().__init__(message, status_code=HttpStatus.UNPROCESSABLE_ENTITY, name="UnprocessableEntity")
+        super().__init__(
+            message,
+            status_code=HttpStatus.UNPROCESSABLE_ENTITY,
+            name="UnprocessableEntity",
+        )
 
 
 class TooManyRequestsException(StormHttpException):
@@ -98,7 +111,9 @@ class TooManyRequestsException(StormHttpException):
     """
 
     def __init__(self, message="Too many requests"):
-        super().__init__(message, status_code=HttpStatus.TOO_MANY_REQUESTS, name="TooManyRequests")
+        super().__init__(
+            message, status_code=HttpStatus.TOO_MANY_REQUESTS, name="TooManyRequests"
+        )
 
 
 class InternalServerErrorException(StormHttpException):
@@ -109,7 +124,11 @@ class InternalServerErrorException(StormHttpException):
     """
 
     def __init__(self, message="Internal server error"):
-        super().__init__(message, status_code=HttpStatus.INTERNAL_SERVER_ERROR, name="InternalServerError")
+        super().__init__(
+            message,
+            status_code=HttpStatus.INTERNAL_SERVER_ERROR,
+            name="InternalServerError",
+        )
 
 
 class ServiceUnavailableException(StormHttpException):
@@ -120,16 +139,22 @@ class ServiceUnavailableException(StormHttpException):
     """
 
     def __init__(self, message="Service unavailable"):
-        super().__init__(message, status_code=HttpStatus.SERVICE_UNAVAILABLE, name="ServiceUnavailable")
+        super().__init__(
+            message,
+            status_code=HttpStatus.SERVICE_UNAVAILABLE,
+            name="ServiceUnavailable",
+        )
 
 
 class GatewayTimeoutException(StormHttpException):
     """
-    Exception raised when the server, while acting as a gateway or proxy, 
+    Exception raised when the server, while acting as a gateway or proxy,
     did not receive a timely response from an upstream server.
 
     :param message: Error message
     """
 
     def __init__(self, message="Gateway timeout"):
-        super().__init__(message, status_code=HttpStatus.GATEWAY_TIMEOUT, name="GatewayTimeout")
+        super().__init__(
+            message, status_code=HttpStatus.GATEWAY_TIMEOUT, name="GatewayTimeout"
+        )
