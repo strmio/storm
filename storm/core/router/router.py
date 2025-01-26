@@ -1,7 +1,6 @@
 from storm.common.services.logger import Logger
 import re
 
-
 class Router:
     def __init__(self):
         self.static_routes = {}
@@ -18,29 +17,9 @@ class Router:
         """
         path_regex = self._path_to_regex(path)
         if ':' in path:
-            self.dynamic_routes[(method, path_regex)] = handler
+            self.dynamic_routes[(method, path, path_regex)] = handler
         else:
             self.static_routes[(method, path)] = handler
-
-    def add_static_route_from_controller_router(self, method_path, handler):
-        """
-        Registers a new static route with the specified HTTP method and path.
-
-        :param method: The HTTP method (GET, POST, etc.)
-        :param path: The URL path (e.g., '/users/:id')
-        :param handler: The function to handle requests to this route
-        """
-        self.static_routes[method_path] = handler
-    
-    def add_dynamic_route_from_controller_router(self, method_path, handler):
-        """
-        Registers a new dynamic route with the specified HTTP method and path.
-
-        :param method: The HTTP method (GET, POST, etc.)
-        :param path: The URL path (e.g., '/users/:id')
-        :param handler: The function to handle requests to this route
-        """
-        self.dynamic_routes[method_path] = handler
 
     def resolve(self, method, path):
         """
@@ -52,12 +31,29 @@ class Router:
         """
         if (method, path) in self.static_routes:
             return self.static_routes[(method, path)], {}
-        for (route_method, path_regex), handler in self.dynamic_routes.items():
+
+        # Sort dynamic routes by specificity
+        sorted_dynamic_routes = sorted(
+            self.dynamic_routes.items(),
+            key=lambda item: self._specificity(item[0][1]),
+            reverse=True,
+        )
+
+        for (route_method, original_path, path_regex), handler in sorted_dynamic_routes:
             if route_method == method and re.match(path_regex, path):
                 params = self._extract_params(path_regex, path)
                 return handler, params
+
         raise ValueError(f"No route found for {method} {path}")
 
+    def _specificity(self, path):
+        """
+        Calculates the specificity of a path based on static segments.
+
+        :param path: The URL path
+        :return: Specificity score (higher is more specific)
+        """
+        return len([segment for segment in path.split('/') if not segment.startswith(':')])
 
     def _path_to_regex(self, path):
         """
@@ -78,19 +74,3 @@ class Router:
         """
         match = re.match(path_regex, path)
         return match.groupdict() if match else {}
-
-    def get_static_routes(self):
-        """
-        Retrieves all static routes.
-
-        :return: A dictionary of static routes with their handlers
-        """
-        return self.static_routes
-
-    def get_dynamic_routes(self):
-        """
-        Retrieves all dynamic routes.
-
-        :return: A dictionary of dynamic routes with their handlers
-        """
-        return self.dynamic_routes

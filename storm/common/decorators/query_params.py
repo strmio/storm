@@ -19,9 +19,8 @@ class Query:
         Resolve the query parameter from the request, optionally applying a pipe.
         """
         # Get the current request from the execution context
-        context = execution_context.get()
-        request = context.get("request", {})
-        query_params = request.get("query_params", {})
+        request = execution_context.get_request()
+        query_params = request.get_query_params()
 
         # Get the specific query parameter or all query parameters
         if self.query_param_name:

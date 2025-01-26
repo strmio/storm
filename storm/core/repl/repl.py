@@ -5,7 +5,8 @@ import atexit
 import os
 import sys
 from .commands import help, list_services, list_controllers, reload, show_routes
-from storm.core.repl.repl_logger import ReplLogger
+# from storm.core.repl.repl_logger import ReplLogger
+from storm.common.services.logger import Logger as ReplLogger
 
 
 class StormRepl:
@@ -16,7 +17,7 @@ class StormRepl:
 
     def __init__(self, app):
         self.app = app
-        self.logger = ReplLogger()
+        self.logger = ReplLogger(self.__class__.__name__)
         self.context = {
             'app': app,
             'help': help,
@@ -59,7 +60,7 @@ class StormRepl:
 
 def start_repl(app):
     """
-    Starts the Storm REPL with the given application context.
+    Starts the Storm REPL with the given application context\n      
 
     :param app: An instance of the Storm application.
     """
