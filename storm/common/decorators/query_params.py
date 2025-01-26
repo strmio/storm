@@ -1,6 +1,7 @@
 from functools import wraps
 from storm.common.execution_context import execution_context
 
+
 class Query:
     """
     A unified decorator and parameter resolver for query parameters.
@@ -10,6 +11,7 @@ class Query:
                              If None, all query parameters will be passed.
     :param pipe: An optional pipe to validate or transform the query parameter value.
     """
+
     def __init__(self, query_param_name=None, pipe=None):
         self.query_param_name = query_param_name
         self.pipe = pipe
@@ -32,14 +34,17 @@ class Query:
         if self.pipe and result is not None:
             # Instantiate the pipe if it's a class
             pipe_instance = self.pipe() if isinstance(self.pipe, type) else self.pipe
-            result = await pipe_instance.transform(result, metadata={"type": "query", "data": self.query_param_name})
-        
+            result = await pipe_instance.transform(
+                result, metadata={"type": "query", "data": self.query_param_name}
+            )
+
         return result
 
     def __call__(self, func=None):
         # If called without a function, resolve the value synchronously for default arguments
         if func is None:
             import asyncio
+
             return asyncio.run(self.resolve())
 
         # If called as a decorator

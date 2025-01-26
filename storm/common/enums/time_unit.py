@@ -1,5 +1,6 @@
 from enum import StrEnum
 
+
 class TimeUnit(StrEnum):
     SECONDS = "seconds"
     MINUTES = "minutes"

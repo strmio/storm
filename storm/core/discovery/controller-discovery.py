@@ -12,5 +12,7 @@ class ControllerDiscovery:
         for controller in root_module.controllers:
             instance = self.container.resolve(controller.__class__.__name__)
             controllers.append(instance)
-            self.discovery_service.register_service(controller.__class__.__name__, instance)
+            self.discovery_service.register_service(
+                controller.__class__.__name__, instance
+            )
         return controllers

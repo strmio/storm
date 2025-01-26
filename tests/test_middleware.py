@@ -37,11 +37,11 @@ class MiddlewareModule(ModuleBase):
 
 class TestMiddleware(Middleware):
     async def process_request(self, request, next_handler):
-        request['processed'] = True
+        request["processed"] = True
         return await next_handler(request)
 
     async def process_response(self, response):
-        response['middleware'] = "processed"
+        response["middleware"] = "processed"
         return response
 
 
@@ -53,6 +53,6 @@ async def test_middleware_pipeline():
         return {"response": "final"}
 
     request = {}
-    response = await pipeline.execute(request, final_handler)
+    await pipeline.execute(request, final_handler)
     # assert response['middleware'] == "processed"
-    assert request['processed'] is True
+    assert request["processed"] is True

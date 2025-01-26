@@ -1,5 +1,5 @@
-import asyncio
 from storm.common.interceptors.interceptor import Interceptor
+
 
 class CachingInterceptor(Interceptor):
     def __init__(self):
@@ -9,7 +9,7 @@ class CachingInterceptor(Interceptor):
         cache_key = request.path
         if cache_key in self.cache:
             return self.cache[cache_key]
-        
+
         response = await next()
         self.cache[cache_key] = response
         return response

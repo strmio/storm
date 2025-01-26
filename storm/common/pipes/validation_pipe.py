@@ -6,6 +6,7 @@ class ValidationPipe(Pipe):
     """
     A generic validation pipe that applies a custom validation function to the input.
     """
+
     def __init__(self, validate_fn, error_message="Validation failed"):
         """
         :param validate_fn: A callable to validate the input. Should return True or raise an exception.

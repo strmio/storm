@@ -1,8 +1,8 @@
-import pytest
 from storm.common.decorators.injectable import Injectable
 from storm.common.decorators import Controller
 from storm.core.container import Container
 from storm.core.module import ModuleBase
+
 
 # Service in a shared module
 @Injectable(singleton=True)
@@ -10,12 +10,14 @@ class SharedService:
     def get_shared_data(self):
         return "Shared data from SharedService"
 
+
 # Shared module
 class SharedModule(ModuleBase):
     def __init__(self):
         super().__init__(
             providers=[SharedService],
         )
+
 
 # Service in the main module
 @Injectable(singleton=True)
@@ -26,6 +28,7 @@ class MainService:
     def get_data(self):
         return f"Main data with {self.shared_service.get_shared_data()}"
 
+
 # Controller in the main module
 @Controller("/main")
 class MainController:
@@ -34,6 +37,7 @@ class MainController:
 
     def get(self):
         return self.main_service.get_data()
+
 
 # Main application module
 class AppModule(ModuleBase):
@@ -44,6 +48,7 @@ class AppModule(ModuleBase):
             imports=[SharedModule()],
         )
 
+
 # Test the nested module architecture
 def test_nested_modules():
     container = Container()
@@ -52,6 +57,7 @@ def test_nested_modules():
 
     controller = container.resolve("MainController")
     assert controller.get() == "Main data with Shared data from SharedService"
+
 
 def test_middleware():
     container = Container()

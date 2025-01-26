@@ -3,6 +3,7 @@ import code
 import sys
 import selectors
 
+
 class ReplManager:
     """
     A class to manage the REPL (Read-Eval-Print Loop) lifecycle for the Storm application.
@@ -25,7 +26,7 @@ class ReplManager:
         self.selector = selectors.DefaultSelector()
         self.prompt = prompt
         self.banner = "Welcome to the REPL (Type 'ctrl-D' to return to the app)."
-        
+
     def start(self):
         """
         Start the REPL listener thread.
@@ -70,7 +71,11 @@ class ReplManager:
         self.app.logger.info("Opening REPL. Type 'exit()' to return to the app.")
         try:
             # Launch Python interactive shell with access to the app context
-            local_context = {"app": self.app, "modules": self.app.modules, "__prompt__": self.prompt}
+            local_context = {
+                "app": self.app,
+                "modules": self.app.modules,
+                "__prompt__": self.prompt,
+            }
             console = code.InteractiveConsole(locals=local_context)
             console.interact(banner=self.banner, exitmsg=None)
         except Exception as e:

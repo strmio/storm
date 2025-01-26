@@ -1,5 +1,6 @@
 from enum import IntEnum
 
+
 class VersioningType(IntEnum):
     URI = 0
     HEADER = 1

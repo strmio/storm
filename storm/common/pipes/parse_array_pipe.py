@@ -6,6 +6,7 @@ class ParseArrayPipe(Pipe):
     """
     Pipe to parse and validate a value as an array of items.
     """
+
     def __init__(self, delimiter=",", item_pipe=None):
         """
         :param delimiter: The delimiter to split the array string.

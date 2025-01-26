@@ -2,6 +2,7 @@ from functools import wraps
 from storm.common.enums.http_status import HttpStatus
 from storm.common.execution_context import execution_context
 
+
 def HttpCode(status_code: int):
     """
     Decorator to set the HTTP status code for a route handler.
@@ -10,7 +11,7 @@ def HttpCode(status_code: int):
     """
     if isinstance(status_code, HttpStatus):
         status_code = status_code.value
-   
+
     def decorator(func):
         @wraps(func)
         async def wrapper(*args, **kwargs):

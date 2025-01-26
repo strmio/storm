@@ -1,6 +1,7 @@
 from contextvars import ContextVar
 from storm.common.decorators.injectable import Injectable
 
+
 @Injectable()
 class ExecutionContext:
     """
@@ -9,7 +10,7 @@ class ExecutionContext:
 
     def __init__(self):
         # Initialize the ContextVar to store the context for each request
-        self._context_var = ContextVar('execution_context', default=None)
+        self._context_var = ContextVar("execution_context", default=None)
 
     def set(self, data):
         """
@@ -42,7 +43,7 @@ class ExecutionContext:
         context = self.get() or {}
         if not isinstance(context, dict):
             raise TypeError("Context must be a dictionary to set request data.")
-        context['request'] = request
+        context["request"] = request
         self.set(context)
 
     def get_request(self):
@@ -53,7 +54,7 @@ class ExecutionContext:
         """
         context = self.get()
         if isinstance(context, dict):
-            return context.get('request', {})
+            return context.get("request", {})
         return None
 
     def set_response(self, response):
@@ -65,7 +66,7 @@ class ExecutionContext:
         context = self.get() or {}
         if not isinstance(context, dict):
             raise TypeError("Context must be a dictionary to set response data.")
-        context['response'] = response
+        context["response"] = response
         self.set(context)
 
     def get_response(self):
@@ -76,7 +77,7 @@ class ExecutionContext:
         """
         context = self.get()
         if isinstance(context, dict):
-            return context.get('response', {})
+            return context.get("response", {})
         return None
 
     def set_context(self, key: str, value):

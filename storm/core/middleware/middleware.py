@@ -1,9 +1,11 @@
 from abc import ABC, abstractmethod
 
+
 class Middleware(ABC):
     """
     Abstract base class for creating middleware in the Storm framework.
     """
+
     @abstractmethod
     async def process_request(self, request, next_handler):
         """

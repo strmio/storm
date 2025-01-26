@@ -1,5 +1,6 @@
 import xml.etree.ElementTree as ET
 
+
 class XMLSerializer:
     """
     A utility class for serializing and deserializing data to and from XML format.
@@ -13,10 +14,10 @@ class XMLSerializer:
         :param data: The data to be serialized, typically a dictionary.
         :return: A string representing the serialized XML data.
         """
-        root_name = 'root'
+        root_name = "root"
         root = ET.Element(root_name)
         XMLSerializer._build_tree(root, data)
-        return ET.tostring(root, encoding='unicode')
+        return ET.tostring(root, encoding="unicode")
 
     @staticmethod
     def deserialize(xml_data):
@@ -43,7 +44,7 @@ class XMLSerializer:
                 XMLSerializer._build_tree(child, value)
         elif isinstance(data, list):
             for item in data:
-                child = ET.SubElement(element, 'item')
+                child = ET.SubElement(element, "item")
                 XMLSerializer._build_tree(child, item)
         else:
             element.text = str(data)

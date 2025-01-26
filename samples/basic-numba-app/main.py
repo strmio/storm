@@ -7,16 +7,17 @@ import numpy as np
 # Numba-optimized functions
 @numba.njit
 def lj_numba_array(r):
-    sr6 = (1. / r) ** 6
-    pot = 4. * (sr6 * sr6 - sr6)
+    sr6 = (1.0 / r) ** 6
+    pot = 4.0 * (sr6 * sr6 - sr6)
     return pot
 
 
 @numba.njit
 def distances_numba_array(cluster):
-    diff = (cluster.reshape(cluster.shape[0], 1, cluster.shape[1]) -
-            cluster.reshape(1, cluster.shape[0], cluster.shape[1]))
-    mat = (diff * diff)
+    diff = cluster.reshape(cluster.shape[0], 1, cluster.shape[1]) - cluster.reshape(
+        1, cluster.shape[0], cluster.shape[1]
+    )
+    mat = diff * diff
     out = np.empty(mat.shape[:2], dtype=mat.dtype)
     for i in np.ndindex(out.shape):
         out[i] = mat[i].sum()
@@ -41,7 +42,6 @@ def potential_numba_array(cluster):
 
 @Injectable()
 class NumbaService:
-
     def __init__(self):
         # Warm up the Numba functions with dummy data during initialization
         dummy_cluster = np.random.rand(10, 3)  # Small test data
@@ -54,7 +54,6 @@ class NumbaService:
 
 @Controller("/process")
 class ProcessController:
-
     numba_service: NumbaService
 
     def __init__(self):
@@ -65,7 +64,7 @@ class ProcessController:
         cluster = np.random.rand(100, 100)
         return {
             "e": self.numba_service.compute_potential(cluster),
-            "cluster": cluster.tolist()
+            "cluster": cluster.tolist(),
         }
 
 

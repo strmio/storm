@@ -1,6 +1,7 @@
 import inspect
 from functools import wraps
 
+
 def add_params(func, **new_params):
     # Get the original signature
     original_signature = inspect.signature(func)
@@ -23,7 +24,7 @@ def add_params(func, **new_params):
             updated_parameters[name] = inspect.Parameter(
                 name,
                 inspect.Parameter.KEYWORD_ONLY,  # Add as keyword-only parameter
-                default=value
+                default=value,
             )
 
     # Create a new signature with updated parameters

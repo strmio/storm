@@ -1,5 +1,6 @@
 import yaml
 
+
 class YamlSerializer:
     """
     A utility class for serializing and deserializing data to and from YAML format.

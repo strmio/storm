@@ -1,19 +1,18 @@
-
-
 from storm.common import Injectable, NotFoundException, Logger, OnModuleInit
 
 
 @Injectable()
 class UsersService(OnModuleInit):
-
     _users = [
         {"id": 1, "name": "John Doe", "email": "john.doe@example.com"},
         {"id": 2, "name": "Jane Smith", "email": "jane.smith@example.com"},
         {"id": 3, "name": "Alice Johnson", "email": "alice.johnson@example.com"},
-        {"id": 4, "name": "Bob Brown", "email": "bob.brown@example.com"}
+        {"id": 4, "name": "Bob Brown", "email": "bob.brown@example.com"},
     ]
 
-    def __init__(self, ):
+    def __init__(
+        self,
+    ):
         self.logger = Logger(self.__class__.__name__)
 
     def on_module_init(self):
@@ -22,9 +21,7 @@ class UsersService(OnModuleInit):
     def get_users(self, q: str = None):
         # Simulate fetching users from a database or external service
         users = [
-            user
-            for user in self._users
-            if not q or q.lower() in user["name"].lower()
+            user for user in self._users if not q or q.lower() in user["name"].lower()
         ]
         return {"users": users}
 
@@ -40,8 +37,7 @@ class UsersService(OnModuleInit):
 
     def get_me(self):
         # Simulate fetching the current user's information
-        current_user = {"id": 1, "name": "John Doe",
-                        "email": "john.doe@example.com"}
+        current_user = {"id": 1, "name": "John Doe", "email": "john.doe@example.com"}
         return {"user": current_user}
 
     def add_user(self, user):

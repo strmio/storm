@@ -1,11 +1,16 @@
-
 class ModuleBase:
     def __init__(
-        self, *, controllers=None, providers=None, imports=None, middleware=None, module_cls=None
+        self,
+        *,
+        controllers=None,
+        providers=None,
+        imports=None,
+        middleware=None,
+        module_cls=None,
     ):
         """
         Initialize the module with controllers, providers, imports, and middleware.
-        
+
         :param controllers: List of controller classes.
         :param providers: List of provider (service) classes.
         :param imports: List of other modules to be imported.
@@ -27,13 +32,15 @@ class ModuleBase:
 
     def _invoke_lifecycle_hook(self, hook_name):
         """Invoke a lifecycle hook if it exists and is callable."""
-        if hasattr(self._module_cls, hook_name) and callable(getattr(self._module_cls, hook_name)):
+        if hasattr(self._module_cls, hook_name) and callable(
+            getattr(self._module_cls, hook_name)
+        ):
             getattr(self._module_cls, hook_name)(self)
 
     def register(self, container):
         """
         Register all providers, controllers, and middleware in the container.
-        
+
         :param container: The DI container.
         """
         self._register_imports(container)

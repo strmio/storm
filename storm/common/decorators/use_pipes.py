@@ -1,8 +1,9 @@
 from functools import wraps
-from typing import Callable, List, Union, Type
+from typing import Callable, Union, Type
 import inspect
 
 from storm.common.pipes.pipe import Pipe
+
 
 def UsePipes(*pipes: Union[Type[Pipe], Pipe]):
     """
@@ -10,6 +11,7 @@ def UsePipes(*pipes: Union[Type[Pipe], Pipe]):
 
     :param pipes: One or more Pipe instances or classes to apply.
     """
+
     def decorator(func: Callable):
         @wraps(func)
         async def wrapper(*args, **kwargs):

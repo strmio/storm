@@ -1,6 +1,7 @@
 import inspect
 from storm.core.container import Container
 
+
 class Injector:
     def __init__(self, container: Container):
         self.container = container
@@ -15,7 +16,7 @@ class Injector:
         dependencies = {}
 
         for param, param_info in constructor_params.items():
-            if param != 'self' and param_info.annotation != inspect.Parameter.empty:
+            if param != "self" and param_info.annotation != inspect.Parameter.empty:
                 dependency_name = param_info.annotation.__name__
                 dependencies[param] = self.container.resolve(dependency_name)
 

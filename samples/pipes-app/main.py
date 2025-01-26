@@ -1,4 +1,14 @@
-from storm.common.decorators import Injectable, Controller, Module, Get, Post, Delete, Body, Query, Param
+from storm.common.decorators import (
+    Injectable,
+    Controller,
+    Module,
+    Get,
+    Post,
+    Delete,
+    Body,
+    Query,
+    Param,
+)
 from storm.common.pipes import ParseIntPipe
 from storm.common.pipes.parse_uuid_pipe import ParseUUIDPipe
 from storm.common.services.logger import Logger
@@ -8,21 +18,20 @@ from storm.core.application import StormApplication
 
 
 @Injectable()
-class UsersService():
+class UsersService:
     def __init__(self):
         self.logger = Logger(self.__class__.__name__)
         self.users = [
             {"id": 1, "name": "John Doe", "email": "john.doe@example.com"},
             {"id": 2, "name": "Jane Smith", "email": "jane.smith@example.com"},
             {"id": 3, "name": "Alice Johnson", "email": "alice.johnson@example.com"},
-            {"id": 4, "name": "Bob Brown", "email": "bob.brown@example.com"}
+            {"id": 4, "name": "Bob Brown", "email": "bob.brown@example.com"},
         ]
 
     def get_users(self, q: str = None):
         # Simulate fetching users from a database or external service
         if q:
-            users = [user for user in self.users if q.lower()
-                     in user["name"].lower()]
+            users = [user for user in self.users if q.lower() in user["name"].lower()]
             return {"users": users}
         return {"users": self.users}
 
@@ -38,8 +47,7 @@ class UsersService():
 
     def get_me(self):
         # Simulate fetching the current user's information
-        current_user = {"id": 1, "name": "John Doe",
-                        "email": "john.doe@example.com"}
+        current_user = {"id": 1, "name": "John Doe", "email": "john.doe@example.com"}
         return {"user": current_user}
 
     def add_user(self, user):
@@ -63,12 +71,12 @@ class UsersService():
             return {"status": "ok", "user": user}
         return {"status": "error", "message": "User not found"}
 
+
 # Define Controller
 
 
 @Controller("/users")  # Define base path for this controller
-class UsersController():
-
+class UsersController:
     def __init__(self, users_service: UsersService):
         self.logger = Logger(self.__class__.__name__)
         self.users_service = users_service
@@ -108,25 +116,33 @@ class UsersController():
 
 
 @Controller("/users/:user_id/notes")  # Define base path for this controller
-class NotesController():
-
+class NotesController:
     def __init__(self):
         self.logger = Logger(self.__class__.__name__)
 
     @Get("/:id")
-    async def get_note(self, user_id: int = Param("user_id", ParseIntPipe),
-                       id=Param("id", ParseUUIDPipe)):
-        return {"note": {"id": str(id), "user_id": user_id, "content": "This is a note."}}
+    async def get_note(
+        self,
+        user_id: int = Param("user_id", ParseIntPipe),
+        id=Param("id", ParseUUIDPipe),
+    ):
+        return {
+            "note": {"id": str(id), "user_id": user_id, "content": "This is a note."}
+        }
+
 
 # Define Modules
+
 
 @Module(controllers=[UsersController], providers=[UsersService])
 class UsersModule:
     pass
 
+
 @Module(controllers=[NotesController])
 class NotesModule:
     pass
+
 
 @Module(imports=[UsersModule, NotesModule])
 class AppModule:
