@@ -3,10 +3,12 @@ from pydantic import BaseModel, ValidationError
 from storm.common.exceptions.http import BadRequestException
 from .pipe import Pipe
 
+
 class PydanticValidationPipe(Pipe):
     """
     Pipe to validate and transform input data using Pydantic models.
     """
+
     def __init__(self, model: BaseModel):
         """
         :param model: A Pydantic model class to validate the input data.

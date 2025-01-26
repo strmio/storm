@@ -46,8 +46,12 @@ class ParamsResolver:
         :return: The resolved value for the parameter.
         """
         if param.default is not Parameter.empty:
-            return await ParamsResolver._resolve_with_default(param, route_params, query_params, body)
-        return ParamsResolver._resolve_without_default(param.name, route_params, query_params, body)
+            return await ParamsResolver._resolve_with_default(
+                param, route_params, query_params, body
+            )
+        return ParamsResolver._resolve_without_default(
+            param.name, route_params, query_params, body
+        )
 
     @staticmethod
     async def _resolve_with_default(param, route_params, query_params, body):

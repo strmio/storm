@@ -1,7 +1,7 @@
 import pytest
-import asyncio
 from storm.common.pipes.validate_non_empty_pipe import ValidateNonEmptyPipe
 from storm.common.pipes.to_uppercase_pipe import ToUpperCasePipe
+
 
 @pytest.mark.asyncio
 async def test_validate_non_empty_pipe():
@@ -19,6 +19,7 @@ async def test_validate_non_empty_pipe():
     # Test with a non-string value
     with pytest.raises(ValueError, match="Value must be a non-empty string"):
         await pipe.transform(123)
+
 
 @pytest.mark.asyncio
 async def test_to_uppercase_pipe():

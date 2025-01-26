@@ -1,7 +1,8 @@
 import logging
 
+
 class ReplLogger:
-    def __init__(self, name='REPL'):
+    def __init__(self, name="REPL"):
         """
         Initializes the REPL logger with a default name and console handler.
         """
@@ -21,7 +22,7 @@ class ReplLogger:
         """
         return logging.Formatter(
             "\033[1;34m%(asctime)s\033[0m - \033[1;32m%(name)s\033[0m - \033[1;33m%(levelname)s\033[0m - %(message)s",
-            datefmt='%Y-%m-%d %H:%M:%S'
+            datefmt="%Y-%m-%d %H:%M:%S",
         )
 
     def info(self, message):

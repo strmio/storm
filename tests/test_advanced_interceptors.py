@@ -1,7 +1,10 @@
 import pytest
 import logging
 from storm.common.interceptors.caching_interceptor import CachingInterceptor
-from storm.common.interceptors.error_handling_interceptor import ErrorHandlingInterceptor
+from storm.common.interceptors.error_handling_interceptor import (
+    ErrorHandlingInterceptor,
+)
+
 
 @pytest.mark.asyncio
 async def test_caching_interceptor():
@@ -23,6 +26,7 @@ async def test_caching_interceptor():
     # Second call should return cached result
     response = await interceptor.intercept(request, next_function)
     assert response == "Processed Response"
+
 
 @pytest.mark.asyncio
 async def test_error_handling_interceptor(caplog):

@@ -3,6 +3,7 @@ from storm.common.interceptors.interceptor import Interceptor
 
 logger = logging.getLogger(__name__)
 
+
 class ErrorHandlingInterceptor(Interceptor):
     async def intercept(self, request, next):
         try:

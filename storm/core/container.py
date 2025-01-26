@@ -1,5 +1,6 @@
 import inspect
 
+
 class Container:
     def __init__(self):
         self._services = {}
@@ -13,8 +14,8 @@ class Container:
         :param singleton: Boolean indicating if the service should be a singleton.
         """
         self._services[name] = {
-            'service': service,
-            'singleton': singleton,
+            "service": service,
+            "singleton": singleton,
         }
 
     def resolve(self, name):
@@ -30,7 +31,7 @@ class Container:
         if not service_meta:
             raise Exception(f"Service {name} not found.")
 
-        service = service_meta['service']
+        service = service_meta["service"]
 
         if inspect.isclass(service):
             # Automatically resolve dependencies for the class's __init__ method
@@ -38,13 +39,13 @@ class Container:
             dependencies = {
                 param: self.resolve(param_class.annotation.__name__)
                 for param, param_class in init_params.items()
-                if param != 'self' and param_class.annotation != inspect.Parameter.empty
+                if param != "self" and param_class.annotation != inspect.Parameter.empty
             }
             instance = service(**dependencies)
         else:
             instance = service
 
-        if service_meta['singleton']:
+        if service_meta["singleton"]:
             self._singletons[name] = instance
 
         return instance

@@ -1,5 +1,3 @@
-import pytest
-
 from storm.common.decorators.injectable import Injectable
 from storm.common.decorators import Controller
 from storm.core.container import Container

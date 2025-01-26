@@ -2,6 +2,7 @@ import io
 import fastavro
 from fastavro.schema import load_schema
 
+
 class AvroSerializer:
     """
     A utility class for serializing and deserializing data to and from Avro format using a predefined schema.

@@ -1,5 +1,6 @@
 from enum import StrEnum
 
+
 class HttpHeaders(StrEnum):
     # General Headers
     CACHE_CONTROL = "Cache-Control"
@@ -10,7 +11,7 @@ class HttpHeaders(StrEnum):
     PRAGMA = "Pragma"
     VIA = "Via"
     WARNING = "Warning"
-    
+
     # Request Headers
     ACCEPT = "Accept"
     ACCEPT_CHARSET = "Accept-Charset"
@@ -35,7 +36,7 @@ class HttpHeaders(StrEnum):
     UPGRADE = "Upgrade"
     X_FORWARDED_FOR = "X-Forwarded-For"
     X_REAL_IP = "X-Real-IP"
-    
+
     # Response Headers
     ACCEPT_RANGES = "Accept-Ranges"
     ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin"
@@ -64,18 +65,18 @@ class HttpHeaders(StrEnum):
     TRANSFER_ENCODING = "Transfer-Encoding"
     VARY = "Vary"
     WWW_AUTHENTICATE = "WWW-Authenticate"
-    
+
     # WebSockets Headers
     SEC_WEBSOCKET_ACCEPT = "Sec-WebSocket-Accept"
     SEC_WEBSOCKET_EXTENSIONS = "Sec-WebSocket-Extensions"
     SEC_WEBSOCKET_KEY = "Sec-WebSocket-Key"
     SEC_WEBSOCKET_PROTOCOL = "Sec-WebSocket-Protocol"
     SEC_WEBSOCKET_VERSION = "Sec-WebSocket-Version"
-    
+
     # CORS Specific Headers
     ACCESS_CONTROL_REQUEST_METHOD = "Access-Control-Request-Method"
     ACCESS_CONTROL_REQUEST_HEADERS = "Access-Control-Request-Headers"
-    
+
     # Deprecated/Legacy Headers (for reference)
     X_CONTENT_TYPE_OPTIONS = "X-Content-Type-Options"
     X_FRAME_OPTIONS = "X-Frame-Options"

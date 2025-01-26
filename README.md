@@ -101,7 +101,7 @@ from storm import Controller, Get
 
 @Controller('/app')
 class AppController:
-    
+
     @Get('/')
     async def get_app(self):
         return {'message': 'Hello from Storm!'}
@@ -118,7 +118,7 @@ from storm import Injectable
 
 @Injectable()
 class AppService:
-    
+
     def get_message(self):
         return 'This is a message from the service.'
 ```
@@ -142,7 +142,7 @@ class AppController:
 
     def __init__(self, service: AppService):
         self.service = service
-    
+
     @Get('/')
     async def get_app(self):
         return {'message': self.service.get_message()}

@@ -5,6 +5,7 @@ class RouteExplorer:
     """
     Resolves and validates routes for controllers and their methods.
     """
+
     def __init__(self):
         self.logger = Logger(self.__class__.__name__)
 
@@ -18,14 +19,16 @@ class RouteExplorer:
         :return: A dictionary with the route information or None if not a valid route.
         """
         attr = getattr(controller, attr_name)
-        if callable(attr) and hasattr(attr, '_route'):
+        if callable(attr) and hasattr(attr, "_route"):
             attr = getattr(controller, attr_name)
-            if callable(attr) and hasattr(attr, '_route'):
-                self.logger.info(f"Mapped: {{{attr._route['method']} {base_path}{attr._route['path']}}}")
+            if callable(attr) and hasattr(attr, "_route"):
+                self.logger.info(
+                    f"Mapped: {{{attr._route['method']} {base_path}{attr._route['path']}}}"
+                )
                 route_info = {
-                    'method': attr._route['method'],  # HTTP method (e.g., GET, POST)
-                    'path': base_path + attr._route['path'],  # Full route path
-                    'handler': attr,  # The handler method
+                    "method": attr._route["method"],  # HTTP method (e.g., GET, POST)
+                    "path": base_path + attr._route["path"],  # Full route path
+                    "handler": attr,  # The handler method
                 }
                 return route_info
         return None
@@ -35,6 +38,7 @@ class RouteResolver:
     """
     Explores and stores routes for the application.
     """
+
     def __init__(self, router):
         """
         Initialize the RouteExplorer.
@@ -58,5 +62,5 @@ class RouteResolver:
             route_info = explorer.explore_route(controller, attr_name, base_path)
             if route_info:
                 self.router.add_route(
-                    route_info['method'], route_info['path'], route_info['handler']
+                    route_info["method"], route_info["path"], route_info["handler"]
                 )

@@ -1,7 +1,7 @@
 import pytest
-import asyncio
 import logging
 from storm.common.interceptors.logging_interceptor import LoggingInterceptor
+
 
 @pytest.mark.asyncio
 async def test_logging_interceptor(caplog):
@@ -18,8 +18,8 @@ async def test_logging_interceptor(caplog):
         # Use an asynchronous function for `next`
         async def next_function():
             return "Processed Response"
-        
-        response = await interceptor.intercept(request, next_function)
-        
+
+        await interceptor.intercept(request, next_function)
+
     assert "Request received: /example" in caplog.text
     assert "Response sent: Processed Response" in caplog.text

@@ -1,5 +1,6 @@
 from storm.core.guards import Guard
 
+
 class IPWhitelistGuard(Guard):
     def __init__(self, allowed_ips):
         self.allowed_ips = allowed_ips

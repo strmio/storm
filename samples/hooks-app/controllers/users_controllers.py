@@ -4,14 +4,12 @@ from storm.common import ParseIntPipe, UnauthorizedException
 from storm.common import Logger, OnModuleInit, Host, Ip
 from services.users_service import UsersService
 
+
 @Controller("/users")  # Define base path for this controller
 class UsersController(OnModuleInit):
-
-    
     def __init__(self, users_service: UsersService):
         self.users_service = users_service
         self._logger = Logger(self.__class__.__name__)
-    
 
     def on_module_init(self):
         self._logger.info("UsersController initialized.")

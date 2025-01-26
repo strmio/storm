@@ -1,5 +1,6 @@
 from enum import IntEnum
 
+
 class RouteParamtypes(IntEnum):
     REQUEST = 0
     RESPONSE = 1

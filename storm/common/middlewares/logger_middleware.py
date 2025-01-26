@@ -1,5 +1,6 @@
 from storm.core.middleware import Middleware
 
+
 class LoggerMiddleware(Middleware):
     async def handle(self, request, next):
         print(f"Handling request: {request.path}")

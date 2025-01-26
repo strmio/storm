@@ -5,6 +5,7 @@ import atexit
 import os
 import sys
 from .commands import help, list_services, list_controllers, reload, show_routes
+
 # from storm.core.repl.repl_logger import ReplLogger
 from storm.common.services.logger import Logger as ReplLogger
 
@@ -19,17 +20,17 @@ class StormRepl:
         self.app = app
         self.logger = ReplLogger(self.__class__.__name__)
         self.context = {
-            'app': app,
-            'help': help,
-            'list_services': lambda: list_services(app),
-            'list_controllers': lambda: list_controllers(app),
-            'reload': lambda: reload(app),
-            'show_routes': lambda: show_routes(app),
+            "app": app,
+            "help": help,
+            "list_services": lambda: list_services(app),
+            "list_controllers": lambda: list_controllers(app),
+            "reload": lambda: reload(app),
+            "show_routes": lambda: show_routes(app),
         }
         self.banner = "Storm REPL - Type 'help()' for a list of available commands."
         # self.setup_history()
         self.setup_autocompletion()
-        sys.ps1 = 'strm $ '
+        sys.ps1 = "strm $ "
 
     def setup_history(self):
         """
@@ -40,7 +41,7 @@ class StormRepl:
         try:
             readline.read_history_file(history_file)
         except FileNotFoundError:
-            open(history_file, 'wb').close()
+            open(history_file, "wb").close()
         atexit.register(readline.write_history_file, history_file)
 
     def setup_autocompletion(self):
@@ -60,7 +61,7 @@ class StormRepl:
 
 def start_repl(app):
     """
-    Starts the Storm REPL with the given application context\n      
+    Starts the Storm REPL with the given application context\n
 
     :param app: An instance of the Storm application.
     """

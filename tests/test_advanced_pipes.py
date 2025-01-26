@@ -2,6 +2,7 @@ import pytest
 from storm.common.pipes.json_to_dict_pipe import JsonToDictPipe
 from storm.common.pipes.email_validation_pipe import EmailValidationPipe
 
+
 @pytest.mark.asyncio
 async def test_json_to_dict_pipe():
     pipe = JsonToDictPipe()
@@ -12,6 +13,7 @@ async def test_json_to_dict_pipe():
 
     with pytest.raises(ValueError, match="Invalid JSON format"):
         await pipe.transform("{key: value}")
+
 
 @pytest.mark.asyncio
 async def test_email_validation_pipe():

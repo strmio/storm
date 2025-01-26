@@ -8,6 +8,7 @@ class HttpRequestEnums(StrEnum):
     """
     Enums to avoid magic strings in HttpRequest.
     """
+
     CONTENT_TYPE = "content-type"
     APPLICATION_JSON = "application/json"
     APPLICATION_FORM = "application/x-www-form-urlencoded"
@@ -35,7 +36,12 @@ class HttpRequest:
     from ASGI scope, receive, and send.
     """
 
-    def __init__(self, scope: Dict[str, Any], receive: Callable[[], Any], send: Callable[[Dict[str, Any]], None]):
+    def __init__(
+        self,
+        scope: Dict[str, Any],
+        receive: Callable[[], Any],
+        send: Callable[[Dict[str, Any]], None],
+    ):
         """
         Initialize the HttpRequest object.
 
@@ -51,38 +57,41 @@ class HttpRequest:
         # Basic request info
         self.method: Optional[str] = scope.get(HttpRequestEnums.METHOD)
         self.path: Optional[str] = scope.get(HttpRequestEnums.PATH)
-        self.raw_path: str = scope.get(
-            HttpRequestEnums.RAW_PATH, b"").decode("utf-8")
+        self.raw_path: str = scope.get(HttpRequestEnums.RAW_PATH, b"").decode("utf-8")
         self.scheme: str = scope.get(HttpRequestEnums.SCHEME, "http")
-        self.http_version: str = scope.get(
-            HttpRequestEnums.HTTP_VERSION, "1.1")
+        self.http_version: str = scope.get(HttpRequestEnums.HTTP_VERSION, "1.1")
 
         # Headers, query params, and cookies
         self.headers: Dict[str, str] = self._parse_headers(
-            scope.get(HttpRequestEnums.HEADERS, []))
+            scope.get(HttpRequestEnums.HEADERS, [])
+        )
         self.query_params: Dict[str, Union[str, List[str]]] = self._parse_query_params(
-            scope.get(HttpRequestEnums.QUERY_STRING, b""))
+            scope.get(HttpRequestEnums.QUERY_STRING, b"")
+        )
         self.cookies: Dict[str, str] = self._parse_cookies(
-            self.headers.get(HttpRequestEnums.COOKIE, ""))
+            self.headers.get(HttpRequestEnums.COOKIE, "")
+        )
 
         # Client and server information
         self.client: Tuple[Optional[str], Optional[int]] = scope.get(
-            HttpRequestEnums.CLIENT, (None, None))
+            HttpRequestEnums.CLIENT, (None, None)
+        )
         (ip, port) = self.client
         self.client_ip: Optional[str] = ip
         self.client_port: Optional[int] = port
 
         self.server: Tuple[Optional[str], Optional[int]] = scope.get(
-            HttpRequestEnums.SERVER, (None, None))
+            HttpRequestEnums.SERVER, (None, None)
+        )
         (ip, port) = self.server
         self.server_host: Optional[str] = ip
         self.server_port: Optional[int] = port
 
         # WebSocket-specific attributes
-        self.is_websocket: bool = scope.get(
-            HttpRequestEnums.TYPE) == HttpRequestEnums.WEBSOCKET
-        self.subprotocols: List[str] = scope.get(
-            HttpRequestEnums.SUBPROTOCOLS, [])
+        self.is_websocket: bool = (
+            scope.get(HttpRequestEnums.TYPE) == HttpRequestEnums.WEBSOCKET
+        )
+        self.subprotocols: List[str] = scope.get(HttpRequestEnums.SUBPROTOCOLS, [])
 
         # Middleware or framework-injected fields
         self.user: Optional[Any] = scope.get(HttpRequestEnums.USER)
@@ -110,15 +119,22 @@ class HttpRequest:
         :param raw_headers: List of (key, value) byte tuples
         :return: Dictionary of headers
         """
-        return {key.decode("utf-8"): value.decode("utf-8") for key, value in raw_headers}
+        return {
+            key.decode("utf-8"): value.decode("utf-8") for key, value in raw_headers
+        }
 
-    def _parse_query_params(self, query_string: bytes) -> Dict[str, Union[str, List[str]]]:
+    def _parse_query_params(
+        self, query_string: bytes
+    ) -> Dict[str, Union[str, List[str]]]:
         """
         Parse query parameters from a query string.
         :param query_string: Query string as bytes
         :return: Dictionary of query parameters
         """
-        return {k: v[0] if len(v) == 1 else v for k, v in parse_qs(query_string.decode("utf-8")).items()}
+        return {
+            k: v[0] if len(v) == 1 else v
+            for k, v in parse_qs(query_string.decode("utf-8")).items()
+        }
 
     def _parse_cookies(self, cookie_header: str) -> Dict[str, str]:
         """
@@ -134,14 +150,15 @@ class HttpRequest:
                     cookies[key] = value
         return cookies
 
-    def _decode_body(self, body_content: bytes) -> Union[str, Dict[str, Any], List[Any]]:
+    def _decode_body(
+        self, body_content: bytes
+    ) -> Union[str, Dict[str, Any], List[Any]]:
         """
         Decode the body content based on content type.
         :param body_content: Raw body bytes
         :return: Decoded body (JSON, text, or raw bytes)
         """
-        content_type: str = self.headers.get(
-            HttpRequestEnums.CONTENT_TYPE, "").lower()
+        content_type: str = self.headers.get(HttpRequestEnums.CONTENT_TYPE, "").lower()
         if HttpRequestEnums.APPLICATION_JSON in content_type:
             try:
                 return json.loads(body_content.decode("utf-8")) if body_content else {}
@@ -281,8 +298,7 @@ class HttpRequest:
             # Set or update a specific key-value pair
             self.params[key_or_dict] = value
         else:
-            raise ValueError(
-                "Provide either a dictionary or a key-value pair.")
+            raise ValueError("Provide either a dictionary or a key-value pair.")
 
     def get_params(self, key: str = None, default: str = None):
         """

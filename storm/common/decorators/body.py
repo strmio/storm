@@ -1,6 +1,7 @@
 from functools import wraps
 from storm.common.execution_context import execution_context
 
+
 class Body:
     """
     A unified decorator and parameter resolver for request body parameters.
@@ -9,6 +10,7 @@ class Body:
     :param param_name: The name of the field in the request body to extract. If None, the entire body is used.
     :param pipe: An optional pipe to validate or transform the body parameter value.
     """
+
     def __init__(self, param_name=None, pipe=None):
         self.param_name = param_name
         self.pipe = pipe
@@ -28,7 +30,9 @@ class Body:
         if self.pipe and result is not None:
             # Instantiate the pipe if it's a class
             pipe_instance = self.pipe() if isinstance(self.pipe, type) else self.pipe
-            result = await pipe_instance.transform(result, metadata={"type": "body", "data": self.param_name})
+            result = await pipe_instance.transform(
+                result, metadata={"type": "body", "data": self.param_name}
+            )
 
         return result
 
@@ -36,6 +40,7 @@ class Body:
         # If called without a function, resolve the value synchronously for default arguments
         if func is None:
             import asyncio
+
             return asyncio.run(self.resolve())
 
         # If called as a decorator

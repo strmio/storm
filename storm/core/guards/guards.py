@@ -2,6 +2,7 @@ class Guard:
     """
     Base class for all guards. Guards are used to determine if a request should proceed to the controller's action.
     """
+
     async def can_activate(self, request, metadata=None):
         """
         Determine whether the request should proceed.
