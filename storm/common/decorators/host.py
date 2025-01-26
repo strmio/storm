@@ -11,11 +11,11 @@ def Host(param_name="host"):
         @wraps(func)
         async def wrapper(*args, **kwargs):
             # Get the current request from the execution context
-            context = execution_context.get()
-            request = context.get("request", {})
+            request = execution_context.get_request()
+            host = request.get_server_host()
 
             # Inject ip 
-            kwargs[param_name] = request.get("host", None)
+            kwargs[param_name] = host
 
             # Call the original function with the updated kwargs
             return await func(*args, **kwargs)

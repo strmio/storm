@@ -36,7 +36,7 @@ class StormApplication:
         self.root_module = root_module
         self.modules = {}
         self.router = Router()
-        self.logger = Logger("StormApplication")
+        self.logger = Logger(self.__class__.__name__)
         self.middleware_pipeline = MiddlewarePipeline()
         self.interceptor_pipeline = InterceptorPipeline(global_interceptors=[])
         self._load_modules()
@@ -201,8 +201,10 @@ class StormApplication:
             handler, params = self.router.resolve(method, path)
             if not handler:
                 raise NotFoundException()
-            request_kwargs["params"] = params
-            execution_context.set({"request": request_kwargs, "req": request, "response": response})
+            
+            request.set_params(params)
+            
+            execution_context.set({"request": request, "response": response})
 
             modified_request = await self.middleware_pipeline.execute(request_kwargs, lambda req: req)
             content = await self.interceptor_pipeline.execute(modified_request, handler)
