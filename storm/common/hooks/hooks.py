@@ -20,3 +20,10 @@ class OnApplicationShutdown(ABC):
     def on_application_shutdown(self, signal: str):
         """Called during application shutdown."""
         pass
+
+
+class OnModuleDestroy(ABC):
+    @abstractmethod
+    def on_module_destroy(self):
+        """Called before the module is destroyed."""
+        pass
