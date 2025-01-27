@@ -44,3 +44,13 @@ def Delete(path=""):
 def Patch(path=""):
     """Decorator to define a PATCH route."""
     return route("PATCH", path)
+
+
+def Options(path=""):
+    """Decorator to define a OPTIONS route."""
+    return route("OPTIONS", path)
+
+
+def Head(path=""):
+    """Decorator to define a HEAD route."""
+    return route("HEAD", path)
