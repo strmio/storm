@@ -2,21 +2,24 @@ import logging
 from typing import Optional, Dict
 
 
+class LogColor:
+    """
+    A class to encapsulate ANSI escape codes for log colors.
+    """
+
+    DEBUG = "\033[35m"  # Cyan
+    INFO = "\033[32m"  # Green
+    WARNING = "\033[33m"  # Yellow
+    ERROR = "\033[31m"  # Red
+    CRITICAL = "\033[1;31m"  # Bold Red
+    NAME = "\033[33m"  # Yellow for logger name and brackets
+    RESET = "\033[0m"  # Reset to default color
+
+
 class Logger:
     """
     A custom logger with support for colored console logging and plain file logging.
     """
-
-    # Define ANSI escape codes for colors
-    LOG_COLORS = {
-        "DEBUG": "\033[36m",  # Cyan
-        "INFO": "\033[32m",  # Green
-        "WARNING": "\033[33m",  # Yellow
-        "ERROR": "\033[31m",  # Red
-        "CRITICAL": "\033[1;31m",  # Bold Red
-        "NAME": "\033[33m",  # Yellow for logger name and brackets
-        "RESET": "\033[0m",  # Reset to default color
-    }
 
     def __init__(self, name: str = "storm", log_file: str = "storm.log"):
         """
@@ -47,25 +50,19 @@ class Logger:
         class ColoredFormatter(logging.Formatter):
             def format(self, record):
                 # Get the color for the log level
-                log_color = Logger.LOG_COLORS.get(
-                    record.levelname, Logger.LOG_COLORS["RESET"]
-                )
+                log_color = getattr(LogColor, record.levelname, LogColor.RESET)
 
                 # Apply color to the log level and message
-                levelname = f"{log_color}{record.levelname}{Logger.LOG_COLORS['RESET']}"
-                message = (
-                    f"{log_color}{record.getMessage()}{Logger.LOG_COLORS['RESET']}"
-                )
+                levelname = f"{log_color}{record.levelname}{LogColor.RESET}"
+                message = f"{log_color}{record.getMessage()}{LogColor.RESET}"
 
                 # Apply yellow color to the logger name with brackets
-                name_color = Logger.LOG_COLORS["NAME"]
-                name = f"{name_color}[{record.name}]{Logger.LOG_COLORS['RESET']}"
+                name_color = LogColor.NAME
+                name = f"{name_color}[{record.name}]{LogColor.RESET}"
 
                 # Always display the `[Storm]` part in green
-                prefix_color = Logger.LOG_COLORS[
-                    "INFO"
-                ]  # Using green (defined for INFO)
-                prefix = f"{prefix_color}[Storm] {record.process} - {Logger.LOG_COLORS['RESET']}"
+                prefix_color = LogColor.INFO  # Using green (defined for INFO)
+                prefix = f"{prefix_color}[Storm] {record.process} - {LogColor.RESET}"
 
                 # Replace placeholders in the format string
                 formatted_message = self._fmt % {
