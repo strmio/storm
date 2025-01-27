@@ -20,7 +20,6 @@ from .decorators import (
     HttpCode,
     Optional,
 )
-from .middlewares import Middleware
 from .enums import HttpHeaders, HttpStatus
 from .exceptions import (
     StormHttpException,
