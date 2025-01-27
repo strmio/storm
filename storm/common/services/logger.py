@@ -78,7 +78,7 @@ class Logger:
 
         console_formatter = ColoredFormatter(
             fmt="%(asctime)s %(levelname)-7s %(name)s %(message)s",
-            datefmt="%Y-%m-%d %H:%M:%S",
+            datefmt="%Y-%m-%d, %I:%M:%S %p",
         )
         console_handler.setFormatter(console_formatter)
         self.logger.addHandler(console_handler)
@@ -88,7 +88,7 @@ class Logger:
         file_handler = logging.FileHandler(self.log_file)
         file_formatter = logging.Formatter(
             fmt="[Storm] %(process)d - %(asctime)s %(levelname)-7s [%(name)s] %(message)s",
-            datefmt="%Y-%m-%d %H:%M:%S",
+            datefmt="%Y-%m-%d, %I:%M:%S %p",
         )
         file_handler.setFormatter(file_formatter)
         self.logger.addHandler(file_handler)
