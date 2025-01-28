@@ -20,23 +20,14 @@ class InterceptorPipeline:
         :param global_interceptors: A list of global interceptor classes.
         :param route_interceptors: A list of route interceptor classes.
         """
-        self.global_interceptors = queue.Queue()
-        self.route_interceptors = queue.Queue()
+        self.global_interceptors = []
+        self.route_interceptors = []
 
         for interceptor in global_interceptors or []:
-            self.global_interceptors.put(interceptor)
+            self.global_interceptors.append(interceptor)
 
         for interceptor in route_interceptors or []:
-            self.route_interceptors.put(interceptor)
-
-    def _merge_interceptors(self):
-        """Merge global and route interceptors into a single queue."""
-        merged_queue = queue.Queue()
-        while not self.global_interceptors.empty():
-            merged_queue.put(self.global_interceptors.get())
-        while not self.route_interceptors.empty():
-            merged_queue.put(self.route_interceptors.get())
-        return merged_queue
+            self.route_interceptors.append(interceptor)
 
     def add_global_interceptor(self, interceptor_cls):
         """
@@ -44,7 +35,20 @@ class InterceptorPipeline:
 
         :param interceptor_cls: The global interceptor class to be added.
         """
-        self.global_interceptors.put(interceptor_cls())
+        self.global_interceptors.append(interceptor_cls())
+
+    def _merge_interceptors(self):
+        """
+        Merges the global and route interceptor lists into a single queue.
+
+        :return: A queue of all interceptors in the pipeline.
+        """
+        all_interceptors = queue.Queue()
+        for interceptor in self.global_interceptors:
+            all_interceptors.put(interceptor)
+        for interceptor in self.route_interceptors:
+            all_interceptors.put(interceptor)
+        return all_interceptors
 
     async def execute(self, request, handler):
         """
