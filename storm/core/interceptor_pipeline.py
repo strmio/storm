@@ -1,4 +1,5 @@
 import queue
+from rx import Observable
 from typing import List, Type, Callable, Awaitable, Optional, Any, Union
 from storm.common import Interceptor
 from storm.common.execution_context import ExecutionContext, execution_context
@@ -103,6 +104,9 @@ class InterceptorPipeline:
             resolved_args = await ParamsResolver.resolve(
                 handler, execution_context.get_request()
             )
+            response = await handler(**resolved_args)
+            if isinstance(response, Observable):
+                return await self._execute_observable(response)
             return await handler(**resolved_args)
 
         current_interceptor: Interceptor = interceptor_queue.get()
@@ -133,3 +137,31 @@ class InterceptorPipeline:
                 kwargs[param_name] = execution_context
 
         return await intercept_method(**kwargs)
+
+    async def _execute_observable(self, observable: Observable) -> Any:
+        """
+        Executes an observable returned from the handler and collects the results.
+
+        :param observable: An instance of rx.Observable.
+        :return: The result emitted by the observable.
+        """
+        result = None
+
+        def on_next(value):
+            nonlocal result
+            result = value  # Capture the emitted value
+
+        def on_error(error):
+            raise Exception(f"Observable error: {error}")
+
+        def on_completed():
+            pass  # Do nothing on completion
+
+        # Subscribe to the observable and block until it's done
+        observable.subscribe(
+            on_next=on_next,
+            on_error=on_error,
+            on_completed=on_completed,
+        )
+
+        return result
