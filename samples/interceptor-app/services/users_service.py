@@ -1,4 +1,6 @@
 from storm.common import Injectable, NotFoundException, Logger, OnModuleInit
+import rx
+from rx import operators as ops
 
 
 @Injectable()
@@ -19,11 +21,11 @@ class UsersService(OnModuleInit):
         self.logger.info("UsersService initialized 100.")
 
     def get_users(self, q: str = None):
-        # Simulate fetching users from a database or external service
-        users = [
-            user for user in self._users if not q or q.lower() in user["name"].lower()
-        ]
-        return {"users": users}
+        # Create an observable from the users list
+        return rx.from_(self._users).pipe(
+            ops.filter(lambda user: not q or q.lower() in user["name"].lower()),
+            ops.to_list(),  # Convert the filtered users back into a list
+        )
 
     def get_user(self, id):
         # Simulate fetching a user by ID from a database or external service
@@ -44,7 +46,10 @@ class UsersService(OnModuleInit):
         self.logger.info(f"Adding user: {user}")
         # Simulate adding a new user to the database or external service
         self._users.append(user)
-        return {"status": "ok", "user": user}
+        # self.user_added_subject.on_next(user)  # Emit the added user through the Subject
+        return rx.of(user).pipe(
+            ops.map(lambda u: {"status": "ok", "user": u})  # Transform user into a dict
+        )
 
     def get_user_by_email(self, email):
         # Simulate fetching a user by email from a database or external service
