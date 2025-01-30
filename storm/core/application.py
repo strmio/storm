@@ -214,10 +214,8 @@ class StormApplication:
 
             execution_context.set({"request": request, "response": response})
 
-            modified_request = await self.middleware_pipeline.execute(
-                request_kwargs, lambda req: req
-            )
-            content = await self.interceptor_pipeline.execute(modified_request, handler)
+            await self.middleware_pipeline.execute(request_kwargs, lambda req: req)
+            content = await self.interceptor_pipeline.execute(handler)
 
             response.update_content(content)
             return response, response.status_code

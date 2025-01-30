@@ -20,6 +20,7 @@ from .decorators import (
     HttpCode,
     Optional,
 )
+from .interceptors.interceptor import Interceptor
 from .enums import HttpHeaders, HttpStatus
 from .exceptions import (
     StormHttpException,
@@ -92,4 +93,5 @@ __all__ = [
     "BadRequestException",
     "ForbiddenException",
     "InternalServerErrorException",
+    "Interceptor",
 ]
