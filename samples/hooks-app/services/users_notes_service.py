@@ -14,9 +14,16 @@ class UsersNotesService:
     def __init__(self, user_service: UsersService):
         self.logger = Logger(self.__class__.__name__)
 
-    def get_notes(self, user_id):
+    def get_notes(self, user_id, q: str = None):
         # Simulate fetching notes from a database or external service
-        user_notes = [note for note in self._notes if note["user_id"] == user_id]
+        if q:
+            user_notes = [
+                note
+                for note in self._notes
+                if note["user_id"] == user_id and q.lower() in note["content"].lower()
+            ]
+        else:
+            user_notes = [note for note in self._notes if note["user_id"] == user_id]
         return {"notes": user_notes}
 
     def note_by_id(self, user_id, note_id):
