@@ -77,3 +77,29 @@ class Router:
         """
         match = re.match(path_regex, path)
         return match.groupdict() if match else {}
+
+    @staticmethod
+    def normalize_path(path: str) -> str:
+        """
+        Normalizes the given path by removing multiple slashes and trailing slashes.
+        This is useful for ensuring consistent path formatting.
+        For example:
+            - '/users//' becomes '/users'
+            - '/users/:id/' becomes '/users/:id'
+        and '/users/:id' remains unchanged.
+        This function is particularly useful for ensuring that paths are in a consistent format
+        before they are processed or stored.
+        This function is also useful for ensuring that paths are in a consistent format
+
+        Args:
+            path (str): The path to be normalized.
+
+        Returns:
+            str: The normalized path.
+        """
+        # Collapse multiple slashes into one
+        path = re.sub(r"\/+", "/", path)
+        # Remove trailing slash unless it's root
+        if path != "/" and path.endswith("/"):
+            path = path[:-1]
+        return path
