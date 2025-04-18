@@ -7,13 +7,16 @@ class LogColor:
     A class to encapsulate ANSI escape codes for log colors.
     """
 
-    DEBUG = "\033[35m"  # Cyan
-    INFO = "\033[32m"  # Green
-    WARNING = "\033[33m"  # Yellow
-    ERROR = "\033[31m"  # Red
-    CRITICAL = "\033[1;31m"  # Bold Red
-    NAME = "\033[33m"  # Yellow for logger name and brackets
-    RESET = "\033[0m"  # Reset to default color
+    DEBUG = "\033[1;35m"  # Bright Magenta
+    INFO = "\033[1;32m"  # Bright Green
+    WARNING = "\033[1;33m"  # Bright Yellow
+    ERROR = "\033[1;31m"  # Bright Red
+    CRITICAL = "\033[1;31m"  # Bright Red
+    NAME = "\033[1;33m"  # Bright Yellow (for module names or [name])
+    TIMESTAMP = "\033[1;37m"  # Bright White
+    HEADER = "\033[1;32m"  # Bright Green (e.g., [Storm])
+    METRIC_LABEL = "\033[1;36m"  # Bright Cyan
+    RESET = "\033[0m"
 
 
 class Logger:
@@ -64,9 +67,13 @@ class Logger:
                 prefix_color = LogColor.INFO  # Using green (defined for INFO)
                 prefix = f"{prefix_color}[Storm] {record.process} - {LogColor.RESET}"
 
+                # Format the timestamp with white color
+                timestamp_color = LogColor.TIMESTAMP
+                timestamp = f"{timestamp_color}{self.formatTime(record, self.datefmt)}{LogColor.RESET}"
+
                 # Replace placeholders in the format string
                 formatted_message = self._fmt % {
-                    "asctime": self.formatTime(record, self.datefmt),
+                    "asctime": timestamp,
                     "levelname": levelname,
                     "name": name,
                     "message": message,
