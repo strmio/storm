@@ -1,7 +1,7 @@
 import queue
 from rx import Observable
 from typing import List, Type, Callable, Awaitable, Optional, Any, Union
-from storm.common import Interceptor
+from storm.common.interceptors.interceptor import Interceptor
 from storm.common.execution_context import ExecutionContext, execution_context
 from storm.core.resolvers.params_resolver import ParamsResolver
 import inspect
