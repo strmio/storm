@@ -13,6 +13,7 @@ from storm.core.resolvers.route_resolver import RouteExplorer, RouteResolver
 from storm.core.router import Router
 from storm.common.services.logger import Logger
 from storm.common.execution_context import execution_context
+from storm.core.services.system_monitor import SystemMonitor
 
 
 class StormApplication:
@@ -38,15 +39,17 @@ class StormApplication:
         self.modules = {}
         self.router = Router()
         self.logger = Logger(self.__class__.__name__)
+        self.system_monitor = SystemMonitor()
         self.middleware_pipeline = MiddlewarePipeline()
         self.interceptor_pipeline = InterceptorPipeline(global_interceptors=[])
         self.logger.info("Starting up Storm application.")
+        self.system_monitor.start()
         self._load_modules()
         self._load_controllers()
         self._shutdown_called = False
 
         # Initialize REPL Manager
-        self.repl_manager = ReplManager(self)
+        self.repl_manager = ReplManager(self, self.system_monitor)
         self.repl_manager.start()
         self.logger.info("Storm application succefully started")
 
@@ -331,5 +334,7 @@ class StormApplication:
         # Stop the REPL manager
         self.logger.info("Stopping REPL manager.")
         self.repl_manager.shutdown()
+        self.logger.info("Stopping system monitor.")
+        self.system_monitor.shutdown()
 
         self.logger.info("Storm application shutdown complete.")
