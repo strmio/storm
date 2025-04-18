@@ -107,7 +107,7 @@ class InterceptorPipeline:
             response = await handler(**resolved_args)
             if isinstance(response, Observable):
                 return await self._execute_observable(response)
-            return await handler(**resolved_args)
+            return response
 
         current_interceptor: Interceptor = interceptor_queue.get()
 
