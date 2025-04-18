@@ -3,6 +3,8 @@ import code
 import sys
 import selectors
 
+from storm.core.services.system_monitor import SystemMonitor
+
 
 class ReplManager:
     """
@@ -14,7 +16,7 @@ class ReplManager:
         shutdown_event: An event to signal the listener to stop.
     """
 
-    def __init__(self, app, prompt=">>>"):
+    def __init__(self, app, system_monitor: SystemMonitor | None = None, prompt=">>>"):
         """
         Initialize the REPL Manager.
 
@@ -22,6 +24,7 @@ class ReplManager:
         """
         self.app = app
         self.repl_thread = None
+        self.system_monitor = system_monitor
         self.shutdown_event = threading.Event()
         self.selector = selectors.DefaultSelector()
         self.prompt = prompt
@@ -55,6 +58,8 @@ class ReplManager:
                     if key.fileobj == sys.stdin:
                         input_line = sys.stdin.readline().strip()
                         if input_line == "":  # Empty line means Enter was pressed
+                            if self.system_monitor:
+                                self.system_monitor.stop()
                             self._open_repl()
             except Exception as e:
                 self.app.logger.error(f"Error in REPL listener: {e}")
@@ -82,3 +87,4 @@ class ReplManager:
             self.app.logger.error(f"Error in REPL: {e}")
         finally:
             self.app.logger.info("REPL closed.")
+            self.system_monitor.continue_() if self.system_monitor else None
