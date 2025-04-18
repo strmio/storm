@@ -76,7 +76,7 @@ class UsersService:
 
 
 # Define Controller
-@Controller("/users")  # Define base path for this controller
+@Controller("/users/")  # Define base path for this controller
 class UsersController:
     def __init__(self, users_service: UsersService):
         self.logger = Logger(self.__class__.__name__)

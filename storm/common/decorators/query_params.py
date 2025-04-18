@@ -12,7 +12,8 @@ class Query:
     :param pipe: An optional pipe to validate or transform the query parameter value.
     """
 
-    def __init__(self, query_param_name=None, pipe=None):
+    def __init__(self, query_param_name=None, param_name=None, pipe=None):
+        self.param_name = param_name
         self.query_param_name = query_param_name
         self.pipe = pipe
 
