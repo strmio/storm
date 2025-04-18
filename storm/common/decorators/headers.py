@@ -12,7 +12,9 @@ class Headers:
     :param pipe: An optional class or instance of a Pipe to transform or validate the header value(s).
     """
 
-    def __init__(self, param_name=None, header_name=None, pipe=None):
+    def __init__(
+        self, param_name: str | None = None, header_name: str | None = None, pipe=None
+    ):
         self.param_name = param_name
         self.header_name = header_name
         self.pipe = pipe
@@ -54,16 +56,20 @@ class Headers:
             headers = request.get_headers()
 
             # Resolve the header value and apply the pipe if necessary
-            if self.header_name in headers:
-                value = headers[self.header_name]
-                if self.pipe:
-                    pipe_instance = (
-                        self.pipe() if isinstance(self.pipe, type) else self.pipe
-                    )
-                    value = await pipe_instance.transform(
-                        value, metadata={"header_name": self.header_name}
-                    )
-                kwargs[self.param_name] = value
+            if self.header_name:
+                headers = {key.upper(): value for key, value in headers.items()}
+                if self.header_name.upper() in headers:
+                    value = headers[self.header_name.upper()]
+                    if self.pipe:
+                        pipe_instance = (
+                            self.pipe() if isinstance(self.pipe, type) else self.pipe
+                        )
+                        value = await pipe_instance.transform(
+                            value, metadata={"header_name": self.header_name}
+                        )
+                    kwargs[self.param_name] = value
+                else:
+                    kwargs[self.param_name] = None
             else:
                 kwargs[self.param_name] = headers
 
