@@ -1,5 +1,6 @@
 from contextvars import ContextVar
 from storm.common.decorators.injectable import Injectable
+from storm.core.adapters.http_response import HttpResponse
 
 
 @Injectable()
@@ -69,7 +70,7 @@ class ExecutionContext:
         context["response"] = response
         self.set(context)
 
-    def get_response(self):
+    def get_response(self) -> HttpResponse | None:
         """
         Get the response context data.
 
