@@ -5,6 +5,7 @@ from storm.common import ParseIntPipe
 from storm.common import Logger, NotFoundException
 from services.users_notes_service import UsersNotesService
 from services.users_service import UsersService
+from storm.common import Query
 
 
 @Controller("/users/:user_id/notes")  # Define base path for this controller
@@ -31,5 +32,8 @@ class NotesController:
         return self.notes_service.note_by_id(user_id, id)
 
     @Get()
-    async def get_notes(self, user_id: int = Param("user_id", ParseIntPipe)):
-        return self.notes_service.get_notes(user_id)
+    @Query("q")
+    async def get_notes(
+        self, user_id: int = Param("user_id", ParseIntPipe), q: str = None
+    ):
+        return self.notes_service.get_notes(user_id, q)

@@ -44,7 +44,7 @@ classifiers = [
 
 
 requires-python = ">=3.13"
-dependencies = ["rx>=3.2.0", "jax>=0.6.0"]
+dependencies = ["rx>=3.2.0", "psutil>=7.0.0"]
 
 [project.optional-dependencies]
 
@@ -61,7 +61,6 @@ standard = [
     # Uvicorn with uvloop
     "uvicorn[standard] >=0.12.0",
     # TODO: this should be part of some pydantic optional extra dependencies
-
 ]
 
 [tool.pdm]

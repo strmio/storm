@@ -101,6 +101,14 @@ class HttpResponse:
         """
         self.headers.update(headers)
 
+    def set_header(self, header_name: str, value: str):
+        """
+        Set a specific header.
+        :param header_name: Header key
+        :param value: Header value
+        """
+        self.headers[header_name] = value
+
     def update_content_type(self, content_type):
         """
         Update the Content-Type header.
@@ -108,6 +116,13 @@ class HttpResponse:
         """
         self.content_type = content_type
         self.headers[HttpHeaders.contentType] = self.content_type
+
+    def get_headers(self):
+        """
+        Get the response headers.
+        :return: Dictionary of headers
+        """
+        return self.headers
 
     async def send(self, send):
         """
