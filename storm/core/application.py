@@ -40,14 +40,15 @@ class StormApplication:
         self.logger = Logger(self.__class__.__name__)
         self.middleware_pipeline = MiddlewarePipeline()
         self.interceptor_pipeline = InterceptorPipeline(global_interceptors=[])
+        self.logger.info("Starting up Storm application.")
         self._load_modules()
         self._load_controllers()
-        self.logger.info("Storm application succefully started")
         self._shutdown_called = False
 
         # Initialize REPL Manager
         self.repl_manager = ReplManager(self)
         self.repl_manager.start()
+        self.logger.info("Storm application succefully started")
 
     def add_global_interceptor(self, interceptor_cls):
         """
@@ -69,6 +70,7 @@ class StormApplication:
         """
         Load and initialize modules from the root module.
         """
+
         self.logger.info(f"{self.root_module.__name__} dependencies initialized")
         for module in self.root_module.imports:
             self.modules[module.__name__] = module
@@ -267,7 +269,6 @@ class StormApplication:
             while True:
                 message = await receive()
                 if message["type"] == "lifespan.startup":
-                    self.logger.info("Starting up Storm application.")
                     await send({"type": "lifespan.startup.complete"})
                 elif message["type"] == "lifespan.shutdown":
                     self.shutdown()
@@ -306,7 +307,7 @@ class StormApplication:
         self.logger.info(f"Received shutdown signal: {signal_number}")
         self.shutdown()
 
-    def shutdown(self):
+    def shutdown(self, shutdown_number=None, frame=None):
         """
         Perform shutdown tasks for the application, including stopping the REPL manager.
         """
