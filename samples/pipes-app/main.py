@@ -1,4 +1,4 @@
-from storm.common.decorators import (
+from storm.common import (
     Injectable,
     Controller,
     Module,
@@ -8,7 +8,9 @@ from storm.common.decorators import (
     Body,
     Query,
     Param,
+    Headers,
 )
+from storm.common import HttpHeaders
 from storm.common.pipes import ParseIntPipe
 from storm.common.pipes.parse_uuid_pipe import ParseUUIDPipe
 from storm.common.services.logger import Logger
@@ -82,7 +84,7 @@ class UsersController:
         self.users_service = users_service
 
     @Get()
-    @Query("q", "q")
+    @Query("q")
     async def get_users(self, q):
         return self.users_service.get_users(q)
 
@@ -103,7 +105,8 @@ class UsersController:
         return self.users_service.add_user(user)
 
     @Get("/me")
-    async def get_me(self, auth):
+    @Headers("auth", HttpHeaders.AUTHORIZATION)
+    async def get_me(self, auth: str):
         self.logger.info(auth)
         if not auth:
             return {"error": "Unauthorized"}
