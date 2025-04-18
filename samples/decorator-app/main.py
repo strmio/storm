@@ -4,7 +4,7 @@ from storm.common.decorators import (
     Body,
     Request,
     Query,
-    Header,
+    Headers,
     Ip,
     Host,
     Param,
@@ -64,9 +64,11 @@ class UsersService:
         return {"user": user}
 
     def delete_user(self, id):
+        self.logger.info(f"Deleting user with ID: {id}")
         # Simulate deleting a user from the database or external service
         users = self.users
         user = next((user for user in users if user["id"] == id), None)
+        print(user)
         if user:
             users.remove(user)
             return {"status": "ok", "user": user}
@@ -105,7 +107,7 @@ class UsersController:
         return self.users_service.add_user(user)
 
     @Get("/me")
-    @Header("auth", "authorization")
+    @Headers("auth", "authorization")
     async def get_me(self, auth):
         self.logger.info(auth)
         if not auth:
@@ -114,7 +116,6 @@ class UsersController:
 
     @Delete("/:id")
     async def delete_user(self, id=Param("id")):
-        self.logger.info(f"Deleting user with ID: {id}, type: {type(id)}")
         return self.users_service.delete_user(int(id))
 
 

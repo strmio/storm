@@ -1,4 +1,5 @@
 from storm.common.services.logger import Logger
+from storm.core.router.router import Router
 
 
 class RouteExplorer:
@@ -22,12 +23,16 @@ class RouteExplorer:
         if callable(attr) and hasattr(attr, "_route"):
             attr = getattr(controller, attr_name)
             if callable(attr) and hasattr(attr, "_route"):
+                normalization_path = Router.normalize_path(
+                    base_path + attr._route["path"]
+                )
                 self.logger.info(
-                    f"Mapped: {{{attr._route['method']} {base_path}{attr._route['path']}}}"
+                    f"Mapped: {{{attr._route['method']} {normalization_path}}}"
                 )
                 route_info = {
-                    "method": attr._route["method"],  # HTTP method (e.g., GET, POST)
-                    "path": base_path + attr._route["path"],  # Full route path
+                    # HTTP method (e.g., GET, POST)
+                    "method": attr._route["method"],
+                    "path": normalization_path,  # Full route path
                     "handler": attr,  # The handler method
                 }
                 return route_info
@@ -39,7 +44,7 @@ class RouteResolver:
     Explores and stores routes for the application.
     """
 
-    def __init__(self, router):
+    def __init__(self, router: Router):
         """
         Initialize the RouteExplorer.
 
@@ -56,10 +61,13 @@ class RouteResolver:
         :param base_path: The base path for the controller.
         :param resolver: An instance of RouteResolver to resolve routes.
         """
-        self.logger.info(f"{controller.__class__.__name__} {base_path}")
+        normilized_path = Router.normalize_path(base_path)
+        self.logger.info(
+            f"{controller.__class__.__name__} {Router.normalize_path(normilized_path)}"
+        )
 
         for attr_name in dir(controller):
-            route_info = explorer.explore_route(controller, attr_name, base_path)
+            route_info = explorer.explore_route(controller, attr_name, normilized_path)
             if route_info:
                 self.router.add_route(
                     route_info["method"], route_info["path"], route_info["handler"]
