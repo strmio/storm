@@ -14,8 +14,9 @@ class SystemMonitor:
     and network traffic, updating a single line in the console periodically.
     """
 
-    def __init__(self):
+    def __init__(self, interval: int = 3):
         self.logger = Logger(self.__class__.__name__)
+        self.interval = interval
         self._shutdown = False
         self._paused = False
         self._lock = threading.Lock()
@@ -118,6 +119,6 @@ class SystemMonitor:
             sys.stdout.write(line)
             sys.stdout.flush()
 
-            time.sleep(1)
+            time.sleep(self.interval)
 
         sys.stdout.write("\n")
