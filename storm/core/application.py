@@ -1,6 +1,8 @@
 import inspect
+from typing import Optional
 from functools import wraps
 import traceback
+from pydantic import BaseModel
 from storm.common.enums.http_status import HttpStatus
 from storm.common.exceptions.exception import StormHttpException
 from storm.common.exceptions.http import InternalServerErrorException, NotFoundException
@@ -16,6 +18,11 @@ from storm.common.execution_context import execution_context
 from storm.core.services.system_monitor import SystemMonitor
 
 
+class AppConfig(BaseModel):
+    start_repl: bool = False
+    start_monitor: bool = False
+
+
 class StormApplication:
     """
     The main application class responsible for bootstrapping the Storm framework.
@@ -29,28 +36,36 @@ class StormApplication:
         - interceptor_pipeline: The pipeline that handles interceptor execution.
     """
 
-    def __init__(self, root_module):
+    def __init__(self, root_module, app_config: Optional[AppConfig] = None):
         """
         Initialize the StormApplication with the given root module.
 
         :param root_module: The root module containing controllers, providers, and imports.
+        :param app_config: Optional dictionary for application configuration.
         """
         self.root_module = root_module
+        self.app_config = app_config or AppConfig()
+        start_repl = self.app_config.start_repl
+        start_monitor = self.app_config.start_monitor
         self.modules = {}
         self.router = Router()
         self.logger = Logger(self.__class__.__name__)
-        self.system_monitor = SystemMonitor()
+        self.system_monitor = SystemMonitor() if start_monitor else None
         self.middleware_pipeline = MiddlewarePipeline()
         self.interceptor_pipeline = InterceptorPipeline(global_interceptors=[])
         self.logger.info("Starting up Storm application.")
-        self.system_monitor.start()
+        if self.system_monitor:
+            self.system_monitor.start()
         self._load_modules()
         self._load_controllers()
         self._shutdown_called = False
 
         # Initialize REPL Manager
-        self.repl_manager = ReplManager(self, self.system_monitor)
-        self.repl_manager.start()
+        if start_repl:
+            self.repl_manager = ReplManager(self, self.system_monitor)
+            self.repl_manager.start()
+        else:
+            self.repl_manager = None
         self.logger.info("Storm application succefully started")
 
     def add_global_interceptor(self, interceptor_cls):
@@ -332,9 +347,13 @@ class StormApplication:
                     )
 
         # Stop the REPL manager
-        self.logger.info("Stopping REPL manager.")
-        self.repl_manager.shutdown()
-        self.logger.info("Stopping system monitor.")
-        self.system_monitor.shutdown()
+
+        if self.repl_manager:
+            self.logger.info("Stopping REPL manager.")
+            self.repl_manager.shutdown()
+
+        if self.system_monitor:
+            self.logger.info("Stopping system monitor.")
+            self.system_monitor.shutdown()
 
         self.logger.info("Storm application shutdown complete.")
