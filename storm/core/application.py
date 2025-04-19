@@ -39,7 +39,7 @@ class StormApplication:
         """
         self.root_module = root_module
         self.settings = settings
-        self.modules = {}
+        self.modules = {root_module.__name__: root_module}
         self.router = Router()
         self.logger = Logger(self.__class__.__name__)
         if self.settings.sys_monitoring_enabled:
@@ -84,6 +84,7 @@ class StormApplication:
         """
 
         self.logger.info(f"{self.root_module.__name__} dependencies initialized")
+        self._initialize_module(self.root_module)
         for module in self.root_module.imports:
             self.modules[module.__name__] = module
             self.logger.info(f"{module.__name__} dependencies initialized")
