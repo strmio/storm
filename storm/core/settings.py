@@ -6,9 +6,9 @@ from functools import lru_cache
 from typing import List
 
 
-class DefaultSettings(BaseSettings):
+class AppSettings(BaseSettings):
     # App Settings
-    app_name: str = "Storm App"
+    app_name: str = Field(default="Storm App")
     debug: bool = Field(default=True)
     environment: str = Field(default="development")  # or "production"
 
@@ -20,7 +20,7 @@ class DefaultSettings(BaseSettings):
 
     # Logging settings
     log_to_file: bool = Field(default=False)
-    # log_file_path: str = Field(default="app.log")
+    log_file_path: str = Field(default="storm.log")
     # log_file_max_size: int = Field(default=10 * 1024 * 1024)  # 10 MB
     # log_file_backup_count: int = Field(default=5)
     # log_file_compression: bool = Field(default=False)
@@ -40,4 +40,4 @@ class DefaultSettings(BaseSettings):
 
 @lru_cache()
 def get_settings():
-    return DefaultSettings()
+    return AppSettings()
