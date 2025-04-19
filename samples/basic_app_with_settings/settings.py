@@ -1,10 +1,10 @@
 from pydantic import Field
 from typing import List
 from functools import lru_cache
-from storm.core.settings import DefaultSettings
+from storm.core.settings import AppSettings
 
 
-class Settings(DefaultSettings):
+class Settings(AppSettings):
     app_name: str = "Storm App"
     debug: bool = Field(default=True)
     environment: str = Field(..., alias="APP_ENV")
