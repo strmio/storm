@@ -14,7 +14,8 @@ from storm.core.router import Router
 from storm.common.services.logger import Logger
 from storm.common.execution_context import execution_context
 from storm.core.services.system_monitor import SystemMonitor
-from storm.core.settings import DefaultSettings as Settings, get_settings
+from storm.core.settings import AppSettings as Settings, get_settings
+from storm.core.context import AppContext
 
 
 class StormApplication:
@@ -39,6 +40,7 @@ class StormApplication:
         """
         self.root_module = root_module
         self.settings = settings
+        AppContext.set_settings(settings)
         self.modules = {root_module.__name__: root_module}
         self.router = Router()
         self.logger = Logger(self.__class__.__name__)
