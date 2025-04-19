@@ -1,6 +1,8 @@
 import logging
 from typing import Optional, Dict
 from .helpers import LogColorNoBold as LogColor
+from storm.core.context import AppContext
+
 
 level_colors = {
     "DEBUG": LogColor.DEBUG,
@@ -16,15 +18,17 @@ class Logger:
     A custom logger with support for colored console logging and plain file logging.
     """
 
-    def __init__(self, name: str = "storm", log_file: str = "storm.log"):
+    def __init__(self, name: str = "storm"):
         """
         Initialize the logger.
 
         :param name: The name of the logger.
         :param log_file: The log file name for file logging.
         """
+        # Get the application settings from AppContext
+        self.app_settings = AppContext.get_settings()
         self.name = name
-        self.log_file = log_file
+        self.log_file = self.app_settings.log_file_path
         self.context: Optional[Dict[str, str]] = None
         self.logger = logging.getLogger(name)
         self.logger.setLevel(logging.DEBUG)
@@ -35,7 +39,9 @@ class Logger:
     def _initialize_handlers(self):
         """Initialize console and file handlers."""
         self._setup_console_handler()
-        self._setup_file_handler()
+        if self.app_settings.log_to_file:
+            # Only set up file handler if logging to file is enabled
+            self._setup_file_handler()
 
     def _setup_console_handler(self):
         """Set up a console handler with colored output."""
