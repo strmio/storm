@@ -1,22 +1,14 @@
 import logging
 from typing import Optional, Dict
+from .helpers import LogColorNoBold as LogColor
 
-
-class LogColor:
-    """
-    A class to encapsulate ANSI escape codes for log colors.
-    """
-
-    DEBUG = "\033[1;35m"  # Bright Magenta
-    INFO = "\033[1;32m"  # Bright Green
-    WARNING = "\033[1;33m"  # Bright Yellow
-    ERROR = "\033[1;31m"  # Bright Red
-    CRITICAL = "\033[1;31m"  # Bright Red
-    NAME = "\033[1;33m"  # Bright Yellow (for module names or [name])
-    TIMESTAMP = "\033[1;37m"  # Bright White
-    HEADER = "\033[1;32m"  # Bright Green (e.g., [Storm])
-    METRIC_LABEL = "\033[1;36m"  # Bright Cyan
-    RESET = "\033[0m"
+level_colors = {
+    "DEBUG": LogColor.DEBUG,
+    "INFO": LogColor.INFO,
+    "WARNING": LogColor.WARNING,
+    "ERROR": LogColor.ERROR,
+    "CRITICAL": LogColor.CRITICAL,
+}
 
 
 class Logger:
@@ -55,23 +47,18 @@ class Logger:
                 # Get the color for the log level
                 log_color = getattr(LogColor, record.levelname, LogColor.RESET)
 
-                # Apply color to the log level and message
+                # Apply color to levelname and message
+                log_color = level_colors.get(record.levelname, LogColor.RESET)
                 levelname = f"{log_color}{record.levelname}{LogColor.RESET}"
                 message = f"{log_color}{record.getMessage()}{LogColor.RESET}"
 
-                # Apply yellow color to the logger name with brackets
-                name_color = LogColor.NAME
-                name = f"{name_color}[{record.name}]{LogColor.RESET}"
+                # Logger name in bright yellow
+                name = f"{LogColor.NAME}[{record.name}]{LogColor.RESET}"
 
-                # Always display the `[Storm]` part in green
-                prefix_color = LogColor.INFO  # Using green (defined for INFO)
-                prefix = f"{prefix_color}[Storm] {record.process} - {LogColor.RESET}"
+                # Prefix with [Storm] in green and timestamp in white
+                prefix = f"{LogColor.HEADER}[Storm] {record.process} -{LogColor.RESET}"
+                timestamp = f"{LogColor.TIMESTAMP}{self.formatTime(record, self.datefmt)}{LogColor.RESET}"
 
-                # Format the timestamp with white color
-                timestamp_color = LogColor.TIMESTAMP
-                timestamp = f"{timestamp_color}{self.formatTime(record, self.datefmt)}{LogColor.RESET}"
-
-                # Replace placeholders in the format string
                 formatted_message = self._fmt % {
                     "asctime": timestamp,
                     "levelname": levelname,
