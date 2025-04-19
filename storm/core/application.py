@@ -1,8 +1,6 @@
 import inspect
-from typing import Optional
 from functools import wraps
 import traceback
-from pydantic import BaseModel
 from storm.common.enums.http_status import HttpStatus
 from storm.common.exceptions.exception import StormHttpException
 from storm.common.exceptions.http import InternalServerErrorException, NotFoundException
@@ -16,11 +14,7 @@ from storm.core.router import Router
 from storm.common.services.logger import Logger
 from storm.common.execution_context import execution_context
 from storm.core.services.system_monitor import SystemMonitor
-
-
-class AppConfig(BaseModel):
-    start_repl: bool = False
-    start_monitor: bool = False
+from storm.core.settings import DefaultSettings as Settings, get_settings
 
 
 class StormApplication:
@@ -36,7 +30,7 @@ class StormApplication:
         - interceptor_pipeline: The pipeline that handles interceptor execution.
     """
 
-    def __init__(self, root_module, app_config: Optional[AppConfig] = None):
+    def __init__(self, root_module, settings: Settings = get_settings()):
         """
         Initialize the StormApplication with the given root module.
 
@@ -44,24 +38,24 @@ class StormApplication:
         :param app_config: Optional dictionary for application configuration.
         """
         self.root_module = root_module
-        self.app_config = app_config or AppConfig()
-        start_repl = self.app_config.start_repl
-        start_monitor = self.app_config.start_monitor
+        self.settings = settings
         self.modules = {}
         self.router = Router()
         self.logger = Logger(self.__class__.__name__)
-        self.system_monitor = SystemMonitor() if start_monitor else None
+        if self.settings.sys_monitoring_enabled:
+            self.system_monitor = SystemMonitor(self.settings.sys_monitoring_interval)
+            self.system_monitor.start()
+        else:
+            self.system_monitor = None
         self.middleware_pipeline = MiddlewarePipeline()
         self.interceptor_pipeline = InterceptorPipeline(global_interceptors=[])
         self.logger.info("Starting up Storm application.")
-        if self.system_monitor:
-            self.system_monitor.start()
         self._load_modules()
         self._load_controllers()
         self._shutdown_called = False
 
         # Initialize REPL Manager
-        if start_repl:
+        if self.settings.repl_enabled:
             self.repl_manager = ReplManager(self, self.system_monitor)
             self.repl_manager.start()
         else:
@@ -309,7 +303,8 @@ class StormApplication:
 
         # Register signal handlers for graceful shutdown
         signal.signal(signal.SIGINT, handle_shutdown)  # Handle Ctrl+C
-        signal.signal(signal.SIGTERM, handle_shutdown)  # Handle termination signals
+        # Handle termination signals
+        signal.signal(signal.SIGTERM, handle_shutdown)
 
         try:
             uvicorn.run(self, host=host, port=port, log_level="error")
