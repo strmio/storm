@@ -54,3 +54,4 @@ if __name__ == "__main__":
 
     # Start the application
     app.run()
+    print(app.settings)

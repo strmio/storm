@@ -7,7 +7,7 @@ from storm.core.settings import DefaultSettings
 class Settings(DefaultSettings):
     app_name: str = "Storm App"
     debug: bool = Field(default=True)
-    environment: str = Field(default="development")
+    environment: str = Field(..., alias="APP_ENV")
 
     # These fields expect DATABASE_URL and SECRET_KEY from .env
     database_url: str = Field(..., alias="DATABASE_URL")
@@ -15,9 +15,10 @@ class Settings(DefaultSettings):
 
     allowed_hosts: List[str] = ["*"]
     log_level: str = "info"
+
     sys_monitoring_enabled: bool = True
     sys_monitoring_interval: float = 0.1
-    monitoring_interval: int = 60
+
     repl_enabled: bool = True
 
     class Config:
