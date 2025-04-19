@@ -5,23 +5,7 @@ import psutil
 import sys
 
 from storm.common.services.logger import Logger
-
-
-class LogColor:
-    """
-    A class to encapsulate ANSI escape codes for log colors.
-    """
-
-    DEBUG = "\033[1;35m"  # Bright Magenta
-    INFO = "\033[1;32m"  # Bright Green
-    WARNING = "\033[1;33m"  # Bright Yellow
-    ERROR = "\033[1;31m"  # Bright Red
-    CRITICAL = "\033[1;31m"  # Bright Red
-    NAME = "\033[1;33m"  # Bright Yellow (for module names or [name])
-    TIMESTAMP = "\033[1;37m"  # Bright White
-    HEADER = "\033[1;32m"  # Bright Green (e.g., [Storm])
-    METRIC_LABEL = "\033[1;36m"  # Bright Cyan
-    RESET = "\033[0m"
+from storm.core.services.helpers import LogColorNoBold as LogColor
 
 
 class SystemMonitor:
@@ -30,8 +14,9 @@ class SystemMonitor:
     and network traffic, updating a single line in the console periodically.
     """
 
-    def __init__(self):
+    def __init__(self, interval: int = 3):
         self.logger = Logger(self.__class__.__name__)
+        self.interval = interval
         self._shutdown = False
         self._paused = False
         self._lock = threading.Lock()
@@ -107,7 +92,7 @@ class SystemMonitor:
     def _render_line(self, data: dict) -> str:
         return (
             f"{LogColor.HEADER}[Storm] {data['pid']} - {LogColor.RESET}"
-            f"{LogColor.TIMESTAMP} {data['timestamp']}{LogColor.RESET} "
+            f"{LogColor.TIMESTAMP}{data['timestamp']}{LogColor.RESET} "
             f"{LogColor.INFO}INFO{LogColor.RESET} "
             f"{LogColor.NAME}[SystemMonitor]{LogColor.RESET} "
             f"CPU: {LogColor.INFO}{data['cpu']:.1f}%{LogColor.RESET} | "
@@ -134,6 +119,6 @@ class SystemMonitor:
             sys.stdout.write(line)
             sys.stdout.flush()
 
-            time.sleep(1)
+            time.sleep(self.interval)
 
         sys.stdout.write("\n")

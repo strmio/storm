@@ -14,6 +14,8 @@ from storm.core.router import Router
 from storm.common.services.logger import Logger
 from storm.common.execution_context import execution_context
 from storm.core.services.system_monitor import SystemMonitor
+from storm.core.settings import AppSettings as Settings, get_settings
+from storm.core.context import AppContext
 
 
 class StormApplication:
@@ -29,28 +31,37 @@ class StormApplication:
         - interceptor_pipeline: The pipeline that handles interceptor execution.
     """
 
-    def __init__(self, root_module):
+    def __init__(self, root_module, settings: Settings = get_settings()):
         """
         Initialize the StormApplication with the given root module.
 
         :param root_module: The root module containing controllers, providers, and imports.
+        :param app_config: Optional dictionary for application configuration.
         """
         self.root_module = root_module
-        self.modules = {}
+        self.settings = settings
+        AppContext.set_settings(settings)
+        self.modules = {root_module.__name__: root_module}
         self.router = Router()
         self.logger = Logger(self.__class__.__name__)
-        self.system_monitor = SystemMonitor()
+        if self.settings.sys_monitoring_enabled:
+            self.system_monitor = SystemMonitor(self.settings.sys_monitoring_interval)
+            self.system_monitor.start()
+        else:
+            self.system_monitor = None
         self.middleware_pipeline = MiddlewarePipeline()
         self.interceptor_pipeline = InterceptorPipeline(global_interceptors=[])
         self.logger.info("Starting up Storm application.")
-        self.system_monitor.start()
         self._load_modules()
         self._load_controllers()
         self._shutdown_called = False
 
         # Initialize REPL Manager
-        self.repl_manager = ReplManager(self, self.system_monitor)
-        self.repl_manager.start()
+        if self.settings.repl_enabled:
+            self.repl_manager = ReplManager(self, self.system_monitor)
+            self.repl_manager.start()
+        else:
+            self.repl_manager = None
         self.logger.info("Storm application succefully started")
 
     def add_global_interceptor(self, interceptor_cls):
@@ -75,6 +86,7 @@ class StormApplication:
         """
 
         self.logger.info(f"{self.root_module.__name__} dependencies initialized")
+        self._initialize_module(self.root_module)
         for module in self.root_module.imports:
             self.modules[module.__name__] = module
             self.logger.info(f"{module.__name__} dependencies initialized")
@@ -294,7 +306,8 @@ class StormApplication:
 
         # Register signal handlers for graceful shutdown
         signal.signal(signal.SIGINT, handle_shutdown)  # Handle Ctrl+C
-        signal.signal(signal.SIGTERM, handle_shutdown)  # Handle termination signals
+        # Handle termination signals
+        signal.signal(signal.SIGTERM, handle_shutdown)
 
         try:
             uvicorn.run(self, host=host, port=port, log_level="error")
@@ -332,9 +345,13 @@ class StormApplication:
                     )
 
         # Stop the REPL manager
-        self.logger.info("Stopping REPL manager.")
-        self.repl_manager.shutdown()
-        self.logger.info("Stopping system monitor.")
-        self.system_monitor.shutdown()
+
+        if self.repl_manager:
+            self.logger.info("Stopping REPL manager.")
+            self.repl_manager.shutdown()
+
+        if self.system_monitor:
+            self.logger.info("Stopping system monitor.")
+            self.system_monitor.shutdown()
 
         self.logger.info("Storm application shutdown complete.")
