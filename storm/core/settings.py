@@ -15,10 +15,8 @@ class AppSettings(BaseSettings):
     # CORS
     allowed_hosts: List[str] = ["*"]
 
-    # Other custom settings
-    log_level: str = "info"
-
     # Logging settings
+    log_level: str = "info"
     log_to_file: bool = Field(default=False)
     log_file_path: str = Field(default="storm.log")
     # log_file_max_size: int = Field(default=10 * 1024 * 1024)  # 10 MB
@@ -36,6 +34,15 @@ class AppSettings(BaseSettings):
 
     # REPL settings
     repl_enabled: bool = Field(default=False)
+
+    # System information
+    sys_info_enabled: bool = Field(default=False)
+
+    # Banner settings
+    banner_enabled: bool = Field(default=False)
+    banner_file: str = Field(default="banner.txt")
+
+    # Other custom settings
 
 
 @lru_cache()

@@ -16,10 +16,14 @@ class Settings(AppSettings):
     allowed_hosts: List[str] = ["*"]
     log_level: str = "info"
 
-    sys_monitoring_enabled: bool = True
-    sys_monitoring_interval: float = 0.1
+    sys_monitoring_enabled: bool = False
+    sys_monitoring_interval: float = 0.5
 
-    repl_enabled: bool = True
+    repl_enabled: bool = False
+
+    sys_info_enabled: bool = True
+    banner_enabled: bool = True
+    banner_file: str = Field(default="banner.txt")
 
     class Config:
         env_file = ".env"
