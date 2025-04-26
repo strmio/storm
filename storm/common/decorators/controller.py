@@ -1,4 +1,4 @@
-def Controller(base_path, middleware=[]):
+def Controller(base_path="", middleware=[]):
     """
     A decorator for registering a controller and its routes.
 
