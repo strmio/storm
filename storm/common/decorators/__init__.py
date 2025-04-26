@@ -13,6 +13,7 @@ from .param import Param
 from .use_pipes import UsePipes
 from .http_code import HttpCode
 from .optional import Optional
+from .sse import Sse
 
 __all__ = [
     "Controller",
@@ -37,4 +38,5 @@ __all__ = [
     "UsePipes",
     "HttpCode",
     "Optional",
+    "Sse",
 ]

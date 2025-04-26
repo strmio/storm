@@ -165,6 +165,52 @@ class HttpResponse:
         else:
             return b""  # Empty response
 
+    async def send_sse_headers(self, send):
+        """
+        Send SSE-specific headers.
+        """
+        await send(
+            {
+                "type": "http.response.start",
+                "status": 200,
+                "headers": [
+                    (b"content-type", b"text/event-stream"),
+                    (b"cache-control", b"no-cache"),
+                    (b"connection", b"keep-alive"),
+                ],
+            }
+        )
+
+    async def send_sse_event(self, send, data: str, event: str = None, id: str = None):
+        """
+        Send a single SSE event.
+        """
+        message = ""
+        if id:
+            message += f"id: {id}\n"
+        if event:
+            message += f"event: {event}\n"
+        message += f"data: {data}\n\n"
+        await send(
+            {
+                "type": "http.response.body",
+                "body": message.encode("utf-8"),
+                "more_body": True,
+            }
+        )
+
+    async def close_sse(self, send):
+        """
+        Close the SSE stream.
+        """
+        await send(
+            {
+                "type": "http.response.body",
+                "body": b"",
+                "more_body": False,
+            }
+        )
+
 
 # Helper methods to create common response types
 
