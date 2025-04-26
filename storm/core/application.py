@@ -1,6 +1,7 @@
 import inspect
 from functools import wraps
 import traceback
+from rich import print
 from storm.common.enums.http_status import HttpStatus
 from storm.common.exceptions.exception import StormHttpException
 from storm.common.exceptions.http import InternalServerErrorException, NotFoundException
@@ -44,6 +45,8 @@ class StormApplication:
         self.modules = {root_module.__name__: root_module}
         self.router = Router()
         self.logger = Logger(self.__class__.__name__)
+        self._print_banner()
+        self.logger.info("Starting up Storm application.")
         if self.settings.sys_monitoring_enabled:
             self.system_monitor = SystemMonitor(self.settings.sys_monitoring_interval)
             self.system_monitor.start()
@@ -51,7 +54,6 @@ class StormApplication:
             self.system_monitor = None
         self.middleware_pipeline = MiddlewarePipeline()
         self.interceptor_pipeline = InterceptorPipeline(global_interceptors=[])
-        self.logger.info("Starting up Storm application.")
         self._load_modules()
         self._load_controllers()
         self._shutdown_called = False
@@ -355,3 +357,45 @@ class StormApplication:
             self.system_monitor.shutdown()
 
         self.logger.info("Storm application shutdown complete.")
+
+    @staticmethod
+    def _get_version(package: str) -> str:
+        try:
+            import importlib.metadata
+
+            return importlib.metadata.version(package)
+        except importlib.metadata.PackageNotFoundError:
+            return "Not installed"
+
+    def info(self, banner: str = None):
+        """
+        Displays system and Storm CLI environment information.
+        """
+        import platform
+
+        print(f"[bold red]{banner}[/bold red]")
+
+        print("[bold yellow][System Information][/bold yellow]")
+        print(f"OS Version         : {platform.system()} {platform.release()}")
+        print(f"Python Version     : {platform.python_version()}")
+
+        print("\n[bold yellow][Storm][/bold yellow]")
+        print(f"Storm Version  : {self._get_version('storm')}\n")
+
+    # banner printing
+
+    def _print_banner(self):
+        """
+        Print the application banner.
+        """
+        if self.settings.banner_enabled:
+            try:
+                with open(self.settings.banner_file, "r") as f:
+                    print()
+                    banner = f.read()
+                    self.info(banner)
+
+            except FileNotFoundError:
+                self.logger.warning(
+                    f"Banner file {self.settings.banner_file} not found. Skipping banner display."
+                )
