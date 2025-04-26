@@ -19,6 +19,7 @@ from .decorators import (
     UsePipes,
     HttpCode,
     Optional,
+    Sse,
 )
 from .interceptors.interceptor import Interceptor
 from .enums import HttpHeaders, HttpStatus
@@ -82,6 +83,7 @@ __all__ = [
     "RoleGuard",
     "IPWhitelistGuard",
     "Logger",
+    "Sse",
     "ExecutionContext",
     "OnModuleInit",
     "OnModuleDestroy",
