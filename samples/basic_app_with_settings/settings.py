@@ -17,10 +17,11 @@ class Settings(AppSettings):
     log_level: str = "info"
 
     sys_monitoring_enabled: bool = False
-    sys_monitoring_interval: float = 0.3
+    sys_monitoring_interval: float = 0.5
 
     repl_enabled: bool = False
 
+    sys_info_enabled: bool = True
     banner_enabled: bool = True
     banner_file: str = Field(default="banner.txt")
 

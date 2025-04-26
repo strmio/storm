@@ -47,11 +47,11 @@ class AppModule:
     pass
 
 
+# Initialize the application with AppModule
+app = StormApplication(AppModule, settings=get_settings())
+
 # Create the Storm Application and Run the Server
 if __name__ == "__main__":
-    # Initialize the application with AppModule
-    app = StormApplication(AppModule, settings=get_settings())
-
     # Start the application
     app.run()
     print(app.settings)

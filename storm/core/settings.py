@@ -35,6 +35,9 @@ class AppSettings(BaseSettings):
     # REPL settings
     repl_enabled: bool = Field(default=False)
 
+    # System information
+    sys_info_enabled: bool = Field(default=False)
+
     # Banner settings
     banner_enabled: bool = Field(default=False)
     banner_file: str = Field(default="banner.txt")
