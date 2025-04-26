@@ -356,7 +356,7 @@ class StormApplication:
             self.logger.info("Stopping system monitor.")
             self.system_monitor.shutdown()
 
-        self.logger.info("Storm application shutdown complete.")
+        self.logger.info("Storm application shutdown complete.\n")
 
     @staticmethod
     def _get_version(package: str) -> str:

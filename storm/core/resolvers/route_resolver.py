@@ -1,5 +1,6 @@
 from storm.common.services.logger import Logger
 from storm.core.router.router import Router
+from storm.core.wrappers.sse_wrapper import _wrap_sse_handler
 
 
 class RouteExplorer:
@@ -34,6 +35,7 @@ class RouteExplorer:
                     "method": attr._route["method"],
                     "path": normalization_path,  # Full route path
                     "handler": attr,  # The handler method
+                    "is_sse": getattr(attr, "is_sse", False),
                 }
                 return route_info
         return None
@@ -69,6 +71,12 @@ class RouteResolver:
         for attr_name in dir(controller):
             route_info = explorer.explore_route(controller, attr_name, normilized_path)
             if route_info:
-                self.router.add_route(
-                    route_info["method"], route_info["path"], route_info["handler"]
-                )
+                if route_info.get("is_sse"):
+                    sse_handler = _wrap_sse_handler(route_info["handler"])
+                    self.router.add_sse_route(
+                        route_info["method"], route_info["path"], sse_handler
+                    )
+                else:
+                    self.router.add_route(
+                        route_info["method"], route_info["path"], route_info["handler"]
+                    )
