@@ -373,8 +373,6 @@ class StormApplication:
         """
         import platform
 
-        print(f"[bold red]{banner}[/bold red]")
-
         print("[bold yellow][System Information][/bold yellow]")
         print(f"OS Version         : {platform.system()} {platform.release()}")
         print(f"Python Version     : {platform.python_version()}")
@@ -393,9 +391,12 @@ class StormApplication:
                 with open(self.settings.banner_file, "r") as f:
                     print()
                     banner = f.read()
-                    self.info(banner)
+                    print(f"[bold red]{banner}[/bold red]")
 
             except FileNotFoundError:
                 self.logger.warning(
                     f"Banner file {self.settings.banner_file} not found. Skipping banner display."
                 )
+
+        if self.settings.sys_info_enabled:
+            self.info()
