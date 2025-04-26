@@ -6,7 +6,18 @@ class Router:
     def __init__(self):
         self.static_routes = {}
         self.dynamic_routes = {}
+        self.sse_routes = {}
         self.logger = Logger(self.__class__.__name__)
+
+    def add_sse_route(self, method, path, handler):
+        """
+        Registers a new SSE route with the specified HTTP method and path.
+        """
+        path_regex = self._path_to_regex(path)
+        if ":" in path:
+            self.sse_routes[(method, path, path_regex)] = handler
+        else:
+            self.sse_routes[(method, path)] = handler
 
     def add_route(self, method, path, handler):
         """
@@ -30,10 +41,15 @@ class Router:
         :param path: The URL path from the incoming request
         :return: The handler function and any extracted parameters
         """
+        # Check SSE static routes
+        if (method, path) in self.sse_routes:
+            return self.sse_routes[(method, path)], {}
+
+        # Check normal static routes
         if (method, path) in self.static_routes:
             return self.static_routes[(method, path)], {}
 
-        # Sort dynamic routes by specificity
+        # Check normal dynamic routes
         sorted_dynamic_routes = sorted(
             self.dynamic_routes.items(),
             key=lambda item: self._specificity(item[0][1]),
@@ -41,6 +57,18 @@ class Router:
         )
 
         for (route_method, original_path, path_regex), handler in sorted_dynamic_routes:
+            if route_method == method and re.match(path_regex, path):
+                params = self._extract_params(path_regex, path)
+                return handler, params
+
+        # Check SSE dynamic routes
+        for (
+            route_method,
+            original_path,
+            path_regex,
+        ), handler in self.sse_routes.items():
+            if isinstance(path_regex, str):
+                continue  # Skip static
             if route_method == method and re.match(path_regex, path):
                 params = self._extract_params(path_regex, path)
                 return handler, params

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SSE Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+    #messages {
+      white-space: pre-wrap;
+      background: #f4f4f4;
+      padding: 10px;
+      border: 1px solid #ccc;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Live SSE Messages:</h1>
+  <div id="messages">Waiting for events...</div>
+
+  <script>
+    const messages = document.getElementById('messages');
+    const es = new EventSource('http://localhost:8000/events/sse');
+
+    es.onmessage = (event) => {
+      try {
+        const parsedData = JSON.parse(event.data);
+        const newMessage = `Received message:\n${JSON.stringify(parsedData, null, 2)}\n\n`;
+        messages.textContent += newMessage;
+      } catch (error) {
+        messages.textContent += `Invalid JSON: ${event.data}\n\n`;
+      }
+    };
+
+    es.onerror = (err) => {
+      console.error("EventSource error:", err);
+      messages.textContent += "Connection error.\n";
+    };
+  </script>
+</body>
+</html>
