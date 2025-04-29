@@ -2,7 +2,7 @@ from enum import IntEnum
 
 
 class VersioningType(IntEnum):
-    URI = 0
-    HEADER = 1
-    MEDIA_TYPE = 2
-    CUSTOM = 3
+    URI = "URI"
+    HEADER = "HEADER"
+    MEDIA_TYPE = "MEDIA_TYPE"
+    CUSTOM = "CUSTOM"
