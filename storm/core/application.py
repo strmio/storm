@@ -3,11 +3,13 @@ from functools import wraps
 import traceback
 from rich import print
 from storm.common.enums.http_status import HttpStatus
+from storm.common.enums.versioning_type import VersioningType
 from storm.common.exceptions.exception import StormHttpException
 from storm.common.exceptions.http import InternalServerErrorException, NotFoundException
 from storm.core.adapters.http_request import HttpRequest
 from storm.core.adapters.http_response import HttpResponse
 from storm.core.interceptor_pipeline import InterceptorPipeline
+from storm.core.interfaces.version_options_interface import VersioningOptions
 from storm.core.middleware_pipeline import MiddlewarePipeline
 from storm.core.repl.repl_manager import ReplManager
 from storm.core.resolvers.route_resolver import RouteExplorer, RouteResolver
@@ -81,6 +83,18 @@ class StormApplication:
         :param middleware_cls: The middleware class to be added as global middleware.
         """
         self.middleware_pipeline.add_global_middleware(middleware_cls)
+
+    def enable_versioning(
+        self, verioning_options: VersioningOptions = {type: VersioningType.URI}
+    ):
+        """
+        Enables versioning for the application with the specified options.
+
+
+        :verioning_options (VersioningOptions, optional): Configuration options for versioning.
+                Defaults to { type: VersioningType.URI }.
+        """
+        pass
 
     def _load_modules(self):
         """
