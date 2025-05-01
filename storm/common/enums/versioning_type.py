@@ -1,7 +1,7 @@
-from enum import IntEnum
+from enum import StrEnum
 
 
-class VersioningType(IntEnum):
+class VersioningType(StrEnum):
     URI = "URI"
     HEADER = "HEADER"
     MEDIA_TYPE = "MEDIA_TYPE"
