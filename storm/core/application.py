@@ -96,7 +96,7 @@ class StormApplication:
         :verioning_options (VersioningOptions, optional): Configuration options for versioning.
                 Defaults to { type: VersioningType.URI }.
         """
-        pass
+        self.app_config.enable_versioning(verioning_options)
 
     def _load_modules(self):
         """

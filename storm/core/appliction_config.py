@@ -18,6 +18,7 @@ class ApplicationConfig:
     """
 
     def __init__(self):
+        # self.logger = Logger(self.__name__)
         self._versioning_options: Optional[VersioningOptions] = None
 
     def enable_versioning(self, options: VersioningOptions):
