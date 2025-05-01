@@ -8,6 +8,7 @@ from storm.common.exceptions.exception import StormHttpException
 from storm.common.exceptions.http import InternalServerErrorException, NotFoundException
 from storm.core.adapters.http_request import HttpRequest
 from storm.core.adapters.http_response import HttpResponse
+from storm.core.appliction_config import ApplicationConfig
 from storm.core.interceptor_pipeline import InterceptorPipeline
 from storm.core.interfaces.version_options_interface import VersioningOptions
 from storm.core.middleware_pipeline import MiddlewarePipeline
@@ -43,6 +44,7 @@ class StormApplication:
         """
         self.root_module = root_module
         self.settings = settings
+        self.app_config = ApplicationConfig()
         AppContext.set_settings(settings)
         self.modules = {root_module.__name__: root_module}
         self.router = Router()
@@ -381,7 +383,7 @@ class StormApplication:
         except importlib.metadata.PackageNotFoundError:
             return "Not installed"
 
-    def info(self, banner: str = None):
+    def info(self):
         """
         Displays system and Storm CLI environment information.
         """
