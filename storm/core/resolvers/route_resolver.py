@@ -33,7 +33,7 @@ class RouteExplorer:
                     )
                 else:
                     self.logger.info(
-                        f"Mapped: {{{attr._route['method']} {normalization_path}}} route"
+                        f"Mapped: {{{normalization_path}, {attr._route['method']}}} route"
                     )
                 route_info = {
                     # HTTP method (e.g., GET, POST)

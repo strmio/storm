@@ -1,5 +1,6 @@
 from collections import defaultdict
 from typing import Optional
+from storm.common.enums.http_headers import HttpHeaders
 from storm.common.enums.versioning_type import VersioningType
 from storm.common.services.logger import Logger
 import re
@@ -66,16 +67,13 @@ class Router:
             else:
                 self.static_routes[method][v][path] = handler
 
-    def resolve(self, method, path, version=None, request=None):
+    def resolve(self, method: str, path: str, request: HttpRequest, version=None):
         """
         Resolves a route for the given HTTP method, path, and version.
 
         If no route is found for the specific version, falls back to VERSION_NEUTRAL.
         """
-        if request:
-            version, path = self.extract_version(request)
-        else:
-            path = self.normalize_path(path)
+        version, path = self.extract_version(request)
 
         # Versions to try
         versions_to_try = [version or VERSION_NEUTRAL]
@@ -185,8 +183,8 @@ class Router:
             return request.get_header(versioning.header), self.normalize_path(path)
 
         elif versioning.type == VersioningType.MEDIA_TYPE:
-            content_type = request.get_header("Content-Type", "")
-            match = re.search(rf"{versioning.key}=([\w\d]+)", content_type)
+            accept = request.get_header(HttpHeaders.ACCEPT, "")
+            match = re.search(rf"{versioning.key}([\w\d]+)", accept)
             return (match.group(1) if match else None), self.normalize_path(path)
 
         elif versioning.type == VersioningType.CUSTOM:
