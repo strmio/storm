@@ -58,17 +58,6 @@ class StormApplication:
             self.system_monitor = None
         self.middleware_pipeline = MiddlewarePipeline()
         self.interceptor_pipeline = InterceptorPipeline(global_interceptors=[])
-        self._load_modules()
-        self._load_controllers()
-        self._shutdown_called = False
-
-        # Initialize REPL Manager
-        if self.settings.repl_enabled:
-            self.repl_manager = ReplManager(self, self.system_monitor)
-            self.repl_manager.start()
-        else:
-            self.repl_manager = None
-        self.logger.info("Storm application succefully started")
 
     def add_global_interceptor(self, interceptor_cls):
         """
@@ -97,6 +86,14 @@ class StormApplication:
                 Defaults to { type: VersioningType.URI }.
         """
         self.app_config.enable_versioning(verioning_options)
+
+    def setGlobalPrefix(self, prefix: str):
+        """
+        Set a global prefix for all routes in the application.
+
+        :param prefix: The prefix to be added to all routes.
+        """
+        self.app_config.set_global_prefix(self.router.normalize_path(prefix))
 
     def _load_modules(self):
         """
@@ -328,11 +325,42 @@ class StormApplication:
         signal.signal(signal.SIGTERM, handle_shutdown)
 
         try:
+            self._initialize_application()
             uvicorn.run(self, host=host, port=port, log_level="error")
         except Exception as e:
             self.logger.error(f"Error while running the server: {e}")
         finally:
             self.shutdown()
+
+    def _initialize_application(self):
+        """
+        Initializes the Storm application by loading necessary modules and controllers,
+        setting up the REPL manager if enabled, and marking the application as started.
+
+        This method performs the following steps:
+        1. Loads application modules.
+        2. Loads application controllers.
+        3. Initializes the REPL (Read-Eval-Print Loop) manager if REPL is enabled in settings.
+        4. Logs the successful startup of the application.
+
+        Attributes:
+            self._shutdown_called (bool): Indicates whether the application shutdown has been called.
+            self.repl_manager (ReplManager or None): The REPL manager instance if enabled, otherwise None.
+
+        Raises:
+            Any exceptions raised during module or controller loading will propagate.
+        """
+        self._load_modules()
+        self._load_controllers()
+        self._shutdown_called = False
+
+        # Initialize REPL Manager
+        if self.settings.repl_enabled:
+            self.repl_manager = ReplManager(self, self.system_monitor)
+            self.repl_manager.start()
+        else:
+            self.repl_manager = None
+        self.logger.info("Storm application succefully started")
 
     def _handle_shutdown(self, signal_number, frame):
         """
