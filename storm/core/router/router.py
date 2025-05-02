@@ -1,6 +1,5 @@
 from collections import defaultdict
 from typing import Optional
-from storm.common.enums.http_headers import HttpHeaders
 from storm.common.enums.versioning_type import VersioningType
 from storm.common.services.logger import Logger
 import re
@@ -156,6 +155,8 @@ class Router:
         # Remove trailing slash unless it's root
         if path != "/" and path.endswith("/"):
             path = path[:-1]
+        if not path.startswith("/"):
+            path = "/" + path
         return path
 
     def extract_version(self, request: HttpRequest) -> tuple[Optional[str], str]:
@@ -167,27 +168,56 @@ class Router:
         if not self.app_config or not versioning:
             return None, self.normalize_path(request.path)
 
-        path = request.path
+        path = self.normalize_path(request.path)
+        version = None
+
         if versioning.type == VersioningType.URI:
-            # Example: /v1/users
+            # Versioning: /api/v1/resource -> should become /api/resource
             prefix = versioning.prefix if versioning.prefix is not False else "v"
-            match = re.match(rf"^/{prefix}(\d+)(/|$)", path)
-            if match:
-                version = match.group(1)
-                # Remove /v1 from the path
-                new_path = re.sub(rf"^/{prefix}{version}", "", path) or "/"
-                return version, self.normalize_path(new_path)
-            return None, self.normalize_path(path)
+            global_prefix = self.app_config.get_global_prefix()
+
+            if global_prefix:
+                # Match /api/v1 or /api/v123
+                pattern = rf"^/({global_prefix})/({prefix})(\d+)(/|$)"
+                match = re.match(pattern, path)
+                if match:
+                    version = match.group(3)
+                    # Reconstruct path: /api/resource
+                    remaining_path = path[match.end() - 1 :] or "/"
+                    new_path = f"/{global_prefix}{remaining_path}"
+                    return version, self.normalize_path(new_path)
+            else:
+                # Match /v1 or /v123
+                pattern = rf"^/({prefix})(\d+)(/|$)"
+                match = re.match(pattern, path)
+                if match:
+                    version = match.group(2)
+                    new_path = path[match.end() - 1 :] or "/"
+                    return version, self.normalize_path(new_path)
+
+            return None, path
 
         elif versioning.type == VersioningType.HEADER:
-            return request.get_header(versioning.header), self.normalize_path(path)
+            return request.get_header(versioning.header), path
 
         elif versioning.type == VersioningType.MEDIA_TYPE:
-            accept = request.get_header(HttpHeaders.ACCEPT, "")
+            accept = request.get_header("accept", "")
             match = re.search(rf"{versioning.key}([\w\d]+)", accept)
-            return (match.group(1) if match else None), self.normalize_path(path)
+            return (match.group(1) if match else None), path
 
-        elif versioning.type == VersioningType.CUSTOM:
-            return versioning.extractor(request), self.normalize_path(path)
+        elif versioning.type == VersioningType.CUSTOM and callable(
+            versioning.extractor
+        ):
+            return versioning.extractor(request), path
 
-        return None, self.normalize_path(path)
+        return None, path
+
+    def get_prefix(self) -> Optional[str]:
+        """
+        Returns the global prefix for the application.
+        """
+        return (
+            self.normalize_path(self.app_config.get_global_prefix())
+            if self.app_config
+            else None
+        )
