@@ -1,0 +1,16 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+        "label": "watch-python",
+        "type": "shell",
+        "command": "watchmedo auto-restart --patterns='*.py' --recursive -- python main.py",
+        "problemMatcher": [],
+        "isBackground": false,
+        "group": {
+            "kind": "build",
+            "isDefault": true
+        }
+    }
+]
+}
