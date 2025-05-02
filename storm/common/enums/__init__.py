@@ -11,7 +11,7 @@ from .notification_type import NotificationType
 from .corss_setting import CORSSetting
 from .compress_algorithm import CompressionAlgorithm
 from .content_type import ContentType
-
+from .versioning_type import VersioningType
 
 __all__ = [
     "HttpStatus",
@@ -27,4 +27,5 @@ __all__ = [
     "CORSSetting",
     "CompressionAlgorithm",
     "ContentType",
+    "VersioningType",
 ]
