@@ -25,6 +25,15 @@ class UsersService(OnModuleInit):
         ]
         return {"users": users}
 
+    def get_users_v2(self, q: str = None):
+        # Simulate fetching users from a database or external service
+        users = [
+            user["id"]
+            for user in self._users
+            if not q or q.lower() in user["name"].lower()
+        ]
+        return {"users": users}
+
     def get_user(self, id):
         # Simulate fetching a user by ID from a database or external service
         user = next((user for user in self._users if user["id"] == id), None)

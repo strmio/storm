@@ -1,5 +1,15 @@
 from typing import List
-from storm.common import Body, Controller, Delete, Get, Post, Headers, Param, Query
+from storm.common import (
+    Body,
+    Controller,
+    Delete,
+    Get,
+    Post,
+    Headers,
+    Param,
+    Query,
+    Version,
+)
 from storm.common import ParseIntPipe, UnauthorizedException
 from storm.common import Logger, OnModuleInit, Host, Ip
 from services.users_service import UsersService
@@ -15,9 +25,14 @@ class UsersController(OnModuleInit):
         self._logger.info("UsersController initialized.")
 
     @Get()
+    async def get_users_v1(self) -> List[dict]:
+        return self.users_service.get_users()
+
+    @Get()
+    @Version("2")
     @Query("q")
-    async def get_users(self, q: str) -> List[dict]:
-        return self.users_service.get_users(q)
+    async def get_users_v2(self, q: str) -> List[dict]:
+        return self.users_service.get_users_v2(q)
 
     @Get("/:id")
     async def get_user(self, id: str = Param("id", ParseIntPipe)):

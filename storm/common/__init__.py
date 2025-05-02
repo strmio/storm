@@ -20,6 +20,7 @@ from .decorators import (
     HttpCode,
     Optional,
     Sse,
+    Version,
 )
 from .interceptors.interceptor import Interceptor
 from .enums import HttpHeaders, HttpStatus, VersioningType
@@ -97,4 +98,5 @@ __all__ = [
     "InternalServerErrorException",
     "Interceptor",
     "VersioningType",
+    "Version",
 ]
