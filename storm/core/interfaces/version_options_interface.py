@@ -1,4 +1,4 @@
-from typing import Union, List, Callable, Optional, Protocol
+from typing import Dict, Type, Union, List, Callable, Optional, Protocol
 
 from storm.common.enums.versioning_type import VersioningType
 
@@ -115,3 +115,10 @@ VersioningOptions = Union[
     MediaTypeVersioningOptions,
     CustomVersioningOptions,
 ]
+
+VERSIONING_CLASS_MAP: Dict[VersioningType, Type[VersioningOptions]] = {
+    VersioningType.HEADER: HeaderVersioningOptions,
+    VersioningType.URI: UriVersioningOptions,
+    VersioningType.MEDIA_TYPE: MediaTypeVersioningOptions,
+    VersioningType.CUSTOM: CustomVersioningOptions,
+}

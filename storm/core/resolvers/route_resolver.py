@@ -69,13 +69,15 @@ class RouteResolver:
         :param base_path: The base path for the controller.
         :param resolver: An instance of RouteResolver to resolve routes.
         """
-        normilized_path = Router.normalize_path(base_path)
+        normilized_prefix = self.router.get_prefix()
+        normilized_path = self.router.normalize_path(base_path)
+        path = normilized_prefix + normilized_path
         self.logger.info(
-            f"{controller.__class__.__name__} {{{Router.normalize_path(normilized_path)}}}"
+            f"{controller.__class__.__name__} {{{Router.normalize_path(path)}}}"
         )
 
         for attr_name in dir(controller):
-            route_info = explorer.explore_route(controller, attr_name, normilized_path)
+            route_info = explorer.explore_route(controller, attr_name, path)
             if route_info:
                 version = route_info.get("version")
 
