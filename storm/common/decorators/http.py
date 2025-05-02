@@ -10,9 +10,11 @@ def route(method, path=""):
         def wrapper(*args, **kwargs):
             return func(*args, **kwargs)
 
+        version = getattr(func, "version", None)
         # Attach route metadata as attributes
         wrapper.is_route = True
-        wrapper._route = {"method": method.upper(), "path": path}
+        wrapper._route = {"method": method.upper(), "path": path, "version": version}
+        wrapper.route_version = version
         wrapper.route_method = method.upper()
         wrapper.route_path = path
 
