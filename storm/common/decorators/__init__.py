@@ -14,6 +14,7 @@ from .use_pipes import UsePipes
 from .http_code import HttpCode
 from .optional import Optional
 from .sse import Sse
+from .version import Version
 
 __all__ = [
     "Controller",
@@ -39,4 +40,5 @@ __all__ = [
     "HttpCode",
     "Optional",
     "Sse",
+    "Version",
 ]

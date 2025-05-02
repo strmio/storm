@@ -42,12 +42,12 @@ class StormApplication:
         :param root_module: The root module containing controllers, providers, and imports.
         :param app_config: Optional dictionary for application configuration.
         """
+        AppContext.set_settings(settings)
         self.root_module = root_module
         self.settings = settings
         self.app_config = ApplicationConfig()
-        AppContext.set_settings(settings)
         self.modules = {root_module.__name__: root_module}
-        self.router = Router()
+        self.router = Router(self.app_config)
         self.logger = Logger(self.__class__.__name__)
         self._print_banner()
         self.logger.info("Starting up Storm application.")
@@ -241,7 +241,7 @@ class StormApplication:
         :return: A tuple containing the response and its status code.
         """
         try:
-            handler, params = self.router.resolve(method, path)
+            handler, params = self.router.resolve(method, path, request=request)
             if not handler:
                 raise NotFoundException()
 
