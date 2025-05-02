@@ -42,6 +42,9 @@ class AppSettings(BaseSettings):
     banner_enabled: bool = Field(default=False)
     banner_file: str = Field(default="banner.txt")
 
+    # force close connection
+    force_close_connections: bool = Field(default=False)
+
     # Other custom settings
 
 
