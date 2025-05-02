@@ -1,21 +1,9 @@
 import inspect
-from typing import Dict, Any, Type, Optional
-from storm.common.enums.versioning_type import VersioningType
+from typing import Dict, Any, Optional
 from storm.core.interfaces.version_options_interface import (
-    CustomVersioningOptions,
-    HeaderVersioningOptions,
-    MediaTypeVersioningOptions,
-    UriVersioningOptions,
     VersioningOptions,
+    VERSIONING_CLASS_MAP,
 )
-
-
-VERSIONING_CLASS_MAP: Dict[VersioningType, Type[VersioningOptions]] = {
-    VersioningType.HEADER: HeaderVersioningOptions,
-    VersioningType.URI: UriVersioningOptions,
-    VersioningType.MEDIA_TYPE: MediaTypeVersioningOptions,
-    VersioningType.CUSTOM: CustomVersioningOptions,
-}
 
 
 class ApplicationConfig:
@@ -34,6 +22,7 @@ class ApplicationConfig:
 
     def __init__(self):
         self._versioning_options: Optional[VersioningOptions] = None
+        self._global_prefix: Optional[str] = None
 
     def enable_versioning(self, options: VersioningOptions):
         """
@@ -80,3 +69,22 @@ class ApplicationConfig:
         params = {k: v for k, v in versioning_options.items() if k in sig.parameters}
 
         return cls(**params)
+
+    def set_global_prefix(self, prefix: str):
+        """
+        Set a global prefix for the application.
+
+        :param prefix: The prefix to set.
+        """
+        if self._global_prefix is not None:
+            raise AttributeError("Global prefix is already set.")
+        # remove leading and trailing slashes
+        self._global_prefix = prefix.strip("/")
+
+    def get_global_prefix(self) -> Optional[str]:
+        """
+        Get the global prefix for the application.
+
+        :return: The global prefix if set, otherwise None.
+        """
+        return self._global_prefix
