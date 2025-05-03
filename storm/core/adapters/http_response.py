@@ -1,8 +1,11 @@
+import base64
 import json
+import hashlib
 from storm.common.enums.content_type import ContentType
 from storm.common.enums.http_headers import HttpHeaders
 from storm.common.enums.http_status import HttpStatus
 from storm.common.exceptions.exception import StormHttpException
+from storm.core.adapters.http_request import HttpRequest
 
 
 class HttpResponse:
@@ -158,12 +161,12 @@ class HttpResponse:
         """
         if isinstance(self.content, (dict, list)):  # JSON content
             return json.dumps(self.content).encode("utf-8")
-        elif isinstance(self.content, str):  # Plain text or HTML
+        if isinstance(self.content, str):  # Plain text or HTML
             return self.content.encode("utf-8")
-        elif isinstance(self.content, bytes):  # Binary content
+        if isinstance(self.content, bytes):  # Binary content
             return self.content
-        else:
-            return b""  # Empty response
+
+        return b""  # Empty response
 
     async def send_sse_headers(self, send):
         """
@@ -211,6 +214,54 @@ class HttpResponse:
             }
         )
 
+    def _generate_etag(self, algorithm: str = "md5", encoding: str = "base64") -> str:
+        """
+        Generate an ETag from the response content.
+
+        :param algorithm: Hash algorithm ("md5", "sha256", etc.)
+        :param encoding: Encoding of the digest ("hex", "base64")
+        :return: Encoded ETag value (not wrapped in W/"" yet)
+        """
+        if isinstance(self.content, (dict, list)):
+            raw = json.dumps(self.content, sort_keys=True).encode("utf-8")
+        elif isinstance(self.content, str):
+            raw = self.content.encode("utf-8")
+        elif isinstance(self.content, bytes):
+            raw = self.content
+        else:
+            raw = b""
+
+        hasher = getattr(hashlib, algorithm)(raw)
+
+        if encoding == "hex":
+            return hasher.hexdigest()
+        elif encoding == "base64":
+            return base64.b64encode(hasher.digest()).decode("ascii")
+        else:
+            raise ValueError("Unsupported encoding for ETag")
+
+    def set_etag(
+        self,
+        weak: bool = True,
+        algorithm: str = "md5",
+        encoding: str = "base64",
+        prefix: str = "c-",
+    ) -> str:
+        """
+        Set the ETag header based on current content.
+
+        :param weak: Whether the ETag is weak (default True)
+        :param algorithm: Hashing algorithm for ETag
+        :param encoding: Digest encoding ("hex", "base64")
+        :param prefix: Prefix to add before the digest (e.g. "c-" like in Express)
+        :return: The computed ETag
+        """
+        digest = self._generate_etag(algorithm=algorithm, encoding=encoding)
+        tag = f"{prefix}{digest}"
+        etag_value = f'W/"{tag}"' if weak else f'"{tag}"'
+        self.set_header(HttpHeaders.ETAG, etag_value)
+        return tag
+
 
 # Helper methods to create common response types
 
@@ -254,7 +305,7 @@ def HtmlResponse(html, status_code=HttpStatus.OK, headers=None):
 def FileResponse(
     file_bytes,
     filename,
-    content_type="application/octet-stream",
+    content_type=ContentType.OCTET_STREAM,
     status_code=200,
     headers=None,
 ):
@@ -262,6 +313,7 @@ def FileResponse(
     Create a file download response.
     """
     headers = headers or {}
+
     headers["content-disposition"] = f'attachment; filename="{filename}"'
     return HttpResponse(
         content=file_bytes,
@@ -269,3 +321,16 @@ def FileResponse(
         headers=headers,
         content_type=content_type,
     )
+
+
+async def etag_response(request: HttpRequest, response: HttpResponse):
+    current_etag = response.set_etag()
+    client_etag = request.get_if_none_match()
+
+    if client_etag and client_etag.strip('"') == current_etag:
+        # Resource hasn't changed, return 304
+        response.update_status_code(HttpStatus.NOT_MODIFIED)
+        response.update_content("")  # No body for 304
+        response.update_headers({HttpHeaders.CONTENT_TYPE: ContentType.PLAIN})
+
+    await response.send(request.send)

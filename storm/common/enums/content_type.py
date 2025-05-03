@@ -10,7 +10,7 @@ class ContentType(StrEnum):
     CSV = "text/csv"
 
     # JSON & XML
-    JSON = "application/json"
+    JSON = "application/json; charset=utf-8"
     XML = "application/xml"
     TEXT_XML = "text/xml"
 
