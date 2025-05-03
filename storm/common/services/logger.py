@@ -1,5 +1,7 @@
 import logging
 from typing import Optional, Dict
+
+from storm.common.services.logger_service import LoggerService
 from .helpers import LogColorNoBold as LogColor
 from storm.core.context import AppContext
 
@@ -13,7 +15,7 @@ level_colors = {
 }
 
 
-class Logger:
+class Logger(LoggerService):
     """
     A custom logger with support for colored console logging and plain file logging.
     """

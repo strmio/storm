@@ -1,8 +1,7 @@
 import datetime
 import threading
 from typing import List, Optional, Callable, Any
-
-from storm.common import Injectable
+from storm.common.decorators.injectable import Injectable
 
 LogLevel = str
 LOG_LEVELS: List[LogLevel] = ["log", "error", "warn", "debug", "verbose", "fatal"]
@@ -19,7 +18,7 @@ class LogBufferRecord:
 
 
 class LoggerService:
-    def log(self, message: Any, *optional_params: Any):
+    def info(self, message: Any, *optional_params: Any):
         pass
 
     def error(self, message: Any, *optional_params: Any):
@@ -58,11 +57,11 @@ class ConsoleLogger(LoggerService):
         context = f"[{self.context}]" if self.context else ""
         return f"{timestamp} {prefix} {context} {message} {' '.join(map(str, optional_params))}".strip()
 
-    def _log(self, level: str, message: Any, *optional_params: Any):
+    def _info(self, level: str, message: Any, *optional_params: Any):
         if level in self.log_levels:
             print(self._format_message(level, message, *optional_params))
 
-    def log(self, message: Any, *optional_params: Any):
+    def info(self, message: Any, *optional_params: Any):
         self._log("log", message, *optional_params)
 
     def error(self, message: Any, *optional_params: Any):
