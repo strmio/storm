@@ -341,3 +341,11 @@ class HttpRequest:
         :return: The value of the If-None-Match header, or None if not present.
         """
         return self.get_header(HttpHeaders.IF_NONE_MATCH)
+
+    def get_if_match(self) -> Optional[str]:
+        """
+        Retrieve the value of the 'If-Match' header from the HTTP request headers.
+
+        :retuen: Optional[str]: The value of the 'If-Match' header if it exists, otherwise None.
+        """
+        return self.get_header(HttpHeaders.IF_MATCH)
