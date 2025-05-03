@@ -1,4 +1,5 @@
 import base64
+from email.utils import formatdate
 import json
 import hashlib
 from storm.common.enums.content_type import ContentType
@@ -50,6 +51,12 @@ class HttpResponse:
         # Default headers
         headers = headers or {}
 
+        # Add X-powered-by header
+        headers[HttpHeaders.X_POWERED_BY] = "Storm"
+
+        # Add Date header
+        headers["Date"] = formatdate(timeval=None, usegmt=True)
+
         # Add a header based on request headers
         if HttpHeaders.ACCEPT_LANGUAGE in request.headers:
             headers[HttpHeaders.ACCEPT_LANGUAGE] = request.headers[
@@ -88,6 +95,14 @@ class HttpResponse:
         Update the response content.
         :param content: New response content
         """
+        # Update Content-Length header
+        if isinstance(content, (str, bytes)):
+            self.headers[HttpHeaders.CONTENT_LENGTH] = str(len(content))
+        elif isinstance(content, (dict, list)):
+            self.headers[HttpHeaders.CONTENT_LENGTH] = str(len(json.dumps(content)))
+        else:
+            self.headers.pop(HttpHeaders.CONTENT_LENGTH, None)
+
         self.content = content
 
     def update_status_code(self, status_code):
@@ -237,8 +252,7 @@ class HttpResponse:
             return hasher.hexdigest()
         elif encoding == "base64":
             return base64.b64encode(hasher.digest()).decode("ascii")
-        else:
-            raise ValueError("Unsupported encoding for ETag")
+        raise ValueError("Unsupported encoding for ETag")
 
     def set_etag(
         self,
