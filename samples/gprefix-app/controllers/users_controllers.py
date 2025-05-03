@@ -15,7 +15,7 @@ from storm.common import Logger, OnModuleInit, Host, Ip
 from services.users_service import UsersService
 
 
-@Controller("users")  # Define base path for this controller
+@Controller("users/")  # Define base path for this controller
 class UsersController(OnModuleInit):
     users_service: UsersService
 
@@ -26,7 +26,7 @@ class UsersController(OnModuleInit):
         self._logger.info("UsersController initialized.")
 
     @Get()
-    # @Version("1")
+    @Version("1")
     async def get_users_v1(self) -> List[dict]:
         return self.users_service.get_users()
 
