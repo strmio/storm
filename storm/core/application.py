@@ -1,6 +1,5 @@
 import inspect
 from functools import wraps
-import traceback
 from rich import print
 from storm.common.enums.content_type import ContentType
 from storm.common.enums.http_headers import HttpHeaders
@@ -16,6 +15,8 @@ from storm.common.exceptions.http import (
 from storm.core.adapters.http_request import HttpRequest
 from storm.core.adapters.http_response import HttpResponse
 from storm.core.appliction_config import ApplicationConfig
+from storm.core.exceptions.exception_handler import ExceptionHandler
+from storm.core.exceptions.traceback_handler import TracebackHandler
 from storm.core.helpers.helpers import strip_etag_quotes
 from storm.core.interceptor_pipeline import InterceptorPipeline
 from storm.core.interfaces.version_options_interface import VersioningOptions
@@ -56,9 +57,11 @@ class StormApplication:
         self.app_config = ApplicationConfig()
         self.modules = {root_module.__name__: root_module}
         self.router = Router(self.app_config)
-        self.logger = Logger(self.__class__.__name__)
+        self.__logger = Logger(self.__class__.__name__)
+        self.__exception_handler = ExceptionHandler()
+        self._traceback_handler = TracebackHandler()
         self._print_banner()
-        self.logger.info("Starting up Storm application.")
+        self.__logger.info("Starting up Storm application.")
         if self.settings.sys_monitoring_enabled:
             self.system_monitor = SystemMonitor(self.settings.sys_monitoring_interval)
             self.system_monitor.start()
@@ -108,11 +111,11 @@ class StormApplication:
         Load and initialize modules from the root module.
         """
 
-        self.logger.info(f"{self.root_module.__name__} dependencies initialized")
+        self.__logger.info(f"{self.root_module.__name__} dependencies initialized")
         self._initialize_module(self.root_module)
         for module in self.root_module.imports:
             self.modules[module.__name__] = module
-            self.logger.info(f"{module.__name__} dependencies initialized")
+            self.__logger.info(f"{module.__name__} dependencies initialized")
             self._initialize_module(module)
 
     def _load_controllers(self):
@@ -265,7 +268,7 @@ class StormApplication:
         except StormHttpException as e:
             raise e
         except Exception as e:
-            self.logger.error(e)
+            self.__exception_handler.handle_exception(e)
             raise InternalServerErrorException() from e
 
         finally:
@@ -317,14 +320,17 @@ class StormApplication:
                         )
 
             except StormHttpException as exc:
-                self.logger.error(exc)
+                # self.__exception_handler.handle_exception(exc)
                 if exc.status_code == HttpStatus.INTERNAL_SERVER_ERROR:
-                    tb = traceback.format_exc()
-                    self.logger.error(tb)
+                    self._traceback_handler.handle_exception(exc, exc.__traceback__)
                 response = HttpResponse.from_error(exc)
-            except Exception:
-                tb = traceback.format_exc()
-                self.logger.error(tb)
+            except Exception as exc:
+                self.__exception_handler.handle_exception(
+                    InternalServerErrorException()
+                )
+                self._traceback_handler.handle_exception(
+                    exc, exc.__traceback__, InternalServerErrorException
+                )
                 response = HttpResponse.from_error(InternalServerErrorException())
             finally:
                 if response:
@@ -351,7 +357,7 @@ class StormApplication:
         import signal
 
         def handle_shutdown(signal_number, frame):
-            self.logger.info(f"Received shutdown signal: {signal_number}")
+            self.__logger.info(f"Received shutdown signal: {signal_number}")
             self.shutdown()
 
         # Register signal handlers for graceful shutdown
@@ -370,7 +376,9 @@ class StormApplication:
                 date_header=False,
             )
         except Exception as e:
-            self.logger.error(f"Error while running the server: {e}")
+            self.__exception_handler.handle_exception(
+                f"Error while running the server: {e}"
+            )
         finally:
             self.shutdown()
 
@@ -402,13 +410,13 @@ class StormApplication:
             self.repl_manager.start()
         else:
             self.repl_manager = None
-        self.logger.info("Storm application succefully started")
+        self.__logger.info("Storm application succefully started")
 
     def _handle_shutdown(self, signal_number, frame):
         """
         Handle shutdown signals like SIGINT and SIGTERM.
         """
-        self.logger.info(f"Received shutdown signal: {signal_number}")
+        self.__logger.info(f"Received shutdown signal: {signal_number}")
         self.shutdown()
 
     def shutdown(self, shutdown_number=None, frame=None):
@@ -418,30 +426,30 @@ class StormApplication:
         if self._shutdown_called:
             return
         self._shutdown_called = True
-        self.logger.info("Shutting down Storm application.")
+        self.__logger.info("Shutting down Storm application.")
         for module_name, module in self.modules.items():
             if hasattr(module, "onDestroy") and callable(module.onDestroy):
                 try:
-                    self.logger.info(
+                    self.__logger.info(
                         f"Executing onDestroy hook for module: {module_name}"
                     )
                     module.onDestroy()
                 except Exception as e:
-                    self.logger.error(
+                    self.__logger.error(
                         f"Error during onDestroy of module {module_name}: {e}"
                     )
 
         # Stop the REPL manager
 
         if self.repl_manager:
-            self.logger.info("Stopping REPL manager.")
+            self.__logger.info("Stopping REPL manager.")
             self.repl_manager.shutdown()
 
         if self.system_monitor:
-            self.logger.info("Stopping system monitor.")
+            self.__logger.info("Stopping system monitor.")
             self.system_monitor.shutdown()
 
-        self.logger.info("Storm application shutdown complete.\n")
+        self.__logger.info("Storm application shutdown complete.\n")
 
     @staticmethod
     def _get_version(package: str) -> str:
@@ -479,7 +487,7 @@ class StormApplication:
                     print(f"[bold red]{banner}[/bold red]")
 
             except FileNotFoundError:
-                self.logger.warning(
+                self.__logger.warning(
                     f"Banner file {self.settings.banner_file} not found. Skipping banner display."
                 )
 
