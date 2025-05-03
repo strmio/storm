@@ -63,6 +63,12 @@ class HttpResponse:
                 HttpHeaders.ACCEPT_LANGUAGE
             ]
 
+        # add keep-alive header
+        headers[HttpHeaders.KEEP_ALIVE] = "keep-alive"
+
+        # Add connection header
+        headers[HttpHeaders.CONNECTION] = "timeout=5"
+
         # Create the response
         return HttpResponse(
             content=content,
