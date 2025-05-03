@@ -253,7 +253,7 @@ class HttpResponse:
         :param weak: Whether the ETag is weak (default True)
         :param algorithm: Hashing algorithm for ETag
         :param encoding: Digest encoding ("hex", "base64")
-        :param prefix: Prefix to add before the digest (e.g. "c-" like in Express)
+        :param prefix: Prefix to add before the digest (e.g. "c-")
         :return: The computed ETag
         """
         digest = self._generate_etag(algorithm=algorithm, encoding=encoding)
