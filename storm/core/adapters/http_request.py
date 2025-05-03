@@ -2,6 +2,7 @@ import json
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 from urllib.parse import parse_qs
 from enum import StrEnum
+from storm.common.enums.http_headers import HttpHeaders
 
 
 class HttpRequestEnums(StrEnum):
@@ -333,3 +334,18 @@ class HttpRequest:
         :return: The server host
         """
         return self.server_host
+
+    def get_if_none_match(self) -> Optional[str]:
+        """
+        Get the value of the If-None-Match header from the request.
+        :return: The value of the If-None-Match header, or None if not present.
+        """
+        return self.get_header(HttpHeaders.IF_NONE_MATCH)
+
+    def get_if_match(self) -> Optional[str]:
+        """
+        Retrieve the value of the 'If-Match' header from the HTTP request headers.
+
+        :retuen: Optional[str]: The value of the 'If-Match' header if it exists, otherwise None.
+        """
+        return self.get_header(HttpHeaders.IF_MATCH)
