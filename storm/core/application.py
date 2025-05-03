@@ -311,7 +311,7 @@ class StormApplication:
                         client_etag
                     ) == strip_etag_quotes(current_etag):
                         response.update_status_code(HttpStatus.NOT_MODIFIED)
-                        response.update_content("")  # No body for 304
+                        response.update_content(None)  # No body for 304
                         response.update_headers(
                             {HttpHeaders.CONTENT_TYPE: ContentType.PLAIN}
                         )
@@ -361,7 +361,14 @@ class StormApplication:
 
         try:
             self._initialize_application()
-            uvicorn.run(self, host=host, port=port, log_level="error")
+            uvicorn.run(
+                self,
+                host=host,
+                port=port,
+                log_level="error",
+                server_header=False,
+                date_header=False,
+            )
         except Exception as e:
             self.logger.error(f"Error while running the server: {e}")
         finally:
