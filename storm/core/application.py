@@ -361,7 +361,14 @@ class StormApplication:
 
         try:
             self._initialize_application()
-            uvicorn.run(self, host=host, port=port, log_level="error")
+            uvicorn.run(
+                self,
+                host=host,
+                port=port,
+                log_level="error",
+                server_header=False,
+                date_header=False,
+            )
         except Exception as e:
             self.logger.error(f"Error while running the server: {e}")
         finally:
