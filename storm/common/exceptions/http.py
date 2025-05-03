@@ -158,3 +158,18 @@ class GatewayTimeoutException(StormHttpException):
         super().__init__(
             message, status_code=HttpStatus.GATEWAY_TIMEOUT, name="GatewayTimeout"
         )
+
+
+class PreconditionFailedException(StormHttpException):
+    """
+    Exception raised when a precondition in the request headers is not met.
+
+    :param message: Error message
+    """
+
+    def __init__(self, message="Precondition failed"):
+        super().__init__(
+            message,
+            status_code=HttpStatus.PRECONDITION_FAILED,
+            name="PreconditionFailed",
+        )
