@@ -1,3 +1,4 @@
+import base64
 import json
 import hashlib
 from storm.common.enums.content_type import ContentType
@@ -213,9 +214,13 @@ class HttpResponse:
             }
         )
 
-    def _generate_etag(self) -> str:
+    def _generate_etag(self, algorithm: str = "md5", encoding: str = "base64") -> str:
         """
         Generate an ETag from the response content.
+
+        :param algorithm: Hash algorithm ("md5", "sha256", etc.)
+        :param encoding: Encoding of the digest ("hex", "base64")
+        :return: Encoded ETag value (not wrapped in W/"" yet)
         """
         if isinstance(self.content, (dict, list)):
             raw = json.dumps(self.content, sort_keys=True).encode("utf-8")
@@ -225,15 +230,37 @@ class HttpResponse:
             raw = self.content
         else:
             raw = b""
-        return hashlib.md5(raw).hexdigest()  # Weak ETag
 
-    def set_etag(self):
+        hasher = getattr(hashlib, algorithm)(raw)
+
+        if encoding == "hex":
+            return hasher.hexdigest()
+        elif encoding == "base64":
+            return base64.b64encode(hasher.digest()).decode("ascii")
+        else:
+            raise ValueError("Unsupported encoding for ETag")
+
+    def set_etag(
+        self,
+        weak: bool = True,
+        algorithm: str = "md5",
+        encoding: str = "base64",
+        prefix: str = "c-",
+    ) -> str:
         """
         Set the ETag header based on current content.
+
+        :param weak: Whether the ETag is weak (default True)
+        :param algorithm: Hashing algorithm for ETag
+        :param encoding: Digest encoding ("hex", "base64")
+        :param prefix: Prefix to add before the digest (e.g. "c-" like in Express)
+        :return: The computed ETag
         """
-        etag = self._generate_etag()
-        self.headers[HttpHeaders.ETAG] = f'"{etag}"'
-        return etag
+        digest = self._generate_etag(algorithm=algorithm, encoding=encoding)
+        tag = f"{prefix}{digest}"
+        etag_value = f'W/"{tag}"' if weak else f'"{tag}"'
+        self.set_header(HttpHeaders.ETAG, etag_value)
+        return tag
 
 
 # Helper methods to create common response types
@@ -286,6 +313,7 @@ def FileResponse(
     Create a file download response.
     """
     headers = headers or {}
+
     headers["content-disposition"] = f'attachment; filename="{filename}"'
     return HttpResponse(
         content=file_bytes,
