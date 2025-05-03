@@ -4,6 +4,7 @@ import traceback
 from rich import print
 from storm.common.enums.content_type import ContentType
 from storm.common.enums.http_headers import HttpHeaders
+from storm.common.enums.http_method import HttpMethod
 from storm.common.enums.http_status import HttpStatus
 from storm.common.enums.versioning_type import VersioningType
 from storm.common.exceptions.exception import StormHttpException
@@ -292,24 +293,29 @@ class StormApplication:
 
                 current_etag = response.set_etag()
 
-                client_etag = request.get_if_match()
-
-                if client_etag and strip_etag_quotes(client_etag) != strip_etag_quotes(
-                    current_etag
+                if request.method in (
+                    HttpMethod.PUT,
+                    HttpMethod.PATCH,
+                    HttpMethod.DELETE,
                 ):
-                    raise PreconditionFailedException()  # Precondition Failed
+                    client_etag = request.get_if_match()
+                    if client_etag and strip_etag_quotes(
+                        client_etag
+                    ) != strip_etag_quotes(current_etag):
+                        raise PreconditionFailedException()
 
-                client_etag = request.get_if_none_match()
+                # If-None-Match (for cache validation on GET)
+                elif request.method == HttpMethod.GET:
+                    client_etag = request.get_if_none_match()
+                    if client_etag and strip_etag_quotes(
+                        client_etag
+                    ) == strip_etag_quotes(current_etag):
+                        response.update_status_code(HttpStatus.NOT_MODIFIED)
+                        response.update_content("")  # No body for 304
+                        response.update_headers(
+                            {HttpHeaders.CONTENT_TYPE: ContentType.PLAIN}
+                        )
 
-                if client_etag and strip_etag_quotes(client_etag) == strip_etag_quotes(
-                    current_etag
-                ):
-                    # Resource hasn't changed, return 304
-                    response.update_status_code(HttpStatus.NOT_MODIFIED)
-                    response.update_content("")  # No body for 304
-                    response.update_headers(
-                        {HttpHeaders.CONTENT_TYPE: ContentType.PLAIN}
-                    )
             except StormHttpException as exc:
                 self.logger.error(exc)
                 if exc.status_code == HttpStatus.INTERNAL_SERVER_ERROR:
@@ -321,7 +327,8 @@ class StormApplication:
                 self.logger.error(tb)
                 response = HttpResponse.from_error(InternalServerErrorException())
             finally:
-                await response.send(send)
+                if response:
+                    await response.send(send)
         elif scope["type"] == "lifespan":
             # Handle startup and shutdown events
             while True:
