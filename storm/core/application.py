@@ -2,6 +2,8 @@ import inspect
 from functools import wraps
 import traceback
 from rich import print
+from storm.common.enums.content_type import ContentType
+from storm.common.enums.http_headers import HttpHeaders
 from storm.common.enums.http_status import HttpStatus
 from storm.common.enums.versioning_type import VersioningType
 from storm.common.exceptions.exception import StormHttpException
@@ -293,6 +295,16 @@ class StormApplication:
                 self.logger.error(tb)
                 response = HttpResponse.from_error(InternalServerErrorException())
             finally:
+                current_etag = response.set_etag()
+                client_etag = request.get_if_none_match()
+
+                if client_etag and client_etag.strip('"') == current_etag:
+                    # Resource hasn't changed, return 304
+                    response.update_status_code(HttpStatus.NOT_MODIFIED)
+                    response.update_content("")  # No body for 304
+                    response.update_headers(
+                        {HttpHeaders.CONTENT_TYPE: ContentType.PLAIN}
+                    )
                 await response.send(send)
         elif scope["type"] == "lifespan":
             # Handle startup and shutdown events
@@ -376,7 +388,6 @@ class StormApplication:
         if self._shutdown_called:
             return
         self._shutdown_called = True
-        print()
         self.logger.info("Shutting down Storm application.")
         for module_name, module in self.modules.items():
             if hasattr(module, "onDestroy") and callable(module.onDestroy):
