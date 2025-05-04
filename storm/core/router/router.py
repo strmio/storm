@@ -66,13 +66,17 @@ class Router:
             else:
                 self.static_routes[method][v][path] = handler
 
-    def resolve(self, method: str, path: str, request: HttpRequest, version=None):
+    def resolve(
+        self, method: str, path: str, request: HttpRequest = None, version=None
+    ):
         """
         Resolves a route for the given HTTP method, path, and version.
 
         If no route is found for the specific version, falls back to VERSION_NEUTRAL.
         """
-        version, path = self.extract_version(request)
+
+        if request:
+            version, path = self.extract_version(request)
 
         # Versions to try
         versions_to_try = [version or VERSION_NEUTRAL]
