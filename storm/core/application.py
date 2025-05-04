@@ -379,6 +379,9 @@ class StormApplication:
             self.__exception_handler.handle_exception(
                 f"Error while running the server: {e}"
             )
+            self._traceback_handler.handle_exception(
+                e, e.__traceback__, InternalServerErrorException
+            )
         finally:
             self.shutdown()
 

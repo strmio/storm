@@ -8,7 +8,7 @@ class TracebackHandler:
         self.console = Console()
 
     async def _print_traceback_async(
-        self, exc_value: Exception, exc_traceback=None, exc_type=type(BaseException)
+        self, exception: Exception, tb=None, excecption_type=type(BaseException)
     ):
         """
         Asynchronously render and print the traceback for a given exception.
@@ -16,13 +16,13 @@ class TracebackHandler:
         Args:
             exception (BaseException): The exception to render and print.
         """
-        if exc_traceback is None:
-            exc_traceback = exc_value.__traceback__
-        traceback = Traceback.from_exception(exc_type, exc_value, exc_traceback)
+        if tb is None:
+            tb = exception.__traceback__
+        traceback = Traceback.from_exception(excecption_type, exception, tb)
         self.console.print(traceback)
 
     def handle_exception(
-        self, exc_value: Exception, exc_traceback=None, exc_type=type(BaseException)
+        self, exception: Exception, tb=None, excecption_type=type(BaseException)
     ):
         """
         Schedule the asynchronous traceback printing without blocking.
@@ -30,6 +30,10 @@ class TracebackHandler:
         Args:
             exception (BaseException): The exception to be handled.
         """
-        asyncio.create_task(
-            self._print_traceback_async(exc_value, exc_traceback, exc_type)
-        )
+        loop = asyncio.get_event_loop()
+        coro = self._print_traceback_async(exception, tb, excecption_type)
+
+        if loop.is_running():
+            loop.create_task(coro)
+        else:
+            asyncio.run(coro)
