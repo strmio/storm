@@ -33,6 +33,7 @@ class HttpResponse:
         self.status_code = status_code
         self.headers = headers or {}
         self.content_type = content_type
+        self._closed = False
 
         # Ensure Content-Type is included in headers
         self.headers[HttpHeaders.CONTENT_TYPE] = self.content_type
@@ -204,6 +205,13 @@ class HttpResponse:
                 ],
             }
         )
+        self._closed = True
+    
+    def is_closed(self):
+        """
+        Check if the response is closed.
+        """
+        return self._closed
 
     async def send_sse_event(self, send, data: str, event: str = None, id: str = None):
         """
