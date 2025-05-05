@@ -3,6 +3,7 @@ from storm.core import StormApplication
 import numba
 import numpy as np
 
+from settings import get_settings
 
 # Numba-optimized functions
 @numba.njit
@@ -79,7 +80,7 @@ class AppModule:
 
 
 # Initialize the application with AppModule
-app = StormApplication(AppModule)
+app = StormApplication(AppModule, settings=get_settings())
 
 if __name__ == "__main__":
     # Start the application

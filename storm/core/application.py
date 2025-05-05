@@ -1,13 +1,25 @@
 import inspect
 from functools import wraps
-import traceback
 from rich import print
+from storm.common.enums.content_type import ContentType
+from storm.common.enums.http_headers import HttpHeaders
+from storm.common.enums.http_method import HttpMethod
 from storm.common.enums.http_status import HttpStatus
+from storm.common.enums.versioning_type import VersioningType
 from storm.common.exceptions.exception import StormHttpException
-from storm.common.exceptions.http import InternalServerErrorException, NotFoundException
+from storm.common.exceptions.http import (
+    InternalServerErrorException,
+    NotFoundException,
+    PreconditionFailedException,
+)
 from storm.core.adapters.http_request import HttpRequest
 from storm.core.adapters.http_response import HttpResponse
+from storm.core.appliction_config import ApplicationConfig
+from storm.core.exceptions.exception_handler import ExceptionHandler
+from storm.core.exceptions.traceback_handler import TracebackHandler
+from storm.core.helpers.helpers import strip_etag_quotes
 from storm.core.interceptor_pipeline import InterceptorPipeline
+from storm.core.interfaces.version_options_interface import VersioningOptions
 from storm.core.middleware_pipeline import MiddlewarePipeline
 from storm.core.repl.repl_manager import ReplManager
 from storm.core.resolvers.route_resolver import RouteExplorer, RouteResolver
@@ -39,32 +51,24 @@ class StormApplication:
         :param root_module: The root module containing controllers, providers, and imports.
         :param app_config: Optional dictionary for application configuration.
         """
+        AppContext.set_settings(settings)
+        self.app_config = ApplicationConfig()
+        self._exception_handler = ExceptionHandler()
+        self._traceback_handler = TracebackHandler()
+        self.middleware_pipeline = MiddlewarePipeline()
+        self.interceptor_pipeline = InterceptorPipeline(global_interceptors=[])
+        self.router = Router(self.app_config)
+        self._logger = Logger(self.__class__.__name__)
         self.root_module = root_module
         self.settings = settings
-        AppContext.set_settings(settings)
         self.modules = {root_module.__name__: root_module}
-        self.router = Router()
-        self.logger = Logger(self.__class__.__name__)
         self._print_banner()
-        self.logger.info("Starting up Storm application.")
+        self._logger.info("Starting up Storm application.")
         if self.settings.sys_monitoring_enabled:
             self.system_monitor = SystemMonitor(self.settings.sys_monitoring_interval)
             self.system_monitor.start()
         else:
             self.system_monitor = None
-        self.middleware_pipeline = MiddlewarePipeline()
-        self.interceptor_pipeline = InterceptorPipeline(global_interceptors=[])
-        self._load_modules()
-        self._load_controllers()
-        self._shutdown_called = False
-
-        # Initialize REPL Manager
-        if self.settings.repl_enabled:
-            self.repl_manager = ReplManager(self, self.system_monitor)
-            self.repl_manager.start()
-        else:
-            self.repl_manager = None
-        self.logger.info("Storm application succefully started")
 
     def add_global_interceptor(self, interceptor_cls):
         """
@@ -82,16 +86,36 @@ class StormApplication:
         """
         self.middleware_pipeline.add_global_middleware(middleware_cls)
 
+    def enable_versioning(
+        self, verioning_options: VersioningOptions = {type: VersioningType.URI}
+    ):
+        """
+        Enables versioning for the application with the specified options.
+
+
+        :verioning_options (VersioningOptions, optional): Configuration options for versioning.
+                Defaults to { type: VersioningType.URI }.
+        """
+        self.app_config.enable_versioning(verioning_options)
+
+    def setGlobalPrefix(self, prefix: str):
+        """
+        Set a global prefix for all routes in the application.
+
+        :param prefix: The prefix to be added to all routes.
+        """
+        self.app_config.set_global_prefix(self.router.normalize_path(prefix))
+
     def _load_modules(self):
         """
         Load and initialize modules from the root module.
         """
 
-        self.logger.info(f"{self.root_module.__name__} dependencies initialized")
+        self._logger.info(f"{self.root_module.__name__} dependencies initialized")
         self._initialize_module(self.root_module)
         for module in self.root_module.imports:
             self.modules[module.__name__] = module
-            self.logger.info(f"{module.__name__} dependencies initialized")
+            self._logger.info(f"{module.__name__} dependencies initialized")
             self._initialize_module(module)
 
     def _load_controllers(self):
@@ -225,7 +249,7 @@ class StormApplication:
         :return: A tuple containing the response and its status code.
         """
         try:
-            handler, params = self.router.resolve(method, path)
+            handler, params = self.router.resolve(method, path, request=request)
             if not handler:
                 raise NotFoundException()
 
@@ -244,7 +268,7 @@ class StormApplication:
         except StormHttpException as e:
             raise e
         except Exception as e:
-            self.logger.error(e)
+            self._exception_handler.handle_exception(e)
             raise InternalServerErrorException() from e
 
         finally:
@@ -264,23 +288,51 @@ class StormApplication:
                 await request.parse_body()
 
                 method, path, request_kwargs = request.get_request_info()
-                response = HttpResponse.from_request(request=request, status_code=200)
+                response = HttpResponse.from_request(request=request)
 
                 response, _ = await self.handle_request(
                     method, path, request, response, **request_kwargs
                 )
+
+                current_etag = response.set_etag()
+
+                if request.method in (
+                    HttpMethod.PUT,
+                    HttpMethod.PATCH,
+                    HttpMethod.DELETE,
+                ):
+                    client_etag = request.get_if_match()
+                    if client_etag and strip_etag_quotes(
+                        client_etag
+                    ) != strip_etag_quotes(current_etag):
+                        raise PreconditionFailedException()
+
+                # If-None-Match (for cache validation on GET)
+                elif request.method == HttpMethod.GET:
+                    client_etag = request.get_if_none_match()
+                    if client_etag and strip_etag_quotes(
+                        client_etag
+                    ) == strip_etag_quotes(current_etag):
+                        response.update_status_code(HttpStatus.NOT_MODIFIED)
+                        response.update_content(None)  # No body for 304
+                        response.update_headers(
+                            {HttpHeaders.CONTENT_TYPE: ContentType.PLAIN}
+                        )
+
             except StormHttpException as exc:
-                self.logger.error(exc)
+                # self.__exception_handler.handle_exception(exc)
                 if exc.status_code == HttpStatus.INTERNAL_SERVER_ERROR:
-                    tb = traceback.format_exc()
-                    self.logger.error(tb)
+                    self._traceback_handler.handle_exception(exc, exc.__traceback__)
                 response = HttpResponse.from_error(exc)
-            except Exception:
-                tb = traceback.format_exc()
-                self.logger.error(tb)
+            except Exception as exc:
+                self._exception_handler.handle_exception(InternalServerErrorException())
+                self._traceback_handler.handle_exception(
+                    exc, exc.__traceback__, InternalServerErrorException
+                )
                 response = HttpResponse.from_error(InternalServerErrorException())
             finally:
-                await response.send(send)
+                if response and not response.is_closed():
+                    await response.send(send)
         elif scope["type"] == "lifespan":
             # Handle startup and shutdown events
             while True:
@@ -303,7 +355,7 @@ class StormApplication:
         import signal
 
         def handle_shutdown(signal_number, frame):
-            self.logger.info(f"Received shutdown signal: {signal_number}")
+            self._logger.info(f"Received shutdown signal: {signal_number}")
             self.shutdown()
 
         # Register signal handlers for graceful shutdown
@@ -312,17 +364,60 @@ class StormApplication:
         signal.signal(signal.SIGTERM, handle_shutdown)
 
         try:
-            uvicorn.run(self, host=host, port=port, log_level="error")
+            self._initialize_application()
+            uvicorn.run(
+                self,
+                host=host,
+                port=port,
+                log_level="error",
+                server_header=False,
+                date_header=False,
+            )
         except Exception as e:
-            self.logger.error(f"Error while running the server: {e}")
+            self._exception_handler.handle_exception(
+                f"Error while running the server: {e}"
+            )
+            self._traceback_handler.handle_exception(
+                e, e.__traceback__, InternalServerErrorException
+            )
         finally:
             self.shutdown()
+
+    def _initialize_application(self):
+        """
+        Initializes the Storm application by loading necessary modules and controllers,
+        setting up the REPL manager if enabled, and marking the application as started.
+
+        This method performs the following steps:
+        1. Loads application modules.
+        2. Loads application controllers.
+        3. Initializes the REPL (Read-Eval-Print Loop) manager if REPL is enabled in settings.
+        4. Logs the successful startup of the application.
+
+        Attributes:
+            self._shutdown_called (bool): Indicates whether the application shutdown has been called.
+            self.repl_manager (ReplManager or None): The REPL manager instance if enabled, otherwise None.
+
+        Raises:
+            Any exceptions raised during module or controller loading will propagate.
+        """
+        self._load_modules()
+        self._load_controllers()
+        self._shutdown_called = False
+
+        # Initialize REPL Manager
+        if self.settings.repl_enabled:
+            self.repl_manager = ReplManager(self, self.system_monitor)
+            self.repl_manager.start()
+        else:
+            self.repl_manager = None
+        self._logger.info("Storm application succefully started")
 
     def _handle_shutdown(self, signal_number, frame):
         """
         Handle shutdown signals like SIGINT and SIGTERM.
         """
-        self.logger.info(f"Received shutdown signal: {signal_number}")
+        self._logger.info(f"Received shutdown signal: {signal_number}")
         self.shutdown()
 
     def shutdown(self, shutdown_number=None, frame=None):
@@ -332,31 +427,30 @@ class StormApplication:
         if self._shutdown_called:
             return
         self._shutdown_called = True
-        print()
-        self.logger.info("Shutting down Storm application.")
+        self._logger.info("Shutting down Storm application.")
         for module_name, module in self.modules.items():
             if hasattr(module, "onDestroy") and callable(module.onDestroy):
                 try:
-                    self.logger.info(
+                    self._logger.info(
                         f"Executing onDestroy hook for module: {module_name}"
                     )
                     module.onDestroy()
                 except Exception as e:
-                    self.logger.error(
+                    self._logger.error(
                         f"Error during onDestroy of module {module_name}: {e}"
                     )
 
         # Stop the REPL manager
 
         if self.repl_manager:
-            self.logger.info("Stopping REPL manager.")
+            self._logger.info("Stopping REPL manager.")
             self.repl_manager.shutdown()
 
         if self.system_monitor:
-            self.logger.info("Stopping system monitor.")
+            self._logger.info("Stopping system monitor.")
             self.system_monitor.shutdown()
 
-        self.logger.info("Storm application shutdown complete.\n")
+        self._logger.info("Storm application shutdown complete.\n")
 
     @staticmethod
     def _get_version(package: str) -> str:
@@ -367,7 +461,7 @@ class StormApplication:
         except importlib.metadata.PackageNotFoundError:
             return "Not installed"
 
-    def info(self, banner: str = None):
+    def info(self):
         """
         Displays system and Storm CLI environment information.
         """
@@ -394,7 +488,7 @@ class StormApplication:
                     print(f"[bold red]{banner}[/bold red]")
 
             except FileNotFoundError:
-                self.logger.warning(
+                self._logger.warning(
                     f"Banner file {self.settings.banner_file} not found. Skipping banner display."
                 )
 

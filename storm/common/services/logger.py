@@ -62,7 +62,7 @@ class Logger:
                 name = f"{LogColor.NAME}[{record.name}]{LogColor.RESET}"
 
                 # Prefix with [Storm] in green and timestamp in white
-                prefix = f"{LogColor.HEADER}[Storm] {record.process} -{LogColor.RESET}"
+                prefix = f"{LogColor.HEADER}[Storm] {record.process} - {LogColor.RESET}"
                 timestamp = f"{LogColor.TIMESTAMP}{self.formatTime(record, self.datefmt)}{LogColor.RESET}"
 
                 formatted_message = self._fmt % {
@@ -74,7 +74,7 @@ class Logger:
                 return f"{prefix} {formatted_message}"
 
         console_formatter = ColoredFormatter(
-            fmt="%(asctime)s %(levelname)-7s %(name)s %(message)s",
+            fmt="%(asctime)s    %(levelname)-7s %(name)s %(message)s",
             datefmt="%Y-%m-%d, %I:%M:%S %p",
         )
         console_handler.setFormatter(console_formatter)
@@ -84,7 +84,7 @@ class Logger:
         """Set up a file handler with plain text formatting."""
         file_handler = logging.FileHandler(self.log_file)
         file_formatter = logging.Formatter(
-            fmt="[Storm] %(process)d - %(asctime)s %(levelname)-7s [%(name)s] %(message)s",
+            fmt="[Storm] %(process)d  - %(asctime)s    %(levelname)-7s [%(name)s] %(message)s",
             datefmt="%Y-%m-%d, %I:%M:%S %p",
         )
         file_handler.setFormatter(file_formatter)

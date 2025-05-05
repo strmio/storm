@@ -1,8 +1,12 @@
+import base64
+from email.utils import formatdate
 import json
+import hashlib
 from storm.common.enums.content_type import ContentType
 from storm.common.enums.http_headers import HttpHeaders
 from storm.common.enums.http_status import HttpStatus
 from storm.common.exceptions.exception import StormHttpException
+from storm.core.adapters.http_request import HttpRequest
 
 
 class HttpResponse:
@@ -15,7 +19,7 @@ class HttpResponse:
         content=None,
         status_code=HttpStatus.OK,
         headers=None,
-        content_type=ContentType.JSON,
+        content_type: ContentType = ContentType.JSON,
     ):
         """
         Initialize the HttpResponse object.
@@ -29,6 +33,7 @@ class HttpResponse:
         self.status_code = status_code
         self.headers = headers or {}
         self.content_type = content_type
+        self._closed = False
 
         # Ensure Content-Type is included in headers
         self.headers[HttpHeaders.CONTENT_TYPE] = self.content_type
@@ -47,11 +52,23 @@ class HttpResponse:
         # Default headers
         headers = headers or {}
 
+        # Add X-powered-by header
+        headers[HttpHeaders.X_POWERED_BY] = "Storm"
+
+        # Add Date header
+        headers["Date"] = formatdate(timeval=None, usegmt=True)
+
         # Add a header based on request headers
         if HttpHeaders.ACCEPT_LANGUAGE in request.headers:
             headers[HttpHeaders.ACCEPT_LANGUAGE] = request.headers[
                 HttpHeaders.ACCEPT_LANGUAGE
             ]
+
+        # add keep-alive header
+        headers[HttpHeaders.KEEP_ALIVE] = "keep-alive"
+
+        # Add connection header
+        headers[HttpHeaders.CONNECTION] = "timeout=5"
 
         # Create the response
         return HttpResponse(
@@ -85,6 +102,14 @@ class HttpResponse:
         Update the response content.
         :param content: New response content
         """
+        # Update Content-Length header
+        if isinstance(content, (str, bytes)):
+            self.headers[HttpHeaders.CONTENT_LENGTH] = str(len(content))
+        elif isinstance(content, (dict, list)):
+            self.headers[HttpHeaders.CONTENT_LENGTH] = str(len(json.dumps(content)))
+        else:
+            self.headers.pop(HttpHeaders.CONTENT_LENGTH, None)
+
         self.content = content
 
     def update_status_code(self, status_code):
@@ -115,7 +140,7 @@ class HttpResponse:
         :param content_type: New Content-Type value
         """
         self.content_type = content_type
-        self.headers[HttpHeaders.contentType] = self.content_type
+        self.headers[HttpHeaders.CONTENT_TYPE] = self.content_type
 
     def get_headers(self):
         """
@@ -158,12 +183,12 @@ class HttpResponse:
         """
         if isinstance(self.content, (dict, list)):  # JSON content
             return json.dumps(self.content).encode("utf-8")
-        elif isinstance(self.content, str):  # Plain text or HTML
+        if isinstance(self.content, str):  # Plain text or HTML
             return self.content.encode("utf-8")
-        elif isinstance(self.content, bytes):  # Binary content
+        if isinstance(self.content, bytes):  # Binary content
             return self.content
-        else:
-            return b""  # Empty response
+
+        return b""  # Empty response
 
     async def send_sse_headers(self, send):
         """
@@ -181,7 +206,13 @@ class HttpResponse:
             }
         )
 
-    async def send_sse_event(self, send, data: str, event: str = None, id: str = None):
+    def is_closed(self):
+        """
+        Check if the response is closed.
+        """
+        return self._closed
+
+    async def send_sse_event(self, send, data: str, event: str | None = None, id: str | None = None):
         """
         Send a single SSE event.
         """
@@ -210,6 +241,54 @@ class HttpResponse:
                 "more_body": False,
             }
         )
+        self._closed = True
+
+    def _generate_etag(self, algorithm: str = "md5", encoding: str = "base64") -> str:
+        """
+        Generate an ETag from the response content.
+
+        :param algorithm: Hash algorithm ("md5", "sha256", etc.)
+        :param encoding: Encoding of the digest ("hex", "base64")
+        :return: Encoded ETag value (not wrapped in W/"" yet)
+        """
+        if isinstance(self.content, (dict, list)):
+            raw = json.dumps(self.content, sort_keys=True).encode("utf-8")
+        elif isinstance(self.content, str):
+            raw = self.content.encode("utf-8")
+        elif isinstance(self.content, bytes):
+            raw = self.content
+        else:
+            raw = b""
+
+        hasher = getattr(hashlib, algorithm)(raw)
+
+        if encoding == "hex":
+            return hasher.hexdigest()
+        elif encoding == "base64":
+            return base64.b64encode(hasher.digest()).decode("ascii")
+        raise ValueError("Unsupported encoding for ETag")
+
+    def set_etag(
+        self,
+        weak: bool = True,
+        algorithm: str = "md5",
+        encoding: str = "base64",
+        prefix: str = "c-",
+    ) -> str:
+        """
+        Set the ETag header based on current content.
+
+        :param weak: Whether the ETag is weak (default True)
+        :param algorithm: Hashing algorithm for ETag
+        :param encoding: Digest encoding ("hex", "base64")
+        :param prefix: Prefix to add before the digest (e.g. "c-")
+        :return: The computed ETag
+        """
+        digest = self._generate_etag(algorithm=algorithm, encoding=encoding)
+        tag = f"{prefix}{digest}"
+        etag_value = f'W/"{tag}"' if weak else f'"{tag}"'
+        self.set_header(HttpHeaders.ETAG, etag_value)
+        return tag
 
 
 # Helper methods to create common response types
@@ -247,21 +326,22 @@ def HtmlResponse(html, status_code=HttpStatus.OK, headers=None):
         content=html,
         status_code=status_code,
         headers=headers,
-        content_type=ContentType.TEXT_HTML,
+        content_type=ContentType.HTML,
     )
 
 
 def FileResponse(
     file_bytes,
     filename,
-    content_type="application/octet-stream",
-    status_code=200,
+    content_type=ContentType.OCTET_STREAM,
+    status_code: HttpStatus = HttpStatus.OK,
     headers=None,
 ):
     """
     Create a file download response.
     """
     headers = headers or {}
+
     headers["content-disposition"] = f'attachment; filename="{filename}"'
     return HttpResponse(
         content=file_bytes,
@@ -269,3 +349,16 @@ def FileResponse(
         headers=headers,
         content_type=content_type,
     )
+
+
+async def etag_response(request: HttpRequest, response: HttpResponse):
+    current_etag = response.set_etag()
+    client_etag = request.get_if_none_match()
+
+    if client_etag and client_etag.strip('"') == current_etag:
+        # Resource hasn't changed, return 304
+        response.update_status_code(HttpStatus.NOT_MODIFIED)
+        response.update_content("")  # No body for 304
+        response.update_headers({HttpHeaders.CONTENT_TYPE: ContentType.PLAIN})
+
+    await response.send(request.send)

@@ -11,6 +11,7 @@ class HttpHeaders(StrEnum):
     PRAGMA = "Pragma"
     VIA = "Via"
     WARNING = "Warning"
+    KEEP_ALIVE = "Keep-Alive"
 
     # Request Headers
     ACCEPT = "Accept"
