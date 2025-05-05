@@ -27,7 +27,7 @@ class RouteExplorer:
                 normalization_path = Router.normalize_path(
                     base_path + attr._route["path"]
                 )
-                if attr._route["version"]:
+                if attr._route.get("version"):
                     self.logger.info(
                         f"Mapped: {{{normalization_path}, {attr._route['method']}}} (version: {attr._route["version"]}) route"
                     )
@@ -41,7 +41,7 @@ class RouteExplorer:
                     "path": normalization_path,  # Full route path
                     "handler": attr,  # The handler method
                     "is_sse": getattr(attr, "is_sse", False),
-                    "version": attr._route["version"],
+                    "version": attr._route.get("version"),
                 }
                 return route_info
         return None
@@ -69,7 +69,7 @@ class RouteResolver:
         :param base_path: The base path for the controller.
         :param resolver: An instance of RouteResolver to resolve routes.
         """
-        normilized_prefix = self.router.get_prefix()
+        normilized_prefix = self.router.get_prefix() or ""
         normilized_path = self.router.normalize_path(base_path)
         path = normilized_prefix + normilized_path
         self.logger.info(

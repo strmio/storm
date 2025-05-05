@@ -222,6 +222,6 @@ class Router:
         """
         return (
             self.normalize_path(self.app_config.get_global_prefix())
-            if self.app_config
+            if self.app_config.get_global_prefix()
             else None
         )

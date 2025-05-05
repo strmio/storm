@@ -10,7 +10,7 @@ app = StormApplication(AppModule, settings=get_settings())
 
 app.enable_versioning({"type": VersioningType.URI})
 
-app.setGlobalPrefix("prefix_app/api")
+app.setGlobalPrefix("api")
 
 # Create the Storm Application and Run the Server
 if __name__ == "__main__":

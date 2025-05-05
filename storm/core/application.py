@@ -331,7 +331,7 @@ class StormApplication:
                 )
                 response = HttpResponse.from_error(InternalServerErrorException())
             finally:
-                if response:
+                if response and not response.is_closed():
                     await response.send(send)
         elif scope["type"] == "lifespan":
             # Handle startup and shutdown events
