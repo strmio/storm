@@ -19,7 +19,7 @@ class HttpResponse:
         content=None,
         status_code=HttpStatus.OK,
         headers=None,
-        content_type=ContentType.JSON,
+        content_type: ContentType = ContentType.JSON,
     ):
         """
         Initialize the HttpResponse object.
@@ -140,7 +140,7 @@ class HttpResponse:
         :param content_type: New Content-Type value
         """
         self.content_type = content_type
-        self.headers[HttpHeaders.contentType] = self.content_type
+        self.headers[HttpHeaders.CONTENT_TYPE] = self.content_type
 
     def get_headers(self):
         """
@@ -205,15 +205,14 @@ class HttpResponse:
                 ],
             }
         )
-        self._closed = True
-    
+
     def is_closed(self):
         """
         Check if the response is closed.
         """
         return self._closed
 
-    async def send_sse_event(self, send, data: str, event: str = None, id: str = None):
+    async def send_sse_event(self, send, data: str, event: str | None = None, id: str | None = None):
         """
         Send a single SSE event.
         """
@@ -242,6 +241,7 @@ class HttpResponse:
                 "more_body": False,
             }
         )
+        self._closed = True
 
     def _generate_etag(self, algorithm: str = "md5", encoding: str = "base64") -> str:
         """
@@ -326,7 +326,7 @@ def HtmlResponse(html, status_code=HttpStatus.OK, headers=None):
         content=html,
         status_code=status_code,
         headers=headers,
-        content_type=ContentType.TEXT_HTML,
+        content_type=ContentType.HTML,
     )
 
 
@@ -334,7 +334,7 @@ def FileResponse(
     file_bytes,
     filename,
     content_type=ContentType.OCTET_STREAM,
-    status_code=200,
+    status_code: HttpStatus = HttpStatus.OK,
     headers=None,
 ):
     """
