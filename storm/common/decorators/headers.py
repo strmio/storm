@@ -1,6 +1,6 @@
 from functools import wraps
 
-from storm.common.execution_context import execution_context
+from storm.common.execution_context import ExecutionContext
 
 
 class Headers:
@@ -22,7 +22,9 @@ class Headers:
         """
         Dynamically resolve the header value or all headers, applying the pipe if specified.
         """
-        request = execution_context.get_request()
+        request = ExecutionContext.get_request()
+        if request is None:
+            raise ValueError("No request found in the execution context")
         headers = request.get_headers()
 
         # Get the specific header or all headers
@@ -49,7 +51,9 @@ class Headers:
         @wraps(func)
         async def wrapper(*args, **kwargs):
             # Get the current request from the execution context
-            request = execution_context.get_request()
+            request = ExecutionContext.get_request()
+            if request is None:
+                raise ValueError("No request found in the execution context")
             headers = request.get_headers()
 
             # Resolve the header value and apply the pipe if necessary

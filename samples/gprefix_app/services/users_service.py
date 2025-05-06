@@ -15,13 +15,13 @@ class UsersService:
     ):
         self.logger = Logger(self.__class__.__name__)
 
-    def get_users(self, q: str = None):
+    def get_users(self, q: str | None = None):
         # Simulate fetching users from a database or external service
         users = [user for user in self._users if not q or q.lower() in user["name"].lower()]
 
         return {"users": users}
 
-    def get_users_v2(self, q: str = None):
+    def get_users_v2(self, q: str | None = None):
         # Simulate fetching users from a database or external service
         users = [user["id"] for user in self._users if not q or q.lower() in user["name"].lower()]
         return {"users": users}
