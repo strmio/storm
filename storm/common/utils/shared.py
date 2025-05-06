@@ -75,3 +75,8 @@ def is_empty(array: Any) -> bool:
 def is_symbol(val: Any) -> bool:
     """Checks if a value is a symbol (not applicable in Python)."""
     return isinstance(val, (bytes, bytearray))  # Symbols don’t exist in Python, but bytes can be similar.
+
+
+def deduplicate_preserve_order(seq):
+    seen = set()
+    return [x for x in seq if not (x in seen or seen.add(x))]
