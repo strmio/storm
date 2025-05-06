@@ -32,12 +32,12 @@ def test_injectable_with_scope_and_durable():
 
 
 def test_mixin_generates_unique_name_and_is_injectable():
+    @Mixin()
     class DynamicService:
         pass
 
-    mixed = Mixin(DynamicService)
-    assert mixed.__name__.startswith("Mixin_")
-    assert Reflect.get_metadata(INJECTABLE_WATERMARK, mixed) is True
+    assert DynamicService.__name__.startswith("Mixin_")
+    assert Reflect.get_metadata(INJECTABLE_WATERMARK, DynamicService) is True
 
 
 def test_injectable_with_only_durable():
@@ -72,12 +72,14 @@ def test_injectable_metadata_is_not_inherited_by_subclass():
 
 
 def test_mixin_multiple_calls_generate_unique_names():
+    @Mixin()
     class Raw:
         pass
 
-    mixin1 = Mixin(Raw)
-    mixin2 = Mixin(type("Another", (), {}))
+    @Mixin()
+    class Raw2:
+        pass
 
-    assert mixin1.__name__ != mixin2.__name__
-    assert Reflect.get_metadata(INJECTABLE_WATERMARK, mixin1) is True
-    assert Reflect.get_metadata(INJECTABLE_WATERMARK, mixin2) is True
+    assert Raw.__name__ != Raw2.__name__
+    assert Reflect.get_metadata(INJECTABLE_WATERMARK, Raw) is True
+    assert Reflect.get_metadata(INJECTABLE_WATERMARK, Raw2) is True
