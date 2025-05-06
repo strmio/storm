@@ -42,11 +42,13 @@ classifiers = [
 
 
 requires-python = ">=3.13"
+
 dependencies = [
     "rx>=3.2.0",
     "psutil>=7.0.0",
     "pydantic-settings>=2.9.1",
     "uvicorn>=0.34.2",
+    "pydantic>=2.11.4",
 ]
 
 [project.optional-dependencies]
