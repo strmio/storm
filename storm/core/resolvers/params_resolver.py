@@ -5,7 +5,7 @@ from storm.common.decorators.headers import Headers
 from storm.common.decorators.optional import OptionalMeta
 from storm.common.decorators.param import Param
 from storm.common.decorators.query_params import Query
-from storm.common.execution_context import execution_context
+from storm.common.execution_context import ExecutionContext
 
 
 class ParamsResolver:
@@ -23,7 +23,9 @@ class ParamsResolver:
         :return: A dictionary of resolved arguments for the handler.
         """
         resolved_args = {}
-        request = execution_context.get_request()
+        request = ExecutionContext.get_request()
+        if request is None:
+            raise ValueError("Request object is missing")
         route_params = request.get_params()
         query_params = request.get_query_params()
         body = request.get_body()

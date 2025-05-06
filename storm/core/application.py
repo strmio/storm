@@ -14,7 +14,7 @@ from storm.common.exceptions.http import (
     NotFoundException,
     PreconditionFailedException,
 )
-from storm.common.execution_context import execution_context
+from storm.common.execution_context import ExecutionContext
 from storm.common.services.logger import Logger
 from storm.core.adapters.http_request import HttpRequest
 from storm.core.adapters.http_response import HttpResponse
@@ -250,7 +250,7 @@ class StormApplication:
 
             request.set_params(params)
 
-            execution_context.set({"request": request, "response": response})
+            ExecutionContext.set({"request": request, "response": response})
 
             await self.middleware_pipeline.execute(request_kwargs, lambda req: req)
             content = await self.interceptor_pipeline.execute(handler)
@@ -267,7 +267,7 @@ class StormApplication:
             raise InternalServerErrorException() from e
 
         finally:
-            execution_context.clear()
+            ExecutionContext.clear()
 
     async def __call__(self, scope, receive, send):
         """

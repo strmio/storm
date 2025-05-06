@@ -1,6 +1,6 @@
 from functools import wraps
 
-from storm.common.execution_context import execution_context
+from storm.common.execution_context import ExecutionContext
 
 
 class Param:
@@ -19,7 +19,9 @@ class Param:
         """
         Dynamically resolve the parameter value or all parameters, applying the pipe if specified.
         """
-        request = execution_context.get_request()
+        request = ExecutionContext.get_request()
+        if request is None:
+            raise ValueError("No request object found in execution context")
         route_params = request.get_params()
 
         # Get the parameter value or all parameters
@@ -46,7 +48,7 @@ class Param:
         @wraps(func)
         async def wrapper(*args, **kwargs):
             # Get the current request from the execution context
-            request = execution_context.get_request()
+            request = ExecutionContext.get_request()
             route_params = request.get_params()
 
             # Resolve the parameter value and apply the pipe if necessary

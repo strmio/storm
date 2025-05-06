@@ -4,7 +4,7 @@ from typing import Any, Awaitable, Callable, List, Optional, Type, Union
 
 from rx import Observable
 
-from storm.common.execution_context import ExecutionContext, execution_context
+from storm.common.execution_context import ExecutionContext
 from storm.common.interceptors.interceptor import Interceptor
 from storm.core.resolvers.params_resolver import ParamsResolver
 
@@ -93,7 +93,7 @@ class InterceptorPipeline:
         """
         if interceptor_queue.empty():
             # Resolve arguments for the handler using the Resolver
-            resolved_args = await ParamsResolver.resolve(handler, execution_context.get_request())
+            resolved_args = await ParamsResolver.resolve(handler, ExecutionContext.get_request())
             response = await handler(**resolved_args)
             if isinstance(response, Observable):
                 return await self._execute_observable(response)
@@ -122,7 +122,7 @@ class InterceptorPipeline:
             if param_name == "next":
                 kwargs[param_name] = next_interceptor
             elif param.annotation is ExecutionContext:
-                kwargs[param_name] = execution_context
+                kwargs[param_name] = ExecutionContext
 
         return await intercept_method(**kwargs)
 

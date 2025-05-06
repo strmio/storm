@@ -1,6 +1,6 @@
 from functools import wraps
 
-from storm.common.execution_context import execution_context
+from storm.common.execution_context import ExecutionContext
 
 
 def Request(param_name):
@@ -15,7 +15,7 @@ def Request(param_name):
         @wraps(func)
         async def wrapper(*args, **kwargs):
             # Get the current request from the execution context
-            request = execution_context.get_request()
+            request = ExecutionContext.get_request()
 
             # Inject the request into the kwargs using the given param_name
             if request:
