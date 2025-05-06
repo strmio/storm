@@ -10,6 +10,7 @@ def _wrap_sse_handler(handler):
     :return: An asynchronous function that handles the SSE communication lifecycle,
              including sending headers, streaming events, and closing the connection.
     """
+
     async def sse_adapter(*args, **kwargs):
         request = execution_context.get_request()
         response = execution_context.get_response()

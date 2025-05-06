@@ -1,10 +1,11 @@
-from inspect import signature, Parameter
-from storm.common.execution_context import execution_context
-from storm.common.decorators.param import Param
-from storm.common.decorators.query_params import Query
+from inspect import Parameter, signature
+
 from storm.common.decorators.body import Body
 from storm.common.decorators.headers import Headers
 from storm.common.decorators.optional import OptionalMeta
+from storm.common.decorators.param import Param
+from storm.common.decorators.query_params import Query
+from storm.common.execution_context import execution_context
 
 
 class ParamsResolver:
@@ -28,9 +29,7 @@ class ParamsResolver:
         body = request.get_body()
 
         for param_name, param in signature(handler).parameters.items():
-            resolved_args[param_name] = await ParamsResolver._resolve_param(
-                param, route_params, query_params, body
-            )
+            resolved_args[param_name] = await ParamsResolver._resolve_param(param, route_params, query_params, body)
 
         return resolved_args
 
@@ -46,12 +45,8 @@ class ParamsResolver:
         :return: The resolved value for the parameter.
         """
         if param.default is not Parameter.empty:
-            return await ParamsResolver._resolve_with_default(
-                param, route_params, query_params, body
-            )
-        return ParamsResolver._resolve_without_default(
-            param.name, route_params, query_params, body
-        )
+            return await ParamsResolver._resolve_with_default(param, route_params, query_params, body)
+        return ParamsResolver._resolve_without_default(param.name, route_params, query_params, body)
 
     @staticmethod
     async def _resolve_with_default(param, route_params, query_params, body):

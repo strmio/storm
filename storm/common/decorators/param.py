@@ -1,4 +1,5 @@
 from functools import wraps
+
 from storm.common.execution_context import execution_context
 
 
@@ -31,9 +32,7 @@ class Param:
         if self.pipe and result is not None:
             # Instantiate the pipe if it's a class
             pipe_instance = self.pipe() if isinstance(self.pipe, type) else self.pipe
-            result = await pipe_instance.transform(
-                result, metadata={"param_name": self.param_name}
-            )
+            result = await pipe_instance.transform(result, metadata={"param_name": self.param_name})
         return result
 
     def __call__(self, func=None):
@@ -54,12 +53,8 @@ class Param:
             if self.param_name in route_params:
                 value = route_params[self.param_name]
                 if self.pipe:
-                    pipe_instance = (
-                        self.pipe() if isinstance(self.pipe, type) else self.pipe
-                    )
-                    value = await pipe_instance.transform(
-                        value, metadata={"param_name": self.param_name}
-                    )
+                    pipe_instance = self.pipe() if isinstance(self.pipe, type) else self.pipe
+                    value = await pipe_instance.transform(value, metadata={"param_name": self.param_name})
                 kwargs[self.param_name] = value
             else:
                 kwargs[self.param_name] = route_params

@@ -1,10 +1,12 @@
-import queue
-from rx import Observable
-from typing import List, Type, Callable, Awaitable, Optional, Any, Union
-from storm.common.interceptors.interceptor import Interceptor
-from storm.common.execution_context import ExecutionContext, execution_context
-from storm.core.resolvers.params_resolver import ParamsResolver
 import inspect
+import queue
+from typing import Any, Awaitable, Callable, List, Optional, Type, Union
+
+from rx import Observable
+
+from storm.common.execution_context import ExecutionContext, execution_context
+from storm.common.interceptors.interceptor import Interceptor
+from storm.core.resolvers.params_resolver import ParamsResolver
 
 
 class InterceptorPipeline:
@@ -14,12 +16,8 @@ class InterceptorPipeline:
 
     def __init__(
         self,
-        global_interceptors: Optional[
-            List[Union[Type[Interceptor], Interceptor]]
-        ] = None,
-        route_interceptors: Optional[
-            List[Union[Type[Interceptor], Interceptor]]
-        ] = None,
+        global_interceptors: Optional[List[Union[Type[Interceptor], Interceptor]]] = None,
+        route_interceptors: Optional[List[Union[Type[Interceptor], Interceptor]]] = None,
     ):
         """
         Initializes the InterceptorPipeline with optional global and route interceptors.
@@ -36,9 +34,7 @@ class InterceptorPipeline:
         for interceptor in route_interceptors or []:
             self.add_route_interceptor(interceptor)
 
-    def add_global_interceptor(
-        self, interceptor: Union[Type[Interceptor], Interceptor]
-    ) -> None:
+    def add_global_interceptor(self, interceptor: Union[Type[Interceptor], Interceptor]) -> None:
         """
         Adds a global interceptor to the pipeline.
 
@@ -51,9 +47,7 @@ class InterceptorPipeline:
         else:
             raise TypeError("interceptor must be a subclass or instance of Interceptor")
 
-    def add_route_interceptor(
-        self, interceptor: Union[Type[Interceptor], Interceptor]
-    ) -> None:
+    def add_route_interceptor(self, interceptor: Union[Type[Interceptor], Interceptor]) -> None:
         """
         Adds a route interceptor to the pipeline.
 
@@ -89,9 +83,7 @@ class InterceptorPipeline:
         all_interceptors = self._merge_interceptors()
         return await self._execute_interceptors(handler, all_interceptors)
 
-    async def _execute_interceptors(
-        self, handler: Callable[..., Awaitable[Any]], interceptor_queue: queue.Queue
-    ) -> Any:
+    async def _execute_interceptors(self, handler: Callable[..., Awaitable[Any]], interceptor_queue: queue.Queue) -> Any:
         """
         Recursively processes the context through each interceptor in the list.
 
@@ -101,9 +93,7 @@ class InterceptorPipeline:
         """
         if interceptor_queue.empty():
             # Resolve arguments for the handler using the Resolver
-            resolved_args = await ParamsResolver.resolve(
-                handler, execution_context.get_request()
-            )
+            resolved_args = await ParamsResolver.resolve(handler, execution_context.get_request())
             response = await handler(**resolved_args)
             if isinstance(response, Observable):
                 return await self._execute_observable(response)
@@ -116,9 +106,7 @@ class InterceptorPipeline:
 
         return await self._call_interceptor(current_interceptor, next_interceptor)
 
-    async def _call_interceptor(
-        self, interceptor: Interceptor, next_interceptor: Callable[[], Awaitable[Any]]
-    ) -> Any:
+    async def _call_interceptor(self, interceptor: Interceptor, next_interceptor: Callable[[], Awaitable[Any]]) -> Any:
         """
         Dynamically injects dependencies and calls the interceptor's `intercept` method.
 

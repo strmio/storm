@@ -1,13 +1,14 @@
+import atexit
 import code
+import os
 import readline
 import rlcompleter
-import atexit
-import os
 import sys
-from .commands import help, list_services, list_controllers, reload, show_routes
 
 # from storm.core.repl.repl_logger import ReplLogger
 from storm.common.services.logger import Logger as ReplLogger
+
+from .commands import help, list_controllers, list_services, reload, show_routes
 
 
 class StormRepl:

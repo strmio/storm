@@ -1,8 +1,9 @@
 import inspect
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
+
 from storm.core.interfaces.version_options_interface import (
-    VersioningOptions,
     VERSIONING_CLASS_MAP,
+    VersioningOptions,
 )
 
 
@@ -39,9 +40,7 @@ class ApplicationConfig:
              The `default_version` attribute of `options` will be modified in-place
              if it is a list.
         """
-        if hasattr(options, "default_version") and isinstance(
-            options.default_version, list
-        ):
+        if hasattr(options, "default_version") and isinstance(options.default_version, list):
             options.default_version = list(dict.fromkeys(options.default_version))
         self._versioning_options = self._init_versioning(options)
 

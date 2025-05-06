@@ -1,4 +1,4 @@
-from typing import TypedDict, Optional, Type
+from typing import Optional, Type, TypedDict
 
 
 class ArgumentMetadata(TypedDict):

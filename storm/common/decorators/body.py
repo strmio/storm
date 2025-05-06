@@ -1,4 +1,5 @@
 from functools import wraps
+
 from storm.common.execution_context import execution_context
 
 
@@ -30,9 +31,7 @@ class Body:
         if self.pipe and result is not None:
             # Instantiate the pipe if it's a class
             pipe_instance = self.pipe() if isinstance(self.pipe, type) else self.pipe
-            result = await pipe_instance.transform(
-                result, metadata={"type": "body", "data": self.param_name}
-            )
+            result = await pipe_instance.transform(result, metadata={"type": "body", "data": self.param_name})
 
         return result
 

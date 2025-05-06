@@ -1,9 +1,10 @@
-from storm.common import Get, Module, Controller, Logger, Injectable
-from storm.core import StormApplication
 import numba
 import numpy as np
-
 from settings import get_settings
+
+from storm.common import Controller, Get, Injectable, Logger, Module
+from storm.core import StormApplication
+
 
 # Numba-optimized functions
 @numba.njit
@@ -15,9 +16,7 @@ def lj_numba_array(r):
 
 @numba.njit
 def distances_numba_array(cluster):
-    diff = cluster.reshape(cluster.shape[0], 1, cluster.shape[1]) - cluster.reshape(
-        1, cluster.shape[0], cluster.shape[1]
-    )
+    diff = cluster.reshape(cluster.shape[0], 1, cluster.shape[1]) - cluster.reshape(1, cluster.shape[0], cluster.shape[1])
     mat = diff * diff
     out = np.empty(mat.shape[:2], dtype=mat.dtype)
     for i in np.ndindex(out.shape):

@@ -1,7 +1,7 @@
-import threading
 import code
-import sys
 import selectors
+import sys
+import threading
 
 from storm.core.services.system_monitor import SystemMonitor
 
@@ -65,7 +65,7 @@ class ReplManager:
                 self.app.logger.error(f"Error in REPL listener: {e}")
             finally:
                 if self.shutdown_event.is_set():
-                    break
+                    ...
 
         self.selector.close()
 
