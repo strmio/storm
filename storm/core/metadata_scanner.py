@@ -15,6 +15,10 @@ class MetadataScanner:
         """
         Iterates through all method names in the class (and parents),
         calls `callback` for each valid method name, and returns results.
+
+        :param cls: The class to scan for method names.
+        :param callback: The callback function to call for each valid method name.
+        :return: A list of results from the callback function.
         """
         result = []
         visited = set()
@@ -31,6 +35,9 @@ class MetadataScanner:
     def get_all_method_names(self, cls: Type | None) -> list[str]:
         """
         Returns all method names (excluding dunder methods and properties).
+
+        :param cls: The class to scan for method names.
+        :return: A list of method names.
         """
         if cls is None:
             return []
