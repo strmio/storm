@@ -1,9 +1,11 @@
 import asyncio
-from storm.common import Get, Module, Controller, Logger, Injectable, Sse
-from storm.core import StormApplication
+
 import jax
 import jax.numpy as jnp
 from jax import random
+
+from storm.common import Controller, Get, Injectable, Logger, Module, Sse
+from storm.core import StormApplication
 
 
 # JAX-optimized functions
@@ -28,6 +30,7 @@ def potential_jax_array(cluster):
     energy = jnp.sum(jnp.where(d > 1e-6, lj_jax_array(d), 0.0))
     return energy
 
+
 @Injectable()
 class JaxService:
     def __init__(self):
@@ -40,7 +43,6 @@ class JaxService:
         return potential_jax_array(cluster)
 
     async def stream(self, random_key):
-
         for _ in range(10):
             # Generate the cluster once at the beginning
             random_key, subkey = random.split(random_key)
@@ -50,6 +52,7 @@ class JaxService:
             await asyncio.sleep(0.1)  # Simulate some delay
 
         yield {"data": {"done": True}}
+
 
 @Controller()
 class ProcessController:
@@ -77,9 +80,11 @@ class ProcessController:
 class UsersModule:
     pass
 
+
 @Module(imports=[UsersModule])
 class AppModule:
     pass
+
 
 # Initialize the application with AppModule
 app = StormApplication(AppModule)

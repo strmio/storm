@@ -1,6 +1,6 @@
-from functools import wraps
-from typing import Callable, Union, Type
 import inspect
+from functools import wraps
+from typing import Callable, Type, Union
 
 from storm.common.pipes.pipe import Pipe
 

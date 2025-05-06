@@ -1,6 +1,8 @@
 import inspect
 from functools import wraps
+
 from rich import print
+
 from storm.common.enums.content_type import ContentType
 from storm.common.enums.http_headers import HttpHeaders
 from storm.common.enums.http_method import HttpMethod
@@ -12,9 +14,12 @@ from storm.common.exceptions.http import (
     NotFoundException,
     PreconditionFailedException,
 )
+from storm.common.execution_context import execution_context
+from storm.common.services.logger import Logger
 from storm.core.adapters.http_request import HttpRequest
 from storm.core.adapters.http_response import HttpResponse
 from storm.core.appliction_config import ApplicationConfig
+from storm.core.context import AppContext
 from storm.core.exceptions.exception_handler import ExceptionHandler
 from storm.core.exceptions.traceback_handler import TracebackHandler
 from storm.core.helpers.helpers import strip_etag_quotes
@@ -24,11 +29,9 @@ from storm.core.middleware_pipeline import MiddlewarePipeline
 from storm.core.repl.repl_manager import ReplManager
 from storm.core.resolvers.route_resolver import RouteExplorer, RouteResolver
 from storm.core.router import Router
-from storm.common.services.logger import Logger
-from storm.common.execution_context import execution_context
 from storm.core.services.system_monitor import SystemMonitor
-from storm.core.settings import AppSettings as Settings, get_settings
-from storm.core.context import AppContext
+from storm.core.settings import AppSettings as Settings
+from storm.core.settings import get_settings
 
 
 class StormApplication:
@@ -44,13 +47,15 @@ class StormApplication:
         - interceptor_pipeline: The pipeline that handles interceptor execution.
     """
 
-    def __init__(self, root_module, settings: Settings = get_settings()):
+    def __init__(self, root_module, settings: Settings | None = None):
         """
         Initialize the StormApplication with the given root module.
 
         :param root_module: The root module containing controllers, providers, and imports.
         :param app_config: Optional dictionary for application configuration.
         """
+        if not settings:
+            settings = get_settings()
         AppContext.set_settings(settings)
         self.app_config = ApplicationConfig()
         self._exception_handler = ExceptionHandler()
@@ -86,9 +91,7 @@ class StormApplication:
         """
         self.middleware_pipeline.add_global_middleware(middleware_cls)
 
-    def enable_versioning(
-        self, verioning_options: VersioningOptions = {type: VersioningType.URI}
-    ):
+    def enable_versioning(self, verioning_options: VersioningOptions = None):
         """
         Enables versioning for the application with the specified options.
 
@@ -96,9 +99,11 @@ class StormApplication:
         :verioning_options (VersioningOptions, optional): Configuration options for versioning.
                 Defaults to { type: VersioningType.URI }.
         """
+        if verioning_options is None:
+            verioning_options = {type: VersioningType.URI}
         self.app_config.enable_versioning(verioning_options)
 
-    def setGlobalPrefix(self, prefix: str):
+    def set_global_prefix(self, prefix: str):
         """
         Set a global prefix for all routes in the application.
 
@@ -158,7 +163,7 @@ class StormApplication:
             service_instance = provider()
             module.providers[name] = service_instance
 
-        for name, provider in module.providers.items():
+        for _name, provider in module.providers.items():
             self._inject_dependencies(provider, module)
 
     def _inject_dependencies(self, service, module):
@@ -172,9 +177,7 @@ class StormApplication:
             for attr_name, dependency in service.__annotations__.items():
                 if hasattr(dependency, "__injectable__") and dependency.__injectable__:
                     if dependency.__name__ in module.providers.keys():
-                        setattr(
-                            service, attr_name, module.providers[dependency.__name__]
-                        )
+                        setattr(service, attr_name, module.providers[dependency.__name__])
 
     def _inject_init_dependencies(self, service_class, module):
         """
@@ -193,24 +196,16 @@ class StormApplication:
             if param_name == "self":  # Skip 'self' parameter
                 continue
             dependency_type = param.annotation
-            if (
-                dependency_type
-                and hasattr(dependency_type, "__injectable__")
-                and dependency_type.__injectable__
-            ):
+            if dependency_type and hasattr(dependency_type, "__injectable__") and dependency_type.__injectable__:
                 if dependency_type.__name__ in module.providers.keys():
                     setattr(
                         service_class,
                         param_name,
                         module.providers[dependency_type.__name__],
                     )
-                    default_kwargs[param_name] = module.providers[
-                        dependency_type.__name__
-                    ]
+                    default_kwargs[param_name] = module.providers[dependency_type.__name__]
                 else:
-                    raise ValueError(
-                        f"Dependency {dependency_type.__name__} not found in module providers."
-                    )
+                    raise ValueError(f"Dependency {dependency_type.__name__} not found in module providers.")
 
         @wraps(original_init)
         def new_init(self, *args, **kwargs):
@@ -263,8 +258,8 @@ class StormApplication:
             response.update_content(content)
             return response, response.status_code
 
-        except ValueError:
-            raise NotFoundException(message=f"Cannot {method} {path}")
+        except ValueError as e:
+            raise NotFoundException(message=f"Cannot {method} {path}") from e
         except StormHttpException as e:
             raise e
         except Exception as e:
@@ -290,9 +285,7 @@ class StormApplication:
                 method, path, request_kwargs = request.get_request_info()
                 response = HttpResponse.from_request(request=request)
 
-                response, _ = await self.handle_request(
-                    method, path, request, response, **request_kwargs
-                )
+                response, _ = await self.handle_request(method, path, request, response, **request_kwargs)
 
                 current_etag = response.set_etag()
 
@@ -302,22 +295,16 @@ class StormApplication:
                     HttpMethod.DELETE,
                 ):
                     client_etag = request.get_if_match()
-                    if client_etag and strip_etag_quotes(
-                        client_etag
-                    ) != strip_etag_quotes(current_etag):
+                    if client_etag and strip_etag_quotes(client_etag) != strip_etag_quotes(current_etag):
                         raise PreconditionFailedException()
 
                 # If-None-Match (for cache validation on GET)
                 elif request.method == HttpMethod.GET:
                     client_etag = request.get_if_none_match()
-                    if client_etag and strip_etag_quotes(
-                        client_etag
-                    ) == strip_etag_quotes(current_etag):
+                    if client_etag and strip_etag_quotes(client_etag) == strip_etag_quotes(current_etag):
                         response.update_status_code(HttpStatus.NOT_MODIFIED)
                         response.update_content(None)  # No body for 304
-                        response.update_headers(
-                            {HttpHeaders.CONTENT_TYPE: ContentType.PLAIN}
-                        )
+                        response.update_headers({HttpHeaders.CONTENT_TYPE: ContentType.PLAIN})
 
             except StormHttpException as exc:
                 # self.__exception_handler.handle_exception(exc)
@@ -326,9 +313,7 @@ class StormApplication:
                 response = HttpResponse.from_error(exc)
             except Exception as exc:
                 self._exception_handler.handle_exception(InternalServerErrorException())
-                self._traceback_handler.handle_exception(
-                    exc, exc.__traceback__, InternalServerErrorException
-                )
+                self._traceback_handler.handle_exception(exc, exc.__traceback__, InternalServerErrorException)
                 response = HttpResponse.from_error(InternalServerErrorException())
             finally:
                 if response and not response.is_closed():
@@ -351,8 +336,9 @@ class StormApplication:
         :param host: The host address to bind the server (default is '127.0.0.1').
         :param port: The port number to bind the server (default is 8000).
         """
-        import uvicorn
         import signal
+
+        import uvicorn
 
         def handle_shutdown(signal_number, frame):
             self._logger.info(f"Received shutdown signal: {signal_number}")
@@ -374,12 +360,8 @@ class StormApplication:
                 date_header=False,
             )
         except Exception as e:
-            self._exception_handler.handle_exception(
-                f"Error while running the server: {e}"
-            )
-            self._traceback_handler.handle_exception(
-                e, e.__traceback__, InternalServerErrorException
-            )
+            self._exception_handler.handle_exception(f"Error while running the server: {e}")
+            self._traceback_handler.handle_exception(e, e.__traceback__, InternalServerErrorException)
         finally:
             self.shutdown()
 
@@ -431,14 +413,10 @@ class StormApplication:
         for module_name, module in self.modules.items():
             if hasattr(module, "onDestroy") and callable(module.onDestroy):
                 try:
-                    self._logger.info(
-                        f"Executing onDestroy hook for module: {module_name}"
-                    )
+                    self._logger.info(f"Executing onDestroy hook for module: {module_name}")
                     module.onDestroy()
                 except Exception as e:
-                    self._logger.error(
-                        f"Error during onDestroy of module {module_name}: {e}"
-                    )
+                    self._logger.error(f"Error during onDestroy of module {module_name}: {e}")
 
         # Stop the REPL manager
 
@@ -488,9 +466,7 @@ class StormApplication:
                     print(f"[bold red]{banner}[/bold red]")
 
             except FileNotFoundError:
-                self._logger.warning(
-                    f"Banner file {self.settings.banner_file} not found. Skipping banner display."
-                )
+                self._logger.warning(f"Banner file {self.settings.banner_file} not found. Skipping banner display.")
 
         if self.settings.sys_info_enabled:
             self.info()

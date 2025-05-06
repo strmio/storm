@@ -1,8 +1,9 @@
 import shutil
+import sys
 import threading
 import time
+
 import psutil
-import sys
 
 from storm.common.services.logger import Logger
 from storm.core.services.helpers import LogColorNoBold as LogColor
@@ -65,12 +66,8 @@ class SystemMonitor:
         time_now = time.time()
         elapsed = time_now - self._last_time or 1  # avoid div by zero
 
-        net_in = (
-            (net_now.bytes_recv - self._last_net.bytes_recv) / elapsed / 1024
-        )  # KB/s
-        net_out = (
-            (net_now.bytes_sent - self._last_net.bytes_sent) / elapsed / 1024
-        )  # KB/s
+        net_in = (net_now.bytes_recv - self._last_net.bytes_recv) / elapsed / 1024  # KB/s
+        net_out = (net_now.bytes_sent - self._last_net.bytes_sent) / elapsed / 1024  # KB/s
 
         self._last_net = net_now
         self._last_time = time_now

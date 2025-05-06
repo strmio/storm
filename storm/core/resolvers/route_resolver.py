@@ -24,17 +24,11 @@ class RouteExplorer:
         if callable(attr) and hasattr(attr, "_route"):
             attr = getattr(controller, attr_name)
             if callable(attr) and hasattr(attr, "_route"):
-                normalization_path = Router.normalize_path(
-                    base_path + attr._route["path"]
-                )
+                normalization_path = Router.normalize_path(base_path + attr._route["path"])
                 if attr._route.get("version"):
-                    self.logger.info(
-                        f"Mapped: {{{normalization_path}, {attr._route['method']}}} (version: {attr._route["version"]}) route"
-                    )
+                    self.logger.info(f"Mapped: {{{normalization_path}, {attr._route['method']}}} (version: {attr._route['version']}) route")
                 else:
-                    self.logger.info(
-                        f"Mapped: {{{normalization_path}, {attr._route['method']}}} route"
-                    )
+                    self.logger.info(f"Mapped: {{{normalization_path}, {attr._route['method']}}} route")
                 route_info = {
                     # HTTP method (e.g., GET, POST)
                     "method": attr._route["method"],
@@ -72,9 +66,7 @@ class RouteResolver:
         normilized_prefix = self.router.get_prefix() or ""
         normilized_path = self.router.normalize_path(base_path)
         path = normilized_prefix + normilized_path
-        self.logger.info(
-            f"{controller.__class__.__name__} {{{Router.normalize_path(path)}}}"
-        )
+        self.logger.info(f"{controller.__class__.__name__} {{{Router.normalize_path(path)}}}")
 
         for attr_name in dir(controller):
             route_info = explorer.explore_route(controller, attr_name, path)
@@ -83,9 +75,7 @@ class RouteResolver:
 
                 if route_info.get("is_sse"):
                     sse_handler = _wrap_sse_handler(route_info["handler"])
-                    self.router.add_sse_route(
-                        route_info["method"], route_info["path"], sse_handler, version
-                    )
+                    self.router.add_sse_route(route_info["method"], route_info["path"], sse_handler, version)
                 else:
                     self.router.add_route(
                         route_info["method"],

@@ -1,16 +1,16 @@
 from storm.common import (
-    Injectable,
-    Controller,
-    Module,
-    Get,
-    Post,
-    Delete,
     Body,
-    Query,
-    Param,
+    Controller,
+    Delete,
+    Get,
     Headers,
+    HttpHeaders,
+    Injectable,
+    Module,
+    Param,
+    Post,
+    Query,
 )
-from storm.common import HttpHeaders
 from storm.common.pipes import ParseIntPipe
 from storm.common.pipes.parse_uuid_pipe import ParseUUIDPipe
 from storm.common.services.logger import Logger
@@ -129,9 +129,7 @@ class NotesController:
         user_id: int = Param("user_id", ParseIntPipe),
         id=Param("id", ParseUUIDPipe),
     ):
-        return {
-            "note": {"id": str(id), "user_id": user_id, "content": "This is a note."}
-        }
+        return {"note": {"id": str(id), "user_id": user_id, "content": "This is a note."}}
 
 
 # Define Modules

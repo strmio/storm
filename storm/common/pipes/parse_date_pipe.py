@@ -1,6 +1,7 @@
 import datetime
 
 from storm.common.exceptions.http import BadRequestException
+
 from .pipe import Pipe
 
 
@@ -18,7 +19,5 @@ class ParseDatePipe(Pipe):
     async def transform(self, value, metadata=None):
         try:
             return datetime.strptime(value, self.date_format)
-        except ValueError:
-            raise BadRequestException(
-                f"Invalid date value: {value}. Expected format: {self.date_format}"
-            )
+        except ValueError as e:
+            raise BadRequestException(f"Invalid date value: {value}. Expected format: {self.date_format}") from e

@@ -1,4 +1,5 @@
 from functools import wraps
+
 from storm.common.execution_context import execution_context
 
 
@@ -12,9 +13,7 @@ class Headers:
     :param pipe: An optional class or instance of a Pipe to transform or validate the header value(s).
     """
 
-    def __init__(
-        self, param_name: str | None = None, header_name: str | None = None, pipe=None
-    ):
+    def __init__(self, param_name: str | None = None, header_name: str | None = None, pipe=None):
         self.param_name = param_name
         self.header_name = header_name
         self.pipe = pipe
@@ -36,9 +35,7 @@ class Headers:
         if self.pipe and result is not None:
             # Instantiate the pipe if it's a class
             pipe_instance = self.pipe() if isinstance(self.pipe, type) else self.pipe
-            result = await pipe_instance.transform(
-                result, metadata={"header_name": self.header_name}
-            )
+            result = await pipe_instance.transform(result, metadata={"header_name": self.header_name})
         return result
 
     def __call__(self, func=None):
@@ -61,12 +58,8 @@ class Headers:
                 if self.header_name.upper() in headers:
                     value = headers[self.header_name.upper()]
                     if self.pipe:
-                        pipe_instance = (
-                            self.pipe() if isinstance(self.pipe, type) else self.pipe
-                        )
-                        value = await pipe_instance.transform(
-                            value, metadata={"header_name": self.header_name}
-                        )
+                        pipe_instance = self.pipe() if isinstance(self.pipe, type) else self.pipe
+                        value = await pipe_instance.transform(value, metadata={"header_name": self.header_name})
                     kwargs[self.param_name] = value
                 else:
                     kwargs[self.param_name] = None

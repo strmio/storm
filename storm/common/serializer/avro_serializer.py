@@ -1,4 +1,5 @@
 import io
+
 import fastavro
 from fastavro.schema import load_schema
 

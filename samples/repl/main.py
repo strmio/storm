@@ -1,6 +1,6 @@
+from storm.common.decorators.module import Module
 from storm.core.application import StormApplication
 from storm.core.repl.repl import StormRepl
-from storm.common.decorators.module import Module
 
 
 # Define a service

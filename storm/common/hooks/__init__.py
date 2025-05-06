@@ -1,8 +1,8 @@
 from .hooks import (
     OnApplicationBootstrap,
     OnApplicationShutdown,
-    OnModuleInit,
     OnModuleDestroy,
+    OnModuleInit,
 )
 
 __all__ = [

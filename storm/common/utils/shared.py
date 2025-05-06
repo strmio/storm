@@ -74,6 +74,4 @@ def is_empty(array: Any) -> bool:
 
 def is_symbol(val: Any) -> bool:
     """Checks if a value is a symbol (not applicable in Python)."""
-    return isinstance(
-        val, (bytes, bytearray)
-    )  # Symbols don’t exist in Python, but bytes can be similar.
+    return isinstance(val, (bytes, bytearray))  # Symbols don’t exist in Python, but bytes can be similar.

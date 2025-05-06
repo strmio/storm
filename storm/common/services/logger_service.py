@@ -1,6 +1,6 @@
 import datetime
 import threading
-from typing import List, Optional, Callable, Any
+from typing import Any, Callable, List, Optional
 
 from storm.common import Injectable
 
