@@ -1,6 +1,6 @@
 import inspect
 from types import FunctionType
-from typing import Callable, Any, Type
+from typing import Any, Callable, Type
 
 
 class MetadataScanner:
@@ -50,10 +50,7 @@ class MetadataScanner:
                     continue
                 visited.add(name)
 
-                if (
-                    isinstance(member, (FunctionType, classmethod, staticmethod))
-                    and not name.startswith("__")
-                ):
+                if isinstance(member, (FunctionType, classmethod, staticmethod)) and not name.startswith("__"):
                     method_names.append(name)
 
         self._cached_scanned_classes[cls] = method_names

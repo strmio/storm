@@ -14,7 +14,7 @@ def Version(version):
             func.route_version = version
         else:
             # If Version is used before @Get, store it temporarily
-            setattr(func, "version", version)
+            func.version = version
         return func
 
     return decorator

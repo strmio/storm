@@ -1,6 +1,6 @@
+from storm.common.decorators.controller import Controller
 from storm.common.decorators.http import Get, Post
 from storm.common.decorators.module import Module
-from storm.common.decorators.controller import Controller
 from storm.common.services.logger import Logger
 from storm.core.application import StormApplication
 

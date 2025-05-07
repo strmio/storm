@@ -1,5 +1,6 @@
 from functools import wraps
-from storm.common.execution_context import execution_context
+
+from storm.common.execution_context import ExecutionContext
 
 
 class Headers:
@@ -12,9 +13,7 @@ class Headers:
     :param pipe: An optional class or instance of a Pipe to transform or validate the header value(s).
     """
 
-    def __init__(
-        self, param_name: str | None = None, header_name: str | None = None, pipe=None
-    ):
+    def __init__(self, param_name: str | None = None, header_name: str | None = None, pipe=None):
         self.param_name = param_name
         self.header_name = header_name
         self.pipe = pipe
@@ -23,7 +22,9 @@ class Headers:
         """
         Dynamically resolve the header value or all headers, applying the pipe if specified.
         """
-        request = execution_context.get_request()
+        request = ExecutionContext.get_request()
+        if request is None:
+            raise ValueError("No request found in the execution context")
         headers = request.get_headers()
 
         # Get the specific header or all headers
@@ -36,9 +37,7 @@ class Headers:
         if self.pipe and result is not None:
             # Instantiate the pipe if it's a class
             pipe_instance = self.pipe() if isinstance(self.pipe, type) else self.pipe
-            result = await pipe_instance.transform(
-                result, metadata={"header_name": self.header_name}
-            )
+            result = await pipe_instance.transform(result, metadata={"header_name": self.header_name})
         return result
 
     def __call__(self, func=None):
@@ -52,7 +51,9 @@ class Headers:
         @wraps(func)
         async def wrapper(*args, **kwargs):
             # Get the current request from the execution context
-            request = execution_context.get_request()
+            request = ExecutionContext.get_request()
+            if request is None:
+                raise ValueError("No request found in the execution context")
             headers = request.get_headers()
 
             # Resolve the header value and apply the pipe if necessary
@@ -61,12 +62,8 @@ class Headers:
                 if self.header_name.upper() in headers:
                     value = headers[self.header_name.upper()]
                     if self.pipe:
-                        pipe_instance = (
-                            self.pipe() if isinstance(self.pipe, type) else self.pipe
-                        )
-                        value = await pipe_instance.transform(
-                            value, metadata={"header_name": self.header_name}
-                        )
+                        pipe_instance = self.pipe() if isinstance(self.pipe, type) else self.pipe
+                        value = await pipe_instance.transform(value, metadata={"header_name": self.header_name})
                     kwargs[self.param_name] = value
                 else:
                     kwargs[self.param_name] = None

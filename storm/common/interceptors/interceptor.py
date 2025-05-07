@@ -1,4 +1,5 @@
-from typing import Callable, Awaitable, Any
+from typing import Any, Awaitable, Callable
+
 from storm.common.execution_context import ExecutionContext
 
 

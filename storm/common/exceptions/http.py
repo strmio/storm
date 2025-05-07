@@ -21,9 +21,7 @@ class UnauthorizedException(StormHttpException):
     """
 
     def __init__(self, message="Unauthorized access"):
-        super().__init__(
-            message, status_code=HttpStatus.UNAUTHORIZED, name="Unauthorized"
-        )
+        super().__init__(message, status_code=HttpStatus.UNAUTHORIZED, name="Unauthorized")
 
 
 class ForbiddenException(StormHttpException):
@@ -56,9 +54,7 @@ class MethodNotAllowedException(StormHttpException):
     """
 
     def __init__(self, message="Method not allowed"):
-        super().__init__(
-            message, status_code=HttpStatus.METHOD_NOT_ALLOWED, name="MethodNotAllowed"
-        )
+        super().__init__(message, status_code=HttpStatus.METHOD_NOT_ALLOWED, name="MethodNotAllowed")
 
 
 class ConflictException(StormHttpException):
@@ -111,9 +107,7 @@ class TooManyRequestsException(StormHttpException):
     """
 
     def __init__(self, message="Too many requests"):
-        super().__init__(
-            message, status_code=HttpStatus.TOO_MANY_REQUESTS, name="TooManyRequests"
-        )
+        super().__init__(message, status_code=HttpStatus.TOO_MANY_REQUESTS, name="TooManyRequests")
 
 
 class InternalServerErrorException(StormHttpException):
@@ -155,9 +149,7 @@ class GatewayTimeoutException(StormHttpException):
     """
 
     def __init__(self, message="Gateway timeout"):
-        super().__init__(
-            message, status_code=HttpStatus.GATEWAY_TIMEOUT, name="GatewayTimeout"
-        )
+        super().__init__(message, status_code=HttpStatus.GATEWAY_TIMEOUT, name="GatewayTimeout")
 
 
 class PreconditionFailedException(StormHttpException):

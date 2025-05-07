@@ -1,4 +1,5 @@
-from typing import List, Any
+from typing import Any, List
+
 from storm.common.utils.shared import is_function, is_nil
 
 
@@ -13,11 +14,7 @@ async def call_operator(instances: List[Any]) -> List:
     """
     Calls `on_module_destroy` on all instances that implement the hook.
     """
-    return [
-        await instance.on_module_destroy()
-        for instance in instances
-        if not is_nil(instance) and has_on_module_destroy_hook(instance)
-    ]
+    return [await instance.on_module_destroy() for instance in instances if not is_nil(instance) and has_on_module_destroy_hook(instance)]
 
 
 async def call_module_destroy_hook(module) -> None:

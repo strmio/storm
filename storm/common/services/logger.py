@@ -1,8 +1,9 @@
 import logging
-from typing import Optional, Dict
-from .helpers import LogColorNoBold as LogColor
+from typing import Dict, Optional
+
 from storm.core.context import AppContext
 
+from .helpers import LogColorNoBold as LogColor
 
 level_colors = {
     "DEBUG": LogColor.DEBUG,
@@ -106,9 +107,7 @@ class Logger:
         :return: The log message with added context information, if available.
         """
         if self.context:
-            context_info = " ".join(
-                [f"{key}={value}" for key, value in self.context.items()]
-            )
+            context_info = " ".join([f"{key}={value}" for key, value in self.context.items()])
             return f"{context_info} {msg}"
         return msg
 

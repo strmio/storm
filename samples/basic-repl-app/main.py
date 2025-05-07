@@ -1,11 +1,9 @@
-from storm.common import Get
-from storm.common import Module
-from storm.common import Controller
-from storm.common import Logger
+from rx import from_iterable
+from rx.operators import filter, map, take, to_list
+
+from storm.common import Controller, Get, Logger, Module
 from storm.core import StormApplication, start_repl
 
-from rx import from_iterable
-from rx.operators import map, filter, to_list, take
 # Define Controller
 
 

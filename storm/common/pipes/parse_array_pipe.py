@@ -1,4 +1,5 @@
 from storm.common.exceptions.http import BadRequestException
+
 from .pipe import Pipe
 
 
@@ -22,4 +23,4 @@ class ParseArrayPipe(Pipe):
                 items = [await self.item_pipe.transform(item) for item in items]
             return items
         except Exception as e:
-            raise BadRequestException(f"Invalid array value: {value}. {str(e)}")
+            raise BadRequestException(f"Invalid array value: {value}. {str(e)}") from e

@@ -74,8 +74,6 @@ class MiddlewarePipeline:
         current_middleware = middleware_queue.get()
 
         async def next_middleware(req):
-            return await self._execute_request_middleware(
-                req, handler, middleware_queue
-            )
+            return await self._execute_request_middleware(req, handler, middleware_queue)
 
         return await current_middleware.process_request(request, next_middleware)

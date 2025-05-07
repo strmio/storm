@@ -1,8 +1,9 @@
+import re
 from collections import defaultdict
 from typing import Optional
+
 from storm.common.enums.versioning_type import VersioningType
 from storm.common.services.logger import Logger
-import re
 from storm.core.adapters.http_request import HttpRequest
 from storm.core.appliction_config import ApplicationConfig
 from storm.core.interfaces.version_options_interface import VERSION_NEUTRAL
@@ -12,9 +13,7 @@ class Router:
     def __init__(self, app_config: ApplicationConfig | None = None):
         self.logger = Logger(self.__class__.__name__)
         self.app_config = app_config
-        self.static_routes = defaultdict(
-            lambda: defaultdict(dict)
-        )  # method -> { path: handler }
+        self.static_routes = defaultdict(lambda: defaultdict(dict))  # method -> { path: handler }
         # method -> list of (specificity, path, regex, handler)
         self.dynamic_routes = defaultdict(lambda: defaultdict(list))
         # method -> { path: handler }
@@ -27,16 +26,12 @@ class Router:
         path = self.normalize_path(path)
         path_regex = self._path_to_regex(path)
 
-        versions = (
-            version if isinstance(version, list) else [version or VERSION_NEUTRAL]
-        )
+        versions = version if isinstance(version, list) else [version or VERSION_NEUTRAL]
 
         for v in versions:
             if ":" in path:
                 specificity = self._specificity(path)
-                self.dynamic_routes[method][v].append(
-                    (specificity, path, path_regex, handler)
-                )
+                self.dynamic_routes[method][v].append((specificity, path, path_regex, handler))
                 self.dynamic_routes[method][v].sort(reverse=True)
             else:
                 self.sse_routes[method][v][path] = handler
@@ -52,23 +47,17 @@ class Router:
         path = self.normalize_path(path)
         path_regex = self._path_to_regex(path)
 
-        versions = (
-            version if isinstance(version, list) else [version or VERSION_NEUTRAL]
-        )
+        versions = version if isinstance(version, list) else [version or VERSION_NEUTRAL]
 
         for v in versions:
             if ":" in path:
                 specificity = self._specificity(path)
-                self.dynamic_routes[method][v].append(
-                    (specificity, path, path_regex, handler)
-                )
+                self.dynamic_routes[method][v].append((specificity, path, path_regex, handler))
                 self.dynamic_routes[method][v].sort(reverse=True)
             else:
                 self.static_routes[method][v][path] = handler
 
-    def resolve(
-        self, method: str, path: str, request: HttpRequest = None, version=None
-    ):
+    def resolve(self, method: str, path: str, request: HttpRequest = None, version=None):
         """
         Resolves a route for the given HTTP method, path, and version.
 
@@ -94,9 +83,7 @@ class Router:
                 return self.static_routes[method][v][path], {}
 
             # Normal dynamic
-            for specificity, original_path, path_regex, handler in self.dynamic_routes[
-                method
-            ].get(v, []):
+            for _specificity, _original_path, path_regex, handler in self.dynamic_routes[method].get(v, []):
                 match = path_regex.match(path)
                 if match:
                     return handler, match.groupdict()
@@ -110,9 +97,7 @@ class Router:
         :param path: The URL path
         :return: Specificity score (higher is more specific)
         """
-        return len(
-            [segment for segment in path.split("/") if not segment.startswith(":")]
-        )
+        return len([segment for segment in path.split("/") if not segment.startswith(":")])
 
     def _path_to_regex(self, path):
         """
@@ -209,9 +194,7 @@ class Router:
             match = re.search(rf"{versioning.key}([\w\d]+)", accept)
             return (match.group(1) if match else None), path
 
-        elif versioning.type == VersioningType.CUSTOM and callable(
-            versioning.extractor
-        ):
+        elif versioning.type == VersioningType.CUSTOM and callable(versioning.extractor):
             return versioning.extractor(request), path
 
         return None, path
@@ -220,8 +203,4 @@ class Router:
         """
         Returns the global prefix for the application.
         """
-        return (
-            self.normalize_path(self.app_config.get_global_prefix())
-            if self.app_config.get_global_prefix()
-            else None
-        )
+        return self.normalize_path(self.app_config.get_global_prefix()) if self.app_config.get_global_prefix() else None

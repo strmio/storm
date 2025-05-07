@@ -1,7 +1,8 @@
 import json
+from enum import StrEnum
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 from urllib.parse import parse_qs
-from enum import StrEnum
+
 from storm.common.enums.http_headers import HttpHeaders
 
 
@@ -63,35 +64,23 @@ class HttpRequest:
         self.http_version: str = scope.get(HttpRequestEnums.HTTP_VERSION, "1.1")
 
         # Headers, query params, and cookies
-        self.headers: Dict[str, str] = self._parse_headers(
-            scope.get(HttpRequestEnums.HEADERS, [])
-        )
-        self.query_params: Dict[str, Union[str, List[str]]] = self._parse_query_params(
-            scope.get(HttpRequestEnums.QUERY_STRING, b"")
-        )
-        self.cookies: Dict[str, str] = self._parse_cookies(
-            self.headers.get(HttpRequestEnums.COOKIE, "")
-        )
+        self.headers: Dict[str, str] = self._parse_headers(scope.get(HttpRequestEnums.HEADERS, []))
+        self.query_params: Dict[str, Union[str, List[str]]] = self._parse_query_params(scope.get(HttpRequestEnums.QUERY_STRING, b""))
+        self.cookies: Dict[str, str] = self._parse_cookies(self.headers.get(HttpRequestEnums.COOKIE, ""))
 
         # Client and server information
-        self.client: Tuple[Optional[str], Optional[int]] = scope.get(
-            HttpRequestEnums.CLIENT, (None, None)
-        )
+        self.client: Tuple[Optional[str], Optional[int]] = scope.get(HttpRequestEnums.CLIENT, (None, None))
         (ip, port) = self.client
         self.client_ip: Optional[str] = ip
         self.client_port: Optional[int] = port
 
-        self.server: Tuple[Optional[str], Optional[int]] = scope.get(
-            HttpRequestEnums.SERVER, (None, None)
-        )
+        self.server: Tuple[Optional[str], Optional[int]] = scope.get(HttpRequestEnums.SERVER, (None, None))
         (ip, port) = self.server
         self.server_host: Optional[str] = ip
         self.server_port: Optional[int] = port
 
         # WebSocket-specific attributes
-        self.is_websocket: bool = (
-            scope.get(HttpRequestEnums.TYPE) == HttpRequestEnums.WEBSOCKET
-        )
+        self.is_websocket: bool = scope.get(HttpRequestEnums.TYPE) == HttpRequestEnums.WEBSOCKET
         self.subprotocols: List[str] = scope.get(HttpRequestEnums.SUBPROTOCOLS, [])
 
         # Middleware or framework-injected fields
@@ -120,22 +109,15 @@ class HttpRequest:
         :param raw_headers: List of (key, value) byte tuples
         :return: Dictionary of headers
         """
-        return {
-            key.decode("utf-8"): value.decode("utf-8") for key, value in raw_headers
-        }
+        return {key.decode("utf-8"): value.decode("utf-8") for key, value in raw_headers}
 
-    def _parse_query_params(
-        self, query_string: bytes
-    ) -> Dict[str, Union[str, List[str]]]:
+    def _parse_query_params(self, query_string: bytes) -> Dict[str, Union[str, List[str]]]:
         """
         Parse query parameters from a query string.
         :param query_string: Query string as bytes
         :return: Dictionary of query parameters
         """
-        return {
-            k: v[0] if len(v) == 1 else v
-            for k, v in parse_qs(query_string.decode("utf-8")).items()
-        }
+        return {k: v[0] if len(v) == 1 else v for k, v in parse_qs(query_string.decode("utf-8")).items()}
 
     def _parse_cookies(self, cookie_header: str) -> Dict[str, str]:
         """
@@ -151,9 +133,7 @@ class HttpRequest:
                     cookies[key] = value
         return cookies
 
-    def _decode_body(
-        self, body_content: bytes
-    ) -> Union[str, Dict[str, Any], List[Any]]:
+    def _decode_body(self, body_content: bytes) -> Union[str, Dict[str, Any], List[Any]]:
         """
         Decode the body content based on content type.
         :param body_content: Raw body bytes

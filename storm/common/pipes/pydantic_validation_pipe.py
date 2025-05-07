@@ -1,6 +1,7 @@
 from pydantic import BaseModel, ValidationError
 
 from storm.common.exceptions.http import BadRequestException
+
 from .pipe import Pipe
 
 
@@ -26,4 +27,4 @@ class PydanticValidationPipe(Pipe):
         try:
             return self.model.model_validate(value)
         except ValidationError as e:
-            raise BadRequestException(f"Pydantic validation error: {e}")
+            raise BadRequestException(f"Pydantic validation error: {e}") from e

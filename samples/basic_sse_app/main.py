@@ -1,7 +1,9 @@
 import asyncio
-from storm.common import Controller, Query, Module, Sse, Get
-from storm.core import StormApplication
+
 from settings import get_settings
+
+from storm.common import Controller, Get, Module, Query, Sse
+from storm.core import StormApplication
 
 
 @Controller("/events")

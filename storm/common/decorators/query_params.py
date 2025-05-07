@@ -1,5 +1,6 @@
 from functools import wraps
-from storm.common.execution_context import execution_context
+
+from storm.common.execution_context import ExecutionContext
 
 
 class Query:
@@ -22,7 +23,9 @@ class Query:
         Resolve the query parameter from the request, optionally applying a pipe.
         """
         # Get the current request from the execution context
-        request = execution_context.get_request()
+        request = ExecutionContext.get_request()
+        if request is None:
+            raise ValueError("No request found in the execution context")
         query_params = request.get_query_params()
 
         # Get the specific query parameter or all query parameters
@@ -35,9 +38,7 @@ class Query:
         if self.pipe and result is not None:
             # Instantiate the pipe if it's a class
             pipe_instance = self.pipe() if isinstance(self.pipe, type) else self.pipe
-            result = await pipe_instance.transform(
-                result, metadata={"type": "query", "data": self.query_param_name}
-            )
+            result = await pipe_instance.transform(result, metadata={"type": "query", "data": self.query_param_name})
 
         return result
 

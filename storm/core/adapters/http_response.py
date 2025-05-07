@@ -1,7 +1,8 @@
 import base64
-from email.utils import formatdate
-import json
 import hashlib
+import json
+from email.utils import formatdate
+
 from storm.common.enums.content_type import ContentType
 from storm.common.enums.http_headers import HttpHeaders
 from storm.common.enums.http_status import HttpStatus
@@ -60,9 +61,7 @@ class HttpResponse:
 
         # Add a header based on request headers
         if HttpHeaders.ACCEPT_LANGUAGE in request.headers:
-            headers[HttpHeaders.ACCEPT_LANGUAGE] = request.headers[
-                HttpHeaders.ACCEPT_LANGUAGE
-            ]
+            headers[HttpHeaders.ACCEPT_LANGUAGE] = request.headers[HttpHeaders.ACCEPT_LANGUAGE]
 
         # add keep-alive header
         headers[HttpHeaders.KEEP_ALIVE] = "keep-alive"
@@ -161,10 +160,7 @@ class HttpResponse:
             {
                 "type": "http.response.start",
                 "status": self.status_code,
-                "headers": [
-                    [key.encode("utf-8"), value.encode("utf-8")]
-                    for key, value in self.headers.items()
-                ],
+                "headers": [[key.encode("utf-8"), value.encode("utf-8")] for key, value in self.headers.items()],
             }
         )
         # Send the response body
@@ -292,63 +288,54 @@ class HttpResponse:
 
 
 # Helper methods to create common response types
-
-
-def JsonResponse(data, status_code=HttpStatus.OK, headers=None):
+class ResponseFactory:
     """
-    Create a JSON response.
+    Factory class for creating different types of HTTP responses.
     """
-    return HttpResponse(
-        content=data,
-        status_code=status_code,
-        headers=headers,
-        content_type=ContentType.JSON,
-    )
 
+    @staticmethod
+    def json(data, status_code=HttpStatus.OK, headers=None):
+        return HttpResponse(
+            content=data,
+            status_code=status_code,
+            headers=headers,
+            content_type=ContentType.JSON,
+        )
 
-def TextResponse(text, status_code=HttpStatus.OK, headers=None):
-    """
-    Create a plain text response.
-    """
-    return HttpResponse(
-        content=text,
-        status_code=status_code,
-        headers=headers,
-        content_type=ContentType.PLAIN,
-    )
+    @staticmethod
+    def text(text, status_code=HttpStatus.OK, headers=None):
+        return HttpResponse(
+            content=text,
+            status_code=status_code,
+            headers=headers,
+            content_type=ContentType.PLAIN,
+        )
 
+    @staticmethod
+    def html(html, status_code=HttpStatus.OK, headers=None):
+        return HttpResponse(
+            content=html,
+            status_code=status_code,
+            headers=headers,
+            content_type=ContentType.HTML,
+        )
 
-def HtmlResponse(html, status_code=HttpStatus.OK, headers=None):
-    """
-    Create an HTML response.
-    """
-    return HttpResponse(
-        content=html,
-        status_code=status_code,
-        headers=headers,
-        content_type=ContentType.HTML,
-    )
-
-
-def FileResponse(
-    file_bytes,
-    filename,
-    content_type=ContentType.OCTET_STREAM,
-    status_code: HttpStatus = HttpStatus.OK,
-    headers=None,
-):
-    """
-    Create a file download response.
-    """
-    headers = headers or {}
-
-    headers["content-disposition"] = f'attachment; filename="{filename}"'
-    return HttpResponse(
-        content=file_bytes,
-        status_code=status_code,
-        headers=headers,
-        content_type=content_type,
-    )
+    @staticmethod
+    def file(
+        file_bytes,
+        filename,
+        content_type=ContentType.OCTET_STREAM,
+        status_code=HttpStatus.OK,
+        headers=None,
+    ):
+        headers = headers or {}
+        headers["content-disposition"] = f'attachment; filename="{filename}"'
+        return HttpResponse(
+            content=file_bytes,
+            status_code=status_code,
+            headers=headers,
+            content_type=content_type,
+        )
 
 
 async def etag_response(request: HttpRequest, response: HttpResponse):

@@ -32,9 +32,7 @@ class ModuleBase:
 
     def _invoke_lifecycle_hook(self, hook_name):
         """Invoke a lifecycle hook if it exists and is callable."""
-        if hasattr(self._module_cls, hook_name) and callable(
-            getattr(self._module_cls, hook_name)
-        ):
+        if hasattr(self._module_cls, hook_name) and callable(getattr(self._module_cls, hook_name)):
             getattr(self._module_cls, hook_name)(self)
 
     def register(self, container):
