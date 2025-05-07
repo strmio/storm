@@ -1,10 +1,11 @@
 # Benchmark setup
 import time
-from storm.core.context import AppContext
-from storm.core.settings import get_settings
 
-from storm.core.router.router import Router
 from rich import print
+
+from storm.core.context import AppContext
+from storm.core.router.router import Router
+from storm.core.settings import get_settings
 
 AppContext.set_settings(get_settings())
 
@@ -41,6 +42,7 @@ def benchmark_router(router_class, n_static=5000, n_dynamic=5000, n_requests=100
 
 if __name__ == "__main__":
     import threading
+
     from rich.console import Console
     from rich.table import Table
 
@@ -70,9 +72,7 @@ if __name__ == "__main__":
 
     # You would replace OptimizedRouter with your original Router for comparison
 
-    print(
-        f"Running benchmark with {5000} static routes, {5000} dynamic routes, {100000} requests."
-    )
+    print(f"Running benchmark with {5000} static routes, {5000} dynamic routes, {100000} requests.")
     print("Benchmarking Optimized Router...")
     optimized_time = benchmark_router(Router)
     print(f"Optimized Router Time: {optimized_time * 1000:.2f} ms")
@@ -85,9 +85,7 @@ if __name__ == "__main__":
     # And compare:
     # print(f"Speedup: {original_time / optimized_time:.2f}x faster!")
 
-    print(
-        f"Running concurrent stress test with {50} threads and {2000} requests per thread."
-    )
+    print(f"Running concurrent stress test with {50} threads and {2000} requests per thread.")
     print("Running concurrent stress test...")
     concurrent_time = stress_test_concurrent(Router)
     print(f"Concurrent Stress Test Time: {concurrent_time * 1000:.2f} ms")

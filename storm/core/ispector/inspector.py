@@ -30,9 +30,7 @@ class Inspector:
         """
         self.logger.info("Routes:")
         for route in self.app.router.routes:
-            self.logger.info(
-                f" - {route.method} {route.path} (Handler: {route.handler.__name__})"
-            )
+            self.logger.info(f" - {route.method} {route.path} (Handler: {route.handler.__name__})")
 
     def inspect_service(self, service_name):
         """

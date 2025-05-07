@@ -1,4 +1,4 @@
-from storm.common.execution_context import execution_context
+from storm.common.execution_context import ExecutionContext
 
 
 def _wrap_sse_handler(handler):
@@ -10,9 +10,14 @@ def _wrap_sse_handler(handler):
     :return: An asynchronous function that handles the SSE communication lifecycle,
              including sending headers, streaming events, and closing the connection.
     """
+
     async def sse_adapter(*args, **kwargs):
-        request = execution_context.get_request()
-        response = execution_context.get_response()
+        request = ExecutionContext.get_request()
+        response = ExecutionContext.get_response()
+        if request is None:
+            raise ValueError("Request object is missing")
+        if response is None:
+            raise ValueError("Response object is missing")
 
         await response.send_sse_headers(request.send)
 

@@ -1,4 +1,5 @@
-from typing import List, Any
+from typing import Any, List
+
 from storm.common.utils import is_function, is_nil
 
 
@@ -14,9 +15,7 @@ async def call_operator(instances: List[Any]) -> List:
     Calls `on_application_bootstrap` on all instances that implement the hook.
     """
     return [
-        await instance.on_application_bootstrap()
-        for instance in instances
-        if not is_nil(instance) and has_on_app_bootstrap_hook(instance)
+        await instance.on_application_bootstrap() for instance in instances if not is_nil(instance) and has_on_app_bootstrap_hook(instance)
     ]
 
 

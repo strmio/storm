@@ -6,9 +6,7 @@ build-backend = "pdm.backend"
 name = "storm"
 version = "0.1.0"
 description = "Storm framework, high performance, Modular, fast to code, ready for production"
-authors = [
-    {name = "Adib Grouz", email = "contact@adib-grouz.com"},
-]
+authors = [{ name = "Adib Grouz", email = "contact@adib-grouz.com" }]
 readme = "README.md"
 license = { text = "MIT" }
 
@@ -27,7 +25,7 @@ classifiers = [
     "Development Status :: 4 - Beta",
     "Environment :: Web Environment",
     "Framework :: AsyncIO",
-    "Framework :: FastAPI",
+    "Framework :: Strom",
     "Framework :: Pydantic",
     "Framework :: Pydantic :: 1",
     "Intended Audience :: Developers",
@@ -44,7 +42,14 @@ classifiers = [
 
 
 requires-python = ">=3.13"
-dependencies = ["rx>=3.2.0", "psutil>=7.0.0", "pydantic-settings>=2.9.1", "uvicorn>=0.34.2"]
+
+dependencies = [
+    "rx>=3.2.0",
+    "psutil>=7.0.0",
+    "pydantic-settings>=2.9.1",
+    "uvicorn>=0.34.2",
+    "pydantic>=2.11.4",
+]
 
 [project.optional-dependencies]
 
@@ -68,6 +73,23 @@ version = { source = "file", path = "storm/__init__.py" }
 distribution = true
 
 [dependency-groups]
-dev = [
-    "pre-commit>=4.2.0",
-]
+dev = ["pre-commit>=4.2.0"]
+
+[tool.ruff]
+line-length = 140
+target-version = "py311"
+exclude = ["build", "dist", ".venv"]
+fix = true
+
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "B"]
+ignore = ["N802", "B008", "N818"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.pytest.ini_options]
+addopts = "-ra -q"
+testpaths = ["tests"]

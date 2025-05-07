@@ -1,15 +1,16 @@
 import asyncio
+
 from rich.console import Console
 from rich.traceback import Traceback
+
+BaseExceptionType = type(BaseException)
 
 
 class TracebackHandler:
     def __init__(self):
         self.console = Console()
 
-    async def _print_traceback_async(
-        self, exception: Exception, tb=None, excecption_type=type(BaseException)
-    ):
+    async def _print_traceback_async(self, exception: Exception, tb=None, excecption_type=BaseExceptionType):
         """
         Asynchronously render and print the traceback for a given exception.
 
@@ -21,9 +22,7 @@ class TracebackHandler:
         traceback = Traceback.from_exception(excecption_type, exception, tb)
         self.console.print(traceback)
 
-    def handle_exception(
-        self, exception: Exception, tb=None, excecption_type=type(BaseException)
-    ):
+    def handle_exception(self, exception: Exception, tb=None, excecption_type=BaseExceptionType):
         """
         Schedule the asynchronous traceback printing without blocking.
 

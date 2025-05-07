@@ -1,5 +1,6 @@
 from functools import wraps
-from storm.common.execution_context import execution_context
+
+from storm.common.execution_context import ExecutionContext
 
 
 def Host(param_name="host"):
@@ -13,7 +14,9 @@ def Host(param_name="host"):
         @wraps(func)
         async def wrapper(*args, **kwargs):
             # Get the current request from the execution context
-            request = execution_context.get_request()
+            request = ExecutionContext.get_request()
+            if request is None:
+                raise ValueError("No request found in the execution context")
             host = request.get_server_host()
 
             # Inject ip

@@ -1,6 +1,8 @@
-from pydantic import Field
-from typing import List
 from functools import lru_cache
+from typing import List
+
+from pydantic import Field
+
 from storm.core.settings import AppSettings
 
 
@@ -20,7 +22,6 @@ class Settings(AppSettings):
     sys_info_enabled: bool = True
     banner_enabled: bool = True
     banner_file: str = Field(default="banner.txt")
-
 
 
 @lru_cache()

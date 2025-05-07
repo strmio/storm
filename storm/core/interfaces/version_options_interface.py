@@ -1,4 +1,4 @@
-from typing import Dict, Type, Union, List, Callable, Optional, Protocol
+from typing import Callable, Dict, List, Optional, Protocol, Type, Union
 
 from storm.common.enums.versioning_type import VersioningType
 

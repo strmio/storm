@@ -1,5 +1,6 @@
 from functools import wraps
-from storm.common.execution_context import execution_context
+
+from storm.common.execution_context import ExecutionContext
 
 
 def Ip(param_name="ip"):
@@ -13,7 +14,9 @@ def Ip(param_name="ip"):
         @wraps(func)
         async def wrapper(*args, **kwargs):
             # Get the current request from the execution context
-            request = execution_context.get_request()
+            request = ExecutionContext.get_request()
+            if request is None:
+                raise ValueError("No request object found in execution context")
             ip = request.get_client_ip()
 
             # Inject ip

@@ -1,6 +1,7 @@
-from storm.core.repl.repl_logger import ReplLogger
-import time
 import os
+import time
+
+from storm.core.repl.repl_logger import ReplLogger
 
 logger = ReplLogger()
 
@@ -88,12 +89,7 @@ def get_service(app, service_name):
     """
     logger.info(f"Retrieving service: {service_name}")
     service = next(
-        (
-            provider
-            for module in app.modules.values()
-            for provider in module.providers
-            if provider.__class__.__name__ == service_name
-        ),
+        (provider for module in app.modules.values() for provider in module.providers if provider.__class__.__name__ == service_name),
         None,
     )
     if service:
