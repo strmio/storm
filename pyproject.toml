@@ -84,7 +84,7 @@ fix = true
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "B"]
-ignore = ["N802", "B008", "N818"]
+ignore = ["N802", "B008", "N818", "E731"]
 
 [tool.ruff.format]
 quote-style = "double"
