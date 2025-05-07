@@ -1,5 +1,3 @@
-# tests/decorators/test_set_metadata.py
-
 import pytest
 
 from storm.common.decorators.core.set_metadata import SetMetadata

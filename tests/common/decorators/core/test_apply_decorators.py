@@ -1,5 +1,3 @@
-# tests/common/decorators/core/test_apply_decorators.py
-
 from storm.common.decorators.core.apply_decorators import ApplyDecorators
 from storm.core.di.reflect import Reflect
 
