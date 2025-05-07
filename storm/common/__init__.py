@@ -71,7 +71,6 @@ __all__ = [
     "UsePipes",
     "HttpCode",
     "Optional",
-    "Middleware",
     "HttpHeaders",
     "HttpStatus",
     "ToUpperCasePipe",

@@ -1,5 +1,3 @@
-# tests/decorators/test_injectable.py
-
 import pytest
 
 from storm.common.constants import INJECTABLE_WATERMARK, SCOPE_OPTIONS_METADATA
