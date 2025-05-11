@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  🧰-setup:
+  setup:
     name: 🧰 Setup Python
     runs-on: ubuntu-latest
     outputs:
@@ -17,9 +17,9 @@ jobs:
         id: set-python
         run: echo "python-version=3.13" >> $GITHUB_OUTPUT
 
-  📦-install:
+  install:
     name: 📦 Install Dependencies
-    needs: 🧰-setup
+    needs: setup
     runs-on: ubuntu-latest
     steps:
       - name: 🧾 Checkout code
@@ -28,7 +28,7 @@ jobs:
       - name: 🐍 Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ needs.🧰-setup.outputs.python-version }}
+          python-version: ${{ needs.setup.outputs.python-version }}
 
       - name: 💾 Cache PDM dependencies
         uses: actions/cache@v4
@@ -50,9 +50,9 @@ jobs:
           name: pdm-deps
           path: __pypackages__/
 
-  🧪-test:
+  test:
     name: 🧪 Run Tests
-    needs: 📦-install
+    needs: install
     runs-on: ubuntu-latest
     steps:
       - name: 🧾 Checkout code
