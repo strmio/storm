@@ -2,7 +2,7 @@ from .body import Body
 from .controller import Controller
 from .headers import Headers
 from .host import Host
-from .http import Delete, Get, Head, Options, Patch, Post, Put
+from .http_ import Delete, Get, Head, Options, Patch, Post, Put
 from .http_code import HttpCode
 from .injectable import Injectable
 from .ip import Ip
