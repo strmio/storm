@@ -30,7 +30,7 @@ jobs:
         with:
           python-version: ${{ needs.setup.outputs.python-version }}
 
-      - name: 💾 Cache PDM dependencies
+      - name: 💾 Cache PDM packages
         uses: actions/cache@v4
         with:
           path: |
@@ -43,12 +43,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install pdm
           pdm install
-
-      - name: 📤 Upload virtualenv
-        uses: actions/upload-artifact@v4
-        with:
-          name: pdm-deps
-          path: __pypackages__/
 
   test:
     name: 🧪 Run Tests
@@ -63,16 +57,19 @@ jobs:
         with:
           python-version: 3.13
 
+      - name: 💾 Restore PDM packages cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pdm
+            __pypackages__/
+          key: ${{ runner.os }}-pdm-${{ hashFiles('**/pdm.lock') }}
+
       - name: 📥 Install PDM
         run: |
           python -m pip install --upgrade pip
           pip install pdm
-
-      - name: 📥 Restore PDM virtualenv
-        uses: actions/download-artifact@v4
-        with:
-          name: pdm-deps
-          path: __pypackages__/
+          pdm install  # Still needed to "re-link" dependencies in current env
 
       - name: 🧪 Run make all
         run: make all
