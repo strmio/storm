@@ -1,5 +1,4 @@
-# .github/workflows/ci.yml
-name: CI
+name: 🧪 CI
 
 on:
   push:
@@ -8,25 +7,72 @@ on:
     branches: [main]
 
 jobs:
-  build-and-test:
+  🧰-setup:
+    name: 🧰 Setup Python
     runs-on: ubuntu-latest
-
+    outputs:
+      python-version: ${{ steps.set-python.outputs.python-version }}
     steps:
-      - name: Checkout code
+      - name: 🔧 Set Python version output
+        id: set-python
+        run: echo "python-version=3.13" >> $GITHUB_OUTPUT
+
+  📦-install:
+    name: 📦 Install Dependencies
+    needs: 🧰-setup
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🧾 Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: 🐍 Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.13"
+          python-version: ${{ needs.🧰-setup.outputs.python-version }}
 
-      - name: Install dependencies
+      - name: 💾 Cache PDM dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pdm
+            __pypackages__/
+          key: ${{ runner.os }}-pdm-${{ hashFiles('**/pdm.lock') }}
+
+      - name: 📥 Install PDM and dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
           pip install pdm
           pdm install
 
-      - name: Run tests
+      - name: 📤 Upload virtualenv
+        uses: actions/upload-artifact@v4
+        with:
+          name: pdm-deps
+          path: __pypackages__/
+
+  🧪-test:
+    name: 🧪 Run Tests
+    needs: 📦-install
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🧾 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.13
+
+      - name: 📥 Install PDM
         run: |
-          make all
+          python -m pip install --upgrade pip
+          pip install pdm
+
+      - name: 📥 Restore PDM virtualenv
+        uses: actions/download-artifact@v4
+        with:
+          name: pdm-deps
+          path: __pypackages__/
+
+      - name: 🧪 Run make all
+        run: make all
