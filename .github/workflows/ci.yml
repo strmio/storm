@@ -1,4 +1,3 @@
-# .github/workflows/ci.yml
 name: CI
 
 on:
@@ -8,9 +7,21 @@ on:
     branches: [main]
 
 jobs:
-  build-and-test:
+  setup:
     runs-on: ubuntu-latest
+    outputs:
+      python-version: ${{ steps.set-python.outputs.python-version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
+      - name: Set Python version output
+        id: set-python
+        run: echo "python-version=3.13" >> $GITHUB_OUTPUT
+
+  install:
+    needs: setup
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -27,6 +38,28 @@ jobs:
           pip install pdm
           pdm install
 
-      - name: Run tests
+      - name: Cache virtualenv or PDM cache (optional)
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pdm
+          key: ${{ runner.os }}-pdm-${{ hashFiles('**/pdm.lock') }}
+
+  test:
+    needs: install
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
         run: |
-          make all
+          pip install pdm
+          pdm install
+
+      - name: Run tests
+        run: make all
