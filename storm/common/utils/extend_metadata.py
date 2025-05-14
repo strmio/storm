@@ -12,4 +12,4 @@ def extend_array_metadata(key: str, values: list, target):
     :param target: Function or class to which metadata applies.
     """
     existing = Reflect.get_metadata(key, target) or []
-    Reflect.define_metadata(key, existing + values, target)
+    Reflect.define_metadata(key, existing + list(values), target)
